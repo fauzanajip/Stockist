@@ -1,0 +1,646 @@
+# 📄 PRODUCT REQUIREMENTS DOCUMENT (PRD)
+
+## Mobile Offline Stock & SPG Reconciliation App
+
+**Versi:** 2.1 — Revised  
+**Tanggal:** April 2026
+
+---
+
+## 1. 📌 Overview
+
+### 1.1 Background
+
+Dalam event penjualan rokok, stokist bertanggung jawab untuk:
+
+- Menerima stok dari distributor
+- Mendistribusikan stok ke SPG
+- Mencatat pergerakan stok (awal & tambahan)
+- Memvalidasi jumlah penjualan
+- Melakukan rekonsiliasi uang cash saat closing
+
+Saat ini proses dilakukan menggunakan Excel manual yang:
+
+- Rentan error
+- Lambat di lapangan
+- Tidak real-time
+- Sulit tracking history
+
+---
+
+### 1.2 Objective
+
+Membangun aplikasi mobile offline untuk:
+
+- Mencatat distribusi stok ke SPG
+- Mengelola mutasi stok (awal, tambah, retur)
+- Input data penjualan manual dari sistem online
+- Menghitung sisa stok otomatis
+- Validasi cash vs penjualan
+- Generate laporan Excel
+
+---
+
+### 1.3 Target User (Persona)
+
+**Stockist Event**
+
+- Mengelola banyak SPG dalam satu event
+- Bekerja di kondisi lapangan (cepat, mobile, offline)
+- Fokus pada akurasi dan kecepatan input
+
+---
+
+## 2. 🎯 Scope
+
+### 2.1 In Scope
+
+- Offline-first mobile app
+- Multi-event support
+- SPG management
+- Product (rokok) management
+- Stock distribution tracking
+- Sales manual input
+- Cash reconciliation (tunai + QRIS)
+- Excel export
+
+---
+
+### 2.2 Out of Scope (Phase 1)
+
+- API integration ke sistem online
+- Real-time sync
+- Multi-device sync
+- Role management (admin, dll)
+
+---
+
+## 3. 🧠 Core Concept
+
+### 3.1 Data Flow
+
+```
+Distributor → Stockist → SPG → Customer
+```
+
+App hanya fokus:
+
+```
+Stockist ↔ SPG
+```
+
+---
+
+### 3.2 Source of Truth
+
+- Penjualan: Sistem online (input manual ke app)
+- Stock: App (berdasarkan distribusi & mutasi)
+
+---
+
+## 4. 🧱 Data Model
+
+---
+
+### 4.1 Event
+
+```
+id
+name
+date
+status (open | closed)
+```
+
+> ✅ Tambahan: `status` agar event yang sudah closed tidak bisa diedit sembarangan.
+
+---
+
+### 4.2 Product (Rokok) — Master Data Global
+
+```
+id
+name
+sku
+price        ← harga default (referensi)
+deleted_at (nullable)
+```
+
+> ✅ `deleted_at` untuk soft delete — produk yang dihapus tidak merusak histori transaksi.  
+> ⚠️ `price` di sini hanya default. Harga aktual per event diambil dari `event_product.price`.
+
+---
+
+### 4.3 SPG — Master Data Global
+
+```
+id
+name
+deleted_at (nullable)
+```
+
+> ✅ `deleted_at` untuk soft delete — SPG yang dinonaktifkan tetap tercatat di histori.  
+> ℹ️ `spb_id` dipindah ke `event_spg` karena assignment SPB bisa berbeda tiap event.
+
+---
+
+### 4.4 Event–SPG Mapping
+
+```
+id
+event_id
+spg_id
+spb_id (nullable)   ← assignment SPB bisa beda tiap event
+```
+
+> ✅ Menentukan SPG mana saja yang aktif di suatu event.  
+> Saat setup event, user memilih SPG dari master dan assign ke event ini.
+
+---
+
+### 4.5 Event–Product Mapping
+
+```
+id
+event_id
+product_id
+price       ← harga produk khusus untuk event ini (override master)
+```
+
+> ✅ Menentukan produk mana saja yang dijual di suatu event, beserta harganya.  
+> Formula `expected_cash` menggunakan `event_product.price`, bukan `product.price`.
+
+---
+
+### 4.6 SPB (Optional)
+
+```
+id
+name
+```
+
+---
+
+### 4.7 Stock Mutation (Core)
+
+```
+id
+event_id
+spg_id
+product_id
+qty
+type (initial | topup | return)
+timestamp
+note (nullable)
+```
+
+> ✅ Tambahan: `note` opsional untuk keterangan khusus (misal: "retur karena basi").
+
+---
+
+### 4.8 Sales Manual
+
+```
+id
+event_id
+spg_id
+product_id
+qty_sold
+updated_at
+previous_qty (nullable)
+```
+
+> ⚠️ Value selalu **replace (bukan incremental)**.  
+> ✅ Tambahan: `previous_qty` untuk menyimpan nilai sebelumnya — membantu audit jika ada dispute perubahan angka.
+
+---
+
+### 4.9 Cash Record
+
+```
+id
+event_id
+spg_id
+cash_received
+qris_received
+note (nullable)
+```
+
+> ✅ Perubahan kritis: Pisah `cash_received` dan `qris_received` karena keduanya dipakai di kalkulasi surplus dan export Excel.
+
+---
+
+### 4.10 Backup Log
+
+```
+id
+event_id
+file_name
+timestamp
+status (success | failed)
+```
+
+---
+
+## 5. 🔄 Core Logic
+
+---
+
+### 5.1 Total Stok Diberikan ke SPG
+
+```
+total_dikasih = SUM(qty where type = 'initial' OR type = 'topup')
+```
+
+---
+
+### 5.2 Total Return
+
+```
+total_return = SUM(qty where type = 'return')
+```
+
+---
+
+### 5.3 Total Terjual
+
+```
+total_terjual = qty_sold (dari Sales Manual)
+```
+
+---
+
+### 5.4 Sisa Sistem
+
+```
+sisa_system = (total_dikasih - total_return) - total_terjual
+```
+
+---
+
+### 5.5 Expected Cash
+
+```
+expected_cash = total_terjual × event_product.price
+```
+
+> ⚠️ Gunakan harga dari `event_product.price` (bukan `product.price`) karena harga bisa berbeda tiap event.
+
+---
+
+### 5.6 Actual Cash
+
+```
+actual_cash = cash_received + qris_received
+```
+
+---
+
+### 5.7 Surplus / Selisih Cash
+
+```
+surplus = actual_cash - expected_cash
+```
+
+> Positif (+) = kelebihan uang  
+> Negatif (-) = kekurangan uang
+
+---
+
+## 6. 📱 User Flow
+
+---
+
+### 6.1 Create Event
+
+- Input nama event
+- Input tanggal
+- Status otomatis: `open`
+
+---
+
+### 6.2 Setup Data (Per Event)
+
+**Assign Produk ke Event:**
+
+- Pilih produk dari master (bisa pilih semua atau sebagian)
+- Set harga produk untuk event ini (default dari `product.price`, bisa di-override)
+- Produk yang dipilih tersimpan di `event_product`
+
+**Assign SPG ke Event:**
+
+- Pilih SPG dari master (bisa pilih semua atau sebagian)
+- (Opsional) Assign SPB untuk masing-masing SPG di event ini
+- SPG yang dipilih tersimpan di `event_spg`
+
+> ✅ SPG dan produk yang tidak di-assign tidak akan muncul di event ini.  
+> ✅ Master data SPG dan produk bisa dipakai ulang di event berikutnya.
+
+---
+
+### 6.3 Distribusi Awal (AWAL)
+
+- Pilih SPG
+- Input jumlah tiap produk
+- Simpan sebagai `mutation type = initial`
+
+---
+
+### 6.4 Tambah Stok (TAMBAH)
+
+- Pilih SPG
+- Pilih produk
+- Input qty
+- Simpan sebagai `mutation type = topup`
+
+---
+
+### 6.5 Update Penjualan (TERJUAL)
+
+- Pilih SPG
+- Input qty per produk
+- **Replace value sebelumnya** (nilai lama disimpan di `previous_qty`)
+
+---
+
+### 6.6 Input Cash
+
+- Pilih SPG
+- Input uang **cash tunai** diterima
+- Input uang **QRIS** diterima (boleh 0)
+
+---
+
+### 6.7 Return Stok (RETUR)
+
+- Pilih SPG
+- Pilih produk
+- Input qty
+- Simpan sebagai `mutation type = return`
+
+> ⚠️ UI: Tombol Retur harus **beda warna** (merah/kuning) agar tidak tertukar dengan Tambah Stok.
+
+---
+
+### 6.8 Closing Event (Per SPG)
+
+Sistem menampilkan ringkasan otomatis:
+
+| Item                       | Nilai           |
+| -------------------------- | --------------- |
+| Total Dikasih              | `total_dikasih` |
+| Total Return               | `total_return`  |
+| Total Terjual              | `total_terjual` |
+| Sisa Sistem                | `sisa_system`   |
+| Expected Cash              | `expected_cash` |
+| Actual Cash (Tunai + QRIS) | `actual_cash`   |
+| Surplus/Selisih            | `surplus`       |
+
+User input tambahan:
+
+- **Sisa Real** (hasil hitung fisik stok)
+- App menampilkan: `selisih_fisik = sisa_system - sisa_real`
+
+**Kriteria Status:**
+
+- ✅ = `selisih_fisik = 0` DAN `surplus = 0`
+- ⚠️ = ada selisih stok ATAU selisih cash
+
+**Closing dapat dilakukan hanya jika:**
+
+- Semua produk sudah ada data `qty_sold` (minimal nilai 0)
+- `cash_received` sudah diinput
+
+**Re-open Closing:**
+
+- Closing per SPG **bisa di-reopen** oleh user selama event masih `status = open`
+- Event di-close permanen hanya saat user menekan "Tutup Event"
+
+---
+
+### 6.9 Local Backup (Keamanan Data)
+
+- User masuk ke Menu Settings/Backup
+- Klik tombol **"Ekspor Data Event"**
+- Sistem mengonversi database SQLite menjadi file `.json`
+- Sistem memicu Android Share Sheet (WhatsApp, Google Drive, dll)
+
+> ✅ Format backup dipilih: **JSON** (lebih portable, bisa dibaca manual jika perlu restore).  
+> ⚠️ Reminder otomatis muncul setiap 4 jam atau setelah sesi distribusi besar.
+
+---
+
+## 7. 🖥️ UI / UX Requirements
+
+---
+
+### 7.1 Home Screen (Event Dashboard)
+
+List SPG per event:
+
+```
+[ Nama SPG ]
+Dikasih: XX  |  Terjual: XX  |  Sisa: XX
+Cash: Rp XXX
+Status: ✅ / ⚠️
+Last Update: HH:mm
+```
+
+**Kriteria Status:**
+
+- ✅ Semua produk closing: selisih fisik = 0, surplus = 0
+- ⚠️ Ada selisih stok atau selisih cash, atau belum semua produk diupdate
+
+---
+
+### 7.2 SPG Detail Screen
+
+Actions:
+
+- ➕ **Tambah Stok** (hijau)
+- 🔄 **Retur Stok** (merah/kuning)
+- 📊 **Update Sales**
+- 💰 **Input Cash**
+- 🔒 **Closing SPG**
+
+---
+
+### 7.3 Input UX Rules
+
+- Min tap — numeric keypad langsung muncul
+- Default ke pilihan terakhir (SPG / produk)
+- Big touch area (lapangan-friendly)
+- Konfirmasi dialog untuk aksi destruktif (retur, hapus)
+
+---
+
+### 7.4 Closing Screen
+
+Menampilkan per produk:
+
+| Produk   | Dikasih | Return | Terjual | Sisa Sistem | Sisa Real | Selisih |
+| -------- | ------- | ------ | ------- | ----------- | --------- | ------- |
+| Produk A | XX      | XX     | XX      | XX          | [input]   | XX      |
+
+Summary:
+
+- Expected Cash: Rp XX
+- Actual Cash (Tunai): Rp XX
+- Actual Cash (QRIS): Rp XX
+- Total Actual: Rp XX
+- Surplus/Selisih: ± Rp XX
+
+---
+
+## 8. 📊 Export Excel
+
+---
+
+### 8.1 Format Per Sheet
+
+**Sheet: Ringkasan Event**
+
+| SPG | Total Dikasih | Total Terjual | Sisa Sistem | Cash Tunai | QRIS | Expected Cash | Surplus |
+| --- | ------------- | ------------- | ----------- | ---------- | ---- | ------------- | ------- |
+
+**Sheet: Detail per SPG (1 sheet per SPG)**
+
+| Produk | AWAL | TAMBAH | RETURN | TERJUAL | SISA |
+| ------ | ---- | ------ | ------ | ------- | ---- |
+
+---
+
+### 8.2 Format Angka
+
+- Qty: Integer tanpa desimal
+- Uang: Format `Rp #,##0` (contoh: `Rp 150.000`)
+
+---
+
+### 8.3 Output
+
+- File `.xlsx`
+- Per event
+- Nama file: `[NamaEvent]_[Tanggal].xlsx`
+
+---
+
+## 9. ⚙️ Technical Requirements
+
+---
+
+### 9.1 Platform
+
+- Flutter (Android focus)
+- **Minimum Android:** API 26 (Android 8.0 Oreo) ke atas
+
+---
+
+### 9.2 Database
+
+- SQLite (offline-first)
+- Migrasi skema menggunakan versi database (untuk update app di masa depan)
+
+---
+
+### 9.3 State Management
+
+- Cubit / Bloc (lightweight)
+
+---
+
+### 9.4 Performance
+
+- Fast load list SPG (target < 500ms)
+- No lag saat input cepat (debounce 300ms jika perlu)
+
+---
+
+## 10. ⚠️ Edge Cases
+
+---
+
+### 10.1 Sales Tidak Diupdate
+
+- Tampilkan: `Last updated: HH:mm` di kartu SPG
+- Jika belum pernah diupdate: tampilkan `Belum ada data penjualan`
+
+---
+
+### 10.2 Selisih Stok
+
+- Tampilkan warning jika `sisa_system ≠ sisa_real` saat closing
+
+---
+
+### 10.3 Over Cash / Under Cash
+
+- Surplus positif: tampilkan `+ Rp XX (kelebihan)`
+- Surplus negatif: tampilkan `- Rp XX (kekurangan)` dengan warna merah
+
+---
+
+### 10.4 Negative Case
+
+- Input qty tidak boleh negatif
+- Field wajib tidak boleh kosong
+- Return qty tidak boleh melebihi total stok yang diberikan
+
+---
+
+### 10.5 Soft Delete
+
+- SPG/Produk yang dihapus tidak muncul di daftar aktif
+- Data histori tetap tersimpan dan tampil di laporan
+
+---
+
+### 10.6 Data Terhapus / HP Rusak
+
+- **Mitigasi:** Reminder backup muncul setiap 4 jam
+- **Auto-backup (Phase 1.1):** Backup otomatis setiap closing event per SPG
+
+---
+
+## 11. 🚀 Future Improvements
+
+---
+
+### Phase 1.1 (Security)
+
+- Auto-Backup setiap kali user melakukan Closing Event per SPG
+
+---
+
+### Phase 2
+
+- Sync ke backend
+- Integrasi API sales
+- Multi-device sync
+- Role (Admin / SPB / SPG)
+
+---
+
+### Phase 3
+
+- Analytics dashboard
+- Auto reconciliation
+- Real-time monitoring
+
+---
+
+## 12. ✅ Success Metrics
+
+- Input time < 3 detik per transaksi
+- Error manual berkurang signifikan
+- Closing lebih cepat dari proses Excel manual
+- Data konsisten dengan sistem online
+
+---
+
+## 📝 Changelog
+
+| Versi | Perubahan                                                                                                                                                                                                                                                 |
+| ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v2.1  | Opsi B fleksibel: tambah tabel `event_spg` dan `event_product`; SPG & Product jadi master data global; harga produk per-event di `event_product.price`; `spb_id` dipindah ke `event_spg`; update user flow 6.2 setup data; update formula `expected_cash` |
+| v2.0  | Tambah `qris_received` di Cash Record; perbaiki formula surplus; definisikan kriteria status ✅/⚠️; perjelas closing flow (re-open, validasi); soft delete SPG & Product; detail export Excel; minimum Android version; pilih JSON sebagai format backup  |
+| v1.0  | Initial PRD                                                                                                                                                                                                                                               |
