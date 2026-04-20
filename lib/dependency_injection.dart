@@ -32,6 +32,7 @@ import '../presentation/blocs/product_bloc/product_bloc.dart';
 import '../presentation/blocs/stock_bloc/stock_bloc.dart';
 import '../presentation/blocs/sales_bloc/sales_bloc.dart';
 import '../presentation/blocs/cash_bloc/cash_bloc.dart';
+// TODO: Add event_product_bloc and event_spg_bloc when needed
 
 final sl = GetIt.instance;
 

@@ -6,6 +6,6 @@ abstract class EventRepository {
   Future<EventEntity> create(EventEntity event);
   Future<EventEntity> update(EventEntity event);
   Future<void> delete(String id);
-  Future<void> closeEvent(String id);
-  Future<void> reopenEvent(String id);
+  Future<EventEntity> closeEvent(String id);
+  Future<EventEntity> reopenEvent(String id);
 }
