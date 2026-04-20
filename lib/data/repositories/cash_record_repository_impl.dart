@@ -23,7 +23,7 @@ class CashRecordRepositoryImpl implements CashRecordRepository {
       );
       return maps.map((map) => CashRecordModel.fromMap(map)).toList();
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal mengambil data cash records: $e');
+      throw AppDatabaseException(message: 'Gagal mengambil data cash records: $e');
     }
   }
 
@@ -41,7 +41,7 @@ class CashRecordRepositoryImpl implements CashRecordRepository {
       }
       return null;
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal mengambil data cash record: $e');
+      throw AppDatabaseException(message: 'Gagal mengambil data cash record: $e');
     }
   }
 
@@ -62,7 +62,7 @@ class CashRecordRepositoryImpl implements CashRecordRepository {
       await db.insert('cash_records', model.toMap());
       return model;
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal membuat cash record: $e');
+      throw AppDatabaseException(message: 'Gagal membuat cash record: $e');
     }
   }
 
@@ -81,7 +81,7 @@ class CashRecordRepositoryImpl implements CashRecordRepository {
       );
       return model;
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal update cash record: $e');
+      throw AppDatabaseException(message: 'Gagal update cash record: $e');
     }
   }
 
@@ -95,7 +95,7 @@ class CashRecordRepositoryImpl implements CashRecordRepository {
         whereArgs: [id],
       );
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal hapus cash record: $e');
+      throw AppDatabaseException(message: 'Gagal hapus cash record: $e');
     }
   }
 }

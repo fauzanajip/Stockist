@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../blocs/event_bloc/event_bloc.dart';
-import 'package:go_router/go_router.dart';
+import '../../blocs/event_bloc/event_state.dart';
+import '../../../domain/entities/event_entity.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});

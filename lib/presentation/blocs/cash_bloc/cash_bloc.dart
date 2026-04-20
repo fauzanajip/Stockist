@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../domain/usecases/cash_record_usecases.dart';
-import 'cash_bloc.dart';
+import 'cash_event.dart';
+import 'cash_state.dart';
 
 class CashBloc extends Bloc<CashEvent, CashState> {
   final CreateOrUpdateCashRecord createOrUpdateCashRecord;

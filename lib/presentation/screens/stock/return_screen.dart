@@ -17,7 +17,7 @@ class ReturnScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const               const Icon(Icons.return, size: 64, color: AppColors.warning),
+            Icon(Icons.refresh, size: 64, color: AppColors.warning),
             const SizedBox(height: 16),
             Text(
               'Return Stock',

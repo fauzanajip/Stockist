@@ -21,7 +21,7 @@ class SpgRepositoryImpl implements SpgRepository {
       );
       return maps.map((map) => SpgModel.fromMap(map)).toList();
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal mengambil data SPG: $e');
+      throw AppDatabaseException(message: 'Gagal mengambil data SPG: $e');
     }
   }
 
@@ -36,7 +36,7 @@ class SpgRepositoryImpl implements SpgRepository {
       );
       return maps.map((map) => SpgModel.fromMap(map)).toList();
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal mengambil data active SPG: $e');
+      throw AppDatabaseException(message: 'Gagal mengambil data active SPG: $e');
     }
   }
 
@@ -54,7 +54,7 @@ class SpgRepositoryImpl implements SpgRepository {
       }
       return null;
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal mengambil data SPG: $e');
+      throw AppDatabaseException(message: 'Gagal mengambil data SPG: $e');
     }
   }
 
@@ -66,7 +66,7 @@ class SpgRepositoryImpl implements SpgRepository {
       await db.insert('spgs', model.toMap());
       return model;
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal membuat SPG baru: $e');
+      throw AppDatabaseException(message: 'Gagal membuat SPG baru: $e');
     }
   }
 
@@ -85,7 +85,7 @@ class SpgRepositoryImpl implements SpgRepository {
       );
       return model;
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal update SPG: $e');
+      throw AppDatabaseException(message: 'Gagal update SPG: $e');
     }
   }
 
@@ -99,7 +99,7 @@ class SpgRepositoryImpl implements SpgRepository {
         whereArgs: [id],
       );
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal hapus SPG: $e');
+      throw AppDatabaseException(message: 'Gagal hapus SPG: $e');
     }
   }
 
@@ -117,7 +117,7 @@ class SpgRepositoryImpl implements SpgRepository {
         whereArgs: [id],
       );
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal soft delete SPG: $e');
+      throw AppDatabaseException(message: 'Gagal soft delete SPG: $e');
     }
   }
 }

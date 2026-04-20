@@ -20,7 +20,7 @@ class ProductRepositoryImpl implements ProductRepository {
       );
       return maps.map((map) => ProductModel.fromMap(map)).toList();
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal mengambil data products: $e');
+      throw AppDatabaseException(message: 'Gagal mengambil data products: $e');
     }
   }
 
@@ -35,7 +35,7 @@ class ProductRepositoryImpl implements ProductRepository {
       );
       return maps.map((map) => ProductModel.fromMap(map)).toList();
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal mengambil data active products: $e');
+      throw AppDatabaseException(message: 'Gagal mengambil data active products: $e');
     }
   }
 
@@ -53,7 +53,7 @@ class ProductRepositoryImpl implements ProductRepository {
       }
       return null;
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal mengambil data product: $e');
+      throw AppDatabaseException(message: 'Gagal mengambil data product: $e');
     }
   }
 
@@ -65,7 +65,7 @@ class ProductRepositoryImpl implements ProductRepository {
       await db.insert('products', model.toMap());
       return model;
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal membuat product baru: $e');
+      throw AppDatabaseException(message: 'Gagal membuat product baru: $e');
     }
   }
 
@@ -84,7 +84,7 @@ class ProductRepositoryImpl implements ProductRepository {
       );
       return model;
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal update product: $e');
+      throw AppDatabaseException(message: 'Gagal update product: $e');
     }
   }
 
@@ -98,7 +98,7 @@ class ProductRepositoryImpl implements ProductRepository {
         whereArgs: [id],
       );
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal hapus product: $e');
+      throw AppDatabaseException(message: 'Gagal hapus product: $e');
     }
   }
 
@@ -116,7 +116,7 @@ class ProductRepositoryImpl implements ProductRepository {
         whereArgs: [id],
       );
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal soft delete product: $e');
+      throw AppDatabaseException(message: 'Gagal soft delete product: $e');
     }
   }
 }

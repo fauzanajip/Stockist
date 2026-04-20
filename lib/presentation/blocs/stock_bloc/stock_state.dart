@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import '../../domain/entities/stock_mutation_entity.dart';
+import '../../../domain/entities/stock_mutation_entity.dart';
 
 class StockState extends Equatable {
   final int totalGiven;

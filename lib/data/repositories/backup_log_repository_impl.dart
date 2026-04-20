@@ -24,7 +24,7 @@ class BackupLogRepositoryImpl implements BackupLogRepository {
       );
       return maps.map((map) => BackupLogModel.fromMap(map)).toList();
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal mengambil data backup logs: $e');
+      throw AppDatabaseException(message: 'Gagal mengambil data backup logs: $e');
     }
   }
 
@@ -43,7 +43,7 @@ class BackupLogRepositoryImpl implements BackupLogRepository {
       await db.insert('backup_logs', model.toMap());
       return model;
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal membuat backup log: $e');
+      throw AppDatabaseException(message: 'Gagal membuat backup log: $e');
     }
   }
 
@@ -57,7 +57,7 @@ class BackupLogRepositoryImpl implements BackupLogRepository {
         whereArgs: [id],
       );
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal hapus backup log: $e');
+      throw AppDatabaseException(message: 'Gagal hapus backup log: $e');
     }
   }
 }

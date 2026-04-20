@@ -23,7 +23,7 @@ class EventProductRepositoryImpl implements EventProductRepository {
       );
       return maps.map((map) => EventProductModel.fromMap(map)).toList();
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal mengambil data Event Product: $e');
+      throw AppDatabaseException(message: 'Gagal mengambil data Event Product: $e');
     }
   }
 
@@ -41,7 +41,7 @@ class EventProductRepositoryImpl implements EventProductRepository {
       }
       return null;
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal mengambil data Event Product: $e');
+      throw AppDatabaseException(message: 'Gagal mengambil data Event Product: $e');
     }
   }
 
@@ -59,7 +59,7 @@ class EventProductRepositoryImpl implements EventProductRepository {
       await db.insert('event_products', model.toMap());
       return model;
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal assign product ke event: $e');
+      throw AppDatabaseException(message: 'Gagal assign product ke event: $e');
     }
   }
 
@@ -76,7 +76,7 @@ class EventProductRepositoryImpl implements EventProductRepository {
       );
       return model;
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal update Event Product: $e');
+      throw AppDatabaseException(message: 'Gagal update Event Product: $e');
     }
   }
 
@@ -90,7 +90,7 @@ class EventProductRepositoryImpl implements EventProductRepository {
         whereArgs: [id],
       );
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal hapus Event Product: $e');
+      throw AppDatabaseException(message: 'Gagal hapus Event Product: $e');
     }
   }
 
@@ -104,7 +104,7 @@ class EventProductRepositoryImpl implements EventProductRepository {
         whereArgs: [eventId],
       );
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal hapus Event Product: $e');
+      throw AppDatabaseException(message: 'Gagal hapus Event Product: $e');
     }
   }
 }

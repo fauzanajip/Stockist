@@ -24,7 +24,7 @@ class StockMutationRepositoryImpl implements StockMutationRepository {
       );
       return maps.map((map) => StockMutationModel.fromMap(map)).toList();
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal mengambil data stock mutations: $e');
+      throw AppDatabaseException(message: 'Gagal mengambil data stock mutations: $e');
     }
   }
 
@@ -40,7 +40,7 @@ class StockMutationRepositoryImpl implements StockMutationRepository {
       );
       return maps.map((map) => StockMutationModel.fromMap(map)).toList();
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal mengambil data stock mutations: $e');
+      throw AppDatabaseException(message: 'Gagal mengambil data stock mutations: $e');
     }
   }
 
@@ -56,7 +56,7 @@ class StockMutationRepositoryImpl implements StockMutationRepository {
       );
       return maps.map((map) => StockMutationModel.fromMap(map)).toList();
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal mengambil data stock mutations: $e');
+      throw AppDatabaseException(message: 'Gagal mengambil data stock mutations: $e');
     }
   }
 
@@ -78,7 +78,7 @@ class StockMutationRepositoryImpl implements StockMutationRepository {
       await db.insert('stock_mutations', model.toMap());
       return model;
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal membuat stock mutation: $e');
+      throw AppDatabaseException(message: 'Gagal membuat stock mutation: $e');
     }
   }
 
@@ -92,7 +92,7 @@ class StockMutationRepositoryImpl implements StockMutationRepository {
         whereArgs: [id],
       );
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal hapus stock mutation: $e');
+      throw AppDatabaseException(message: 'Gagal hapus stock mutation: $e');
     }
   }
 
@@ -112,7 +112,7 @@ class StockMutationRepositoryImpl implements StockMutationRepository {
       }
       return 0;
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal menghitung total given: $e');
+      throw AppDatabaseException(message: 'Gagal menghitung total given: $e');
     }
   }
 
@@ -132,7 +132,7 @@ class StockMutationRepositoryImpl implements StockMutationRepository {
       }
       return 0;
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal menghitung total return: $e');
+      throw AppDatabaseException(message: 'Gagal menghitung total return: $e');
     }
   }
 }

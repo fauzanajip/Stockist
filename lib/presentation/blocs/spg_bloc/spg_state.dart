@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import '../../domain/entities/spg_entity.dart';
+import '../../../domain/entities/spg_entity.dart';
 
 abstract class SpgState extends Equatable {
   const SpgState();

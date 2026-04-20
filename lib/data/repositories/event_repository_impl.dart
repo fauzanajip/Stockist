@@ -20,7 +20,7 @@ class EventRepositoryImpl implements EventRepository {
       );
       return maps.map((map) => EventModel.fromMap(map)).toList();
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal mengambil data events');
+      throw AppDatabaseException(message: 'Gagal mengambil data events');
     }
   }
 
@@ -38,7 +38,7 @@ class EventRepositoryImpl implements EventRepository {
       }
       return null;
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal mengambil data event');
+      throw AppDatabaseException(message: 'Gagal mengambil data event');
     }
   }
 
@@ -50,7 +50,7 @@ class EventRepositoryImpl implements EventRepository {
       await db.insert('events', model.toMap());
       return model;
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal membuat event baru');
+      throw AppDatabaseException(message: 'Gagal membuat event baru');
     }
   }
 
@@ -69,7 +69,7 @@ class EventRepositoryImpl implements EventRepository {
       );
       return model;
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal update event');
+      throw AppDatabaseException(message: 'Gagal update event');
     }
   }
 
@@ -83,7 +83,7 @@ class EventRepositoryImpl implements EventRepository {
         whereArgs: [id],
       );
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal hapus event');
+      throw AppDatabaseException(message: 'Gagal hapus event');
     }
   }
 
@@ -102,11 +102,11 @@ class EventRepositoryImpl implements EventRepository {
       );
       final event = await getById(id);
       if (event == null) {
-        throw const AppNotFoundException(message: 'Event not found');
+        throw AppNotFoundException(message: 'Event not found');
       }
       return event;
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal close event');
+      throw AppDatabaseException(message: 'Gagal close event');
     }
   }
 
@@ -125,11 +125,11 @@ class EventRepositoryImpl implements EventRepository {
       );
       final event = await getById(id);
       if (event == null) {
-        throw const AppNotFoundException(message: 'Event not found');
+        throw AppNotFoundException(message: 'Event not found');
       }
       return event;
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal reopen event');
+      throw AppDatabaseException(message: 'Gagal reopen event');
     }
   }
 }

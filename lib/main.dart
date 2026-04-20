@@ -4,6 +4,7 @@ import 'dependency_injection.dart';
 import 'core/constants/app_theme.dart';
 import 'presentation/routers/app_router.dart';
 import 'presentation/blocs/event_bloc/event_bloc.dart';
+import 'presentation/blocs/event_bloc/event_event.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,19 +19,18 @@ class StockistApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiRepositoryProvider(
+    return MultiBlocProvider(
       providers: [
-        RepositoryProvider.value(value: sl<EventBloc>()),
-      ],
-      child: MultiBlocProvider(
-        providers: [
-          BlocProvider<EventBloc>(
-            create: (context) => sl<EventBloc>()..add(LoadAllEvents()),
-          ),
-        ],
-        child: MaterialApp.router(
-          title: 'Stockist App',
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.darkTheme,
-          routerConfig: AppRouter.router,
+        BlocProvider<EventBloc>(
+          create: (context) => sl<EventBloc>()..add(LoadAllEvents()),
         ),
+      ],
+      child: MaterialApp.router(
+        title: 'Stockist App',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.darkTheme,
+        routerConfig: AppRouter.router,
+      ),
+    );
+  }
+}

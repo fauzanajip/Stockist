@@ -23,7 +23,7 @@ class EventSpgRepositoryImpl implements EventSpgRepository {
       );
       return maps.map((map) => EventSpgModel.fromMap(map)).toList();
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal mengambil data Event SPG: $e');
+      throw AppDatabaseException(message: 'Gagal mengambil data Event SPG: $e');
     }
   }
 
@@ -41,7 +41,7 @@ class EventSpgRepositoryImpl implements EventSpgRepository {
       }
       return null;
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal mengambil data Event SPG: $e');
+      throw AppDatabaseException(message: 'Gagal mengambil data Event SPG: $e');
     }
   }
 
@@ -59,7 +59,7 @@ class EventSpgRepositoryImpl implements EventSpgRepository {
       await db.insert('event_spgs', model.toMap());
       return model;
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal assign SPG ke event: $e');
+      throw AppDatabaseException(message: 'Gagal assign SPG ke event: $e');
     }
   }
 
@@ -76,7 +76,7 @@ class EventSpgRepositoryImpl implements EventSpgRepository {
       );
       return model;
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal update Event SPG: $e');
+      throw AppDatabaseException(message: 'Gagal update Event SPG: $e');
     }
   }
 
@@ -90,7 +90,7 @@ class EventSpgRepositoryImpl implements EventSpgRepository {
         whereArgs: [id],
       );
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal hapus Event SPG: $e');
+      throw AppDatabaseException(message: 'Gagal hapus Event SPG: $e');
     }
   }
 
@@ -104,7 +104,7 @@ class EventSpgRepositoryImpl implements EventSpgRepository {
         whereArgs: [eventId],
       );
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal hapus Event SPG: $e');
+      throw AppDatabaseException(message: 'Gagal hapus Event SPG: $e');
     }
   }
 }

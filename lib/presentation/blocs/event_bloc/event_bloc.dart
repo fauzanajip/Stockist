@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../domain/usecases/event_usecases.dart';
-import 'event_bloc.dart';
+import 'event_event.dart';
+import 'event_state.dart';
 
 class EventBloc extends Bloc<EventEvent, EventState> {
   final GetAllEvents getAllEvents;

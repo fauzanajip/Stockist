@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../domain/usecases/sales_usecases.dart';
-import 'sales_bloc.dart';
+import 'sales_event.dart';
+import 'sales_state.dart';
 
 class SalesBloc extends Bloc<SalesEvent, SalesState> {
   final CreateOrUpdateSales createOrUpdateSales;

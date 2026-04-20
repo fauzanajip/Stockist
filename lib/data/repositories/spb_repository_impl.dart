@@ -22,7 +22,7 @@ class SpbRepositoryImpl implements SpbRepository {
       );
       return maps.map((map) => SpbModel.fromMap(map)).toList();
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal mengambil data SPB: $e');
+      throw AppDatabaseException(message: 'Gagal mengambil data SPB: $e');
     }
   }
 
@@ -40,7 +40,7 @@ class SpbRepositoryImpl implements SpbRepository {
       }
       return null;
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal mengambil data SPB: $e');
+      throw AppDatabaseException(message: 'Gagal mengambil data SPB: $e');
     }
   }
 
@@ -56,7 +56,7 @@ class SpbRepositoryImpl implements SpbRepository {
       await db.insert('spbs', model.toMap());
       return model;
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal membuat SPB baru: $e');
+      throw AppDatabaseException(message: 'Gagal membuat SPB baru: $e');
     }
   }
 
@@ -70,7 +70,7 @@ class SpbRepositoryImpl implements SpbRepository {
         whereArgs: [id],
       );
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal hapus SPB: $e');
+      throw AppDatabaseException(message: 'Gagal hapus SPB: $e');
     }
   }
 }

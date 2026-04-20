@@ -1,6 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../domain/entities/stock_mutation_entity.dart';
 import '../../../domain/usecases/stock_mutation_usecases.dart';
-import 'stock_bloc.dart';
+import 'stock_event.dart';
+import 'stock_state.dart';
 
 class StockBloc extends Bloc<StockEvent, StockState> {
   final CreateStockMutation createStockMutation;

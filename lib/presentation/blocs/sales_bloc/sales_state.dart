@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import '../../domain/entities/sales_entity.dart';
+import '../../../domain/entities/sales_entity.dart';
 
 class SalesState extends Equatable {
   final Map<String, int> salesByProduct;

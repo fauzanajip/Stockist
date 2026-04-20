@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import '../../domain/entities/stock_mutation_entity.dart';
+import '../../../domain/entities/stock_mutation_entity.dart';
 
 abstract class StockEvent extends Equatable {
   const StockEvent();

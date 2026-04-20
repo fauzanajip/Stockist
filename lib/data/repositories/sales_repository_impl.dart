@@ -23,7 +23,7 @@ class SalesRepositoryImpl implements SalesRepository {
       );
       return maps.map((map) => SalesModel.fromMap(map)).toList();
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal mengambil data sales: $e');
+      throw AppDatabaseException(message: 'Gagal mengambil data sales: $e');
     }
   }
 
@@ -38,7 +38,7 @@ class SalesRepositoryImpl implements SalesRepository {
       );
       return maps.map((map) => SalesModel.fromMap(map)).toList();
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal mengambil data sales: $e');
+      throw AppDatabaseException(message: 'Gagal mengambil data sales: $e');
     }
   }
 
@@ -56,7 +56,7 @@ class SalesRepositoryImpl implements SalesRepository {
       }
       return null;
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal mengambil data sales: $e');
+      throw AppDatabaseException(message: 'Gagal mengambil data sales: $e');
     }
   }
 
@@ -77,7 +77,7 @@ class SalesRepositoryImpl implements SalesRepository {
       await db.insert('sales', model.toMap());
       return model;
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal membuat sales record: $e');
+      throw AppDatabaseException(message: 'Gagal membuat sales record: $e');
     }
   }
 
@@ -96,7 +96,7 @@ class SalesRepositoryImpl implements SalesRepository {
       );
       return model;
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal update sales record: $e');
+      throw AppDatabaseException(message: 'Gagal update sales record: $e');
     }
   }
 
@@ -115,7 +115,7 @@ class SalesRepositoryImpl implements SalesRepository {
       }
       return 0;
     } catch (e) {
-      throw const AppDatabaseException(message: 'Gagal menghitung total sold: $e');
+      throw AppDatabaseException(message: 'Gagal menghitung total sold: $e');
     }
   }
 }
