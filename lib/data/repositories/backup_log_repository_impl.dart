@@ -4,8 +4,8 @@ import '../data_sources/database_helper.dart';
 import '../models/backup_log_model.dart';
 import '../../domain/entities/backup_log_entity.dart';
 import '../../domain/repositories/backup_log_repository.dart';
-import '../../../core/error/failures.dart';
-import 'package:dartz/dartz.dart';
+import '../../../core/error/exceptions.dart';
+import 'package:sqflite/sqflite.dart' hide DatabaseException;
 
 class BackupLogRepositoryImpl implements BackupLogRepository {
   final DatabaseHelper dbHelper;
@@ -13,7 +13,7 @@ class BackupLogRepositoryImpl implements BackupLogRepository {
   BackupLogRepositoryImpl({required this.dbHelper});
 
   @override
-  Future<Either<Failure, List<BackupLogEntity>>> getByEvent(String eventId) async {
+  Future<List<BackupLogEntity>> getByEvent(String eventId) async {
     try {
       final db = await dbHelper.database;
       final List<Map<String, dynamic>> maps = await db.query(
@@ -22,14 +22,14 @@ class BackupLogRepositoryImpl implements BackupLogRepository {
         whereArgs: [eventId],
         orderBy: 'timestamp DESC',
       );
-      return Right(maps.map((map) => BackupLogModel.fromMap(map)).toList());
+      return maps.map((map) => BackupLogModel.fromMap(map)).toList();
     } catch (e) {
-      return const Left(DatabaseFailure(message: 'Gagal mengambil data backup logs'));
+      throw const AppDatabaseException(message: 'Gagal mengambil data backup logs: $e');
     }
   }
 
   @override
-  Future<Either<Failure, BackupLogEntity>> create(BackupLogEntity backupLog) async {
+  Future<BackupLogEntity> create(BackupLogEntity backupLog) async {
     try {
       final db = await dbHelper.database;
       final model = BackupLogModel(
@@ -41,14 +41,14 @@ class BackupLogRepositoryImpl implements BackupLogRepository {
         createdAt: DateTime.now(),
       );
       await db.insert('backup_logs', model.toMap());
-      return Right(model);
+      return model;
     } catch (e) {
-      return const Left(DatabaseFailure(message: 'Gagal membuat backup log'));
+      throw const AppDatabaseException(message: 'Gagal membuat backup log: $e');
     }
   }
 
   @override
-  Future<Either<Failure, void>> delete(String id) async {
+  Future<void> delete(String id) async {
     try {
       final db = await dbHelper.database;
       await db.delete(
@@ -56,9 +56,8 @@ class BackupLogRepositoryImpl implements BackupLogRepository {
         where: 'id = ?',
         whereArgs: [id],
       );
-      return const Right(null);
     } catch (e) {
-      return const Left(DatabaseFailure(message: 'Gagal hapus backup log'));
+      throw const AppDatabaseException(message: 'Gagal hapus backup log: $e');
     }
   }
 }

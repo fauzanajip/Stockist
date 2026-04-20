@@ -1,11 +1,9 @@
-import 'package:sqflite/sqflite.dart';
+import 'package:sqflite/sqflite.dart' hide DatabaseException;
 import '../data_sources/database_helper.dart';
 import '../models/event_model.dart';
 import '../../domain/entities/event_entity.dart';
 import '../../domain/repositories/event_repository.dart';
 import '../../../core/error/exceptions.dart';
-import '../../../core/error/failures.dart';
-import 'package:dartz/dartz.dart';
 
 class EventRepositoryImpl implements EventRepository {
   final DatabaseHelper dbHelper;
@@ -13,21 +11,21 @@ class EventRepositoryImpl implements EventRepository {
   EventRepositoryImpl({required this.dbHelper});
 
   @override
-  Future<Either<Failure, List<EventEntity>>> getAll() async {
+  Future<List<EventEntity>> getAll() async {
     try {
       final db = await dbHelper.database;
       final List<Map<String, dynamic>> maps = await db.query(
         'events',
         orderBy: 'date DESC',
       );
-      return Right(maps.map((map) => EventModel.fromMap(map)).toList());
+      return maps.map((map) => EventModel.fromMap(map)).toList();
     } catch (e) {
-      return const Left(DatabaseFailure(message: 'Gagal mengambil data events'));
+      throw const AppDatabaseException(message: 'Gagal mengambil data events');
     }
   }
 
   @override
-  Future<Either<Failure, EventEntity?>> getById(String id) async {
+  Future<EventEntity?> getById(String id) async {
     try {
       final db = await dbHelper.database;
       final List<Map<String, dynamic>> maps = await db.query(
@@ -36,28 +34,28 @@ class EventRepositoryImpl implements EventRepository {
         whereArgs: [id],
       );
       if (maps.isNotEmpty) {
-        return Right(EventModel.fromMap(maps.first));
+        return EventModel.fromMap(maps.first);
       }
-      return const Right(null);
+      return null;
     } catch (e) {
-      return const Left(DatabaseFailure(message: 'Gagal mengambil data event'));
+      throw const AppDatabaseException(message: 'Gagal mengambil data event');
     }
   }
 
   @override
-  Future<Either<Failure, EventEntity>> create(EventEntity event) async {
+  Future<EventEntity> create(EventEntity event) async {
     try {
       final db = await dbHelper.database;
       final model = EventModel.fromEntity(event);
       await db.insert('events', model.toMap());
-      return Right(model);
+      return model;
     } catch (e) {
-      return const Left(DatabaseFailure(message: 'Gagal membuat event baru'));
+      throw const AppDatabaseException(message: 'Gagal membuat event baru');
     }
   }
 
   @override
-  Future<Either<Failure, EventEntity>> update(EventEntity event) async {
+  Future<EventEntity> update(EventEntity event) async {
     try {
       final db = await dbHelper.database;
       final model = EventModel.fromEntity(event).copyWith(
@@ -67,16 +65,16 @@ class EventRepositoryImpl implements EventRepository {
         'events',
         model.toMap(),
         where: 'id = ?',
-        whereArgs: [id],
+        whereArgs: [event.id],
       );
-      return Right(model);
+      return model;
     } catch (e) {
-      return const Left(DatabaseFailure(message: 'Gagal update event'));
+      throw const AppDatabaseException(message: 'Gagal update event');
     }
   }
 
   @override
-  Future<Either<Failure, void>> delete(String id) async {
+  Future<void> delete(String id) async {
     try {
       final db = await dbHelper.database;
       await db.delete(
@@ -84,14 +82,13 @@ class EventRepositoryImpl implements EventRepository {
         where: 'id = ?',
         whereArgs: [id],
       );
-      return const Right(null);
     } catch (e) {
-      return const Left(DatabaseFailure(message: 'Gagal hapus event'));
+      throw const AppDatabaseException(message: 'Gagal hapus event');
     }
   }
 
   @override
-  Future<Either<Failure, EventEntity>> closeEvent(String id) async {
+  Future<EventEntity> closeEvent(String id) async {
     try {
       final db = await dbHelper.database;
       await db.update(
@@ -104,17 +101,17 @@ class EventRepositoryImpl implements EventRepository {
         whereArgs: [id],
       );
       final event = await getById(id);
-      return event.fold(
-        (l) => Left(const DatabaseFailure(message: 'Gagal close event')),
-        (r) => Right(r!),
-      );
+      if (event == null) {
+        throw const AppNotFoundException(message: 'Event not found');
+      }
+      return event;
     } catch (e) {
-      return const Left(DatabaseFailure(message: 'Gagal close event'));
+      throw const AppDatabaseException(message: 'Gagal close event');
     }
   }
 
   @override
-  Future<Either<Failure, EventEntity>> reopenEvent(String id) async {
+  Future<EventEntity> reopenEvent(String id) async {
     try {
       final db = await dbHelper.database;
       await db.update(
@@ -127,12 +124,12 @@ class EventRepositoryImpl implements EventRepository {
         whereArgs: [id],
       );
       final event = await getById(id);
-      return event.fold(
-        (l) => Left(const DatabaseFailure(message: 'Gagal reopen event')),
-        (r) => Right(r!),
-      );
+      if (event == null) {
+        throw const AppNotFoundException(message: 'Event not found');
+      }
+      return event;
     } catch (e) {
-      return const Left(DatabaseFailure(message: 'Gagal reopen event'));
+      throw const AppDatabaseException(message: 'Gagal reopen event');
     }
   }
 }

@@ -27,76 +27,71 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     LoadAllEvents event,
     Emitter<EventState> emit,
   ) async {
-    emit(EventLoading());
-    
-    final result = await getAllEvents();
-    
-    result.fold(
-      (failure) => emit(EventError(message: failure.message)),
-      (events) => emit(EventsLoaded(events: events)),
-    );
+    try {
+      emit(EventLoading());
+      final events = await getAllEvents();
+      emit(EventsLoaded(events: events));
+    } catch (e) {
+      emit(EventError(message: e.toString()));
+    }
   }
 
   Future<void> _onLoadEventById(
     LoadEventById event,
     Emitter<EventState> emit,
   ) async {
-    emit(EventLoading());
-    
-    final result = await getEventById(event.id);
-    
-    result.fold(
-      (failure) => emit(EventError(message: failure.message)),
-      (eventEntity) {
-        if (eventEntity != null) {
-          emit(EventDetailLoaded(event: eventEntity));
-        } else {
-          emit(const EventError(message: 'Event not found'));
-        }
-      },
-    );
+    try {
+      emit(EventLoading());
+      final eventEntity = await getEventById(event.id);
+      if (eventEntity != null) {
+        emit(EventDetailLoaded(event: eventEntity));
+      } else {
+        emit(const EventError(message: 'Event not found'));
+      }
+    } catch (e) {
+      emit(EventError(message: e.toString()));
+    }
   }
 
   Future<void> _onCreateNewEvent(
     CreateNewEvent event,
     Emitter<EventState> emit,
   ) async {
-    emit(EventLoading());
-    
-    final result = await createEvent(
-      CreateEventParams(name: event.name, date: event.date),
-    );
-    
-    result.fold(
-      (failure) => emit(EventError(message: failure.message)),
-      (newEvent) {
-        emit(EventCreated(event: newEvent));
-        add(LoadAllEvents());
-      },
-    );
+    try {
+      emit(EventLoading());
+      final newEvent = await createEvent(
+        CreateEventParams(name: event.name, date: event.date),
+      );
+      emit(EventCreated(event: newEvent));
+      add(LoadAllEvents());
+    } catch (e) {
+      emit(EventError(message: e.toString()));
+    }
   }
 
   Future<void> _onCloseCurrentEvent(
     CloseCurrentEvent event,
     Emitter<EventState> emit,
   ) async {
-    final result = await closeEvent(event.id);
-    
-    result.fold(
-      (failure) => emit(EventError(message: failure.message)),
-      (closedEvent) => emit(EventClosed(event: closedEvent)),
-    );
+    try {
+      final closedEvent = await closeEvent(event.id);
+      emit(EventClosed(event: closedEvent));
+      add(LoadAllEvents());
+    } catch (e) {
+      emit(EventError(message: e.toString()));
+    }
   }
 
   Future<void> _onReopenCurrentEvent(
     ReopenCurrentEvent event,
     Emitter<EventState> emit,
   ) async {
-    final result = await reopenEvent(event.id);
-    
-    result.fold(
-      (failure) => emit(EventError(message: failure.message)),
-      (reopenedEvent) => emit(EventReopened(event: reopenedEvent)),
-    );
+    try {
+      final reopenedEvent = await reopenEvent(event.id);
+      emit(EventReopened(event: reopenedEvent));
+      add(LoadAllEvents());
+    } catch (e) {
+      emit(EventError(message: e.toString()));
+    }
   }
 }

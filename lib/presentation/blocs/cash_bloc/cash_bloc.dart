@@ -18,36 +18,37 @@ class CashBloc extends Bloc<CashEvent, CashState> {
     UpdateCashRecord event,
     Emitter<CashState> emit,
   ) async {
-    await createOrUpdateCashRecord(
-      CreateOrUpdateCashRecordParams(
-        eventId: event.eventId,
-        spgId: event.spgId,
-        cashReceived: event.cashReceived,
-        qrisReceived: event.qrisReceived,
-        note: event.note,
-      ),
-    );
-    
-    add(LoadCashRecord(eventId: event.eventId, spgId: event.spgId));
+    try {
+      await createOrUpdateCashRecord(
+        CreateOrUpdateCashRecordParams(
+          eventId: event.eventId,
+          spgId: event.spgId,
+          cashReceived: event.cashReceived,
+          qrisReceived: event.qrisReceived,
+          note: event.note,
+        ),
+      );
+      add(LoadCashRecord(eventId: event.eventId, spgId: event.spgId));
+    } catch (e) {
+      // TODO: Emit error state
+    }
   }
 
   Future<void> _onLoadCashRecord(
     LoadCashRecord event,
     Emitter<CashState> emit,
   ) async {
-    final result = await getCashRecordByEventSpg(event.eventId, event.spgId);
-    
-    result.fold(
-      (failure) => {},
-      (cashRecord) {
-        if (cashRecord != null) {
-          emit(CashState(
-            cashReceived: cashRecord.cashReceived,
-            qrisReceived: cashRecord.qrisReceived,
-            actualCash: cashRecord.actualCash,
-          ));
-        }
-      },
-    );
+    try {
+      final cashRecord = await getCashRecordByEventSpg(event.eventId, event.spgId);
+      if (cashRecord != null) {
+        emit(CashState(
+          cashReceived: cashRecord.cashReceived,
+          qrisReceived: cashRecord.qrisReceived,
+          actualCash: cashRecord.actualCash,
+        ));
+      }
+    } catch (e) {
+      // TODO: Emit error state
+    }
   }
 }

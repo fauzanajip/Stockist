@@ -4,8 +4,8 @@ import '../data_sources/database_helper.dart';
 import '../models/event_spg_model.dart';
 import '../../domain/entities/event_spg_entity.dart';
 import '../../domain/repositories/event_spg_repository.dart';
-import '../../../core/error/failures.dart';
-import 'package:dartz/dartz.dart';
+import '../../../core/error/exceptions.dart';
+import 'package:sqflite/sqflite.dart' hide DatabaseException;
 
 class EventSpgRepositoryImpl implements EventSpgRepository {
   final DatabaseHelper dbHelper;
@@ -13,7 +13,7 @@ class EventSpgRepositoryImpl implements EventSpgRepository {
   EventSpgRepositoryImpl({required this.dbHelper});
 
   @override
-  Future<Either<Failure, List<EventSpgEntity>>> getByEvent(String eventId) async {
+  Future<List<EventSpgEntity>> getByEvent(String eventId) async {
     try {
       final db = await dbHelper.database;
       final List<Map<String, dynamic>> maps = await db.query(
@@ -21,14 +21,14 @@ class EventSpgRepositoryImpl implements EventSpgRepository {
         where: 'event_id = ?',
         whereArgs: [eventId],
       );
-      return Right(maps.map((map) => EventSpgModel.fromMap(map)).toList());
+      return maps.map((map) => EventSpgModel.fromMap(map)).toList();
     } catch (e) {
-      return const Left(DatabaseFailure(message: 'Gagal mengambil data Event SPG'));
+      throw const AppDatabaseException(message: 'Gagal mengambil data Event SPG: $e');
     }
   }
 
   @override
-  Future<Either<Failure, EventSpgEntity?>> getById(String id) async {
+  Future<EventSpgEntity?> getById(String id) async {
     try {
       final db = await dbHelper.database;
       final List<Map<String, dynamic>> maps = await db.query(
@@ -37,16 +37,16 @@ class EventSpgRepositoryImpl implements EventSpgRepository {
         whereArgs: [id],
       );
       if (maps.isNotEmpty) {
-        return Right(EventSpgModel.fromMap(maps.first));
+        return EventSpgModel.fromMap(maps.first);
       }
-      return const Right(null);
+      return null;
     } catch (e) {
-      return const Left(DatabaseFailure(message: 'Gagal mengambil data Event SPG'));
+      throw const AppDatabaseException(message: 'Gagal mengambil data Event SPG: $e');
     }
   }
 
   @override
-  Future<Either<Failure, EventSpgEntity>> create(EventSpgEntity eventSpg) async {
+  Future<EventSpgEntity> create(EventSpgEntity eventSpg) async {
     try {
       final db = await dbHelper.database;
       final model = EventSpgModel(
@@ -57,14 +57,14 @@ class EventSpgRepositoryImpl implements EventSpgRepository {
         createdAt: DateTime.now(),
       );
       await db.insert('event_spgs', model.toMap());
-      return Right(model);
+      return model;
     } catch (e) {
-      return const Left(DatabaseFailure(message: 'Gagal assign SPG ke event'));
+      throw const AppDatabaseException(message: 'Gagal assign SPG ke event: $e');
     }
   }
 
   @override
-  Future<Either<Failure, EventSpgEntity>> update(EventSpgEntity eventSpg) async {
+  Future<EventSpgEntity> update(EventSpgEntity eventSpg) async {
     try {
       final db = await dbHelper.database;
       final model = EventSpgModel.fromEntity(eventSpg);
@@ -74,14 +74,14 @@ class EventSpgRepositoryImpl implements EventSpgRepository {
         where: 'id = ?',
         whereArgs: [eventSpg.id],
       );
-      return Right(model);
+      return model;
     } catch (e) {
-      return const Left(DatabaseFailure(message: 'Gagal update Event SPG'));
+      throw const AppDatabaseException(message: 'Gagal update Event SPG: $e');
     }
   }
 
   @override
-  Future<Either<Failure, void>> delete(String id) async {
+  Future<void> delete(String id) async {
     try {
       final db = await dbHelper.database;
       await db.delete(
@@ -89,14 +89,13 @@ class EventSpgRepositoryImpl implements EventSpgRepository {
         where: 'id = ?',
         whereArgs: [id],
       );
-      return const Right(null);
     } catch (e) {
-      return const Left(DatabaseFailure(message: 'Gagal hapus Event SPG'));
+      throw const AppDatabaseException(message: 'Gagal hapus Event SPG: $e');
     }
   }
 
   @override
-  Future<Either<Failure, void>> deleteByEvent(String eventId) async {
+  Future<void> deleteByEvent(String eventId) async {
     try {
       final db = await dbHelper.database;
       await db.delete(
@@ -104,9 +103,8 @@ class EventSpgRepositoryImpl implements EventSpgRepository {
         where: 'event_id = ?',
         whereArgs: [eventId],
       );
-      return const Right(null);
     } catch (e) {
-      return const Left(DatabaseFailure(message: 'Gagal hapus Event SPG'));
+      throw const AppDatabaseException(message: 'Gagal hapus Event SPG: $e');
     }
   }
 }

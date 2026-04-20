@@ -5,18 +5,18 @@ abstract class AppException implements Exception {
   const AppException({required this.message, this.originalException});
 }
 
-class DatabaseException extends AppException {
-  const DatabaseException({required super.message, super.originalException});
+class AppDatabaseException extends AppException {
+  const AppDatabaseException({required super.message, super.originalException});
 }
 
-class ValidationException extends AppException {
-  const ValidationException({required super.message});
+class AppValidationException extends AppException {
+  const AppValidationException({required super.message});
 }
 
-class NotFoundException extends AppException {
-  const NotFoundException({required super.message});
+class AppNotFoundException extends AppException {
+  const AppNotFoundException({required super.message});
 }
 
-class CacheException extends AppException {
-  const CacheException({required super.message, super.originalException});
+class AppCacheException extends AppException {
+  const AppCacheException({required super.message, super.originalException});
 }

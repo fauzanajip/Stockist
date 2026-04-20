@@ -1,8 +1,5 @@
-import 'package:uuid/uuid.dart';
 import '../../domain/entities/stock_mutation_entity.dart';
 import '../../domain/repositories/stock_mutation_repository.dart';
-import '../../../core/error/failures.dart';
-import 'package:dartz/dartz.dart';
 
 class CreateStockMutationParams {
   final String eventId;
@@ -27,7 +24,7 @@ class CreateStockMutation {
 
   CreateStockMutation(this.repository);
 
-  Future<Either<Failure, StockMutationEntity>> call(CreateStockMutationParams params) async {
+  Future<StockMutationEntity> call(CreateStockMutationParams params) async {
     return await repository.create(
       StockMutationEntity(
         id: '',
@@ -48,7 +45,7 @@ class GetStockMutationsByEvent {
 
   GetStockMutationsByEvent(this.repository);
 
-  Future<Either<Failure, List<StockMutationEntity>>> call(String eventId) async {
+  Future<List<StockMutationEntity>> call(String eventId) async {
     return await repository.getByEvent(eventId);
   }
 }
@@ -58,7 +55,7 @@ class GetStockMutationsByEventSpg {
 
   GetStockMutationsByEventSpg(this.repository);
 
-  Future<Either<Failure, List<StockMutationEntity>>> call(String eventId, String spgId) async {
+  Future<List<StockMutationEntity>> call(String eventId, String spgId) async {
     return await repository.getByEventAndSpg(eventId, spgId);
   }
 }
@@ -68,7 +65,7 @@ class GetTotalGiven {
 
   GetTotalGiven(this.repository);
 
-  Future<Either<Failure, int>> call(String eventId, String spgId, String productId) async {
+  Future<int> call(String eventId, String spgId, String productId) async {
     return await repository.getTotalGiven(eventId, spgId, productId);
   }
 }
@@ -78,7 +75,7 @@ class GetTotalReturn {
 
   GetTotalReturn(this.repository);
 
-  Future<Either<Failure, int>> call(String eventId, String spgId, String productId) async {
+  Future<int> call(String eventId, String spgId, String productId) async {
     return await repository.getTotalReturn(eventId, spgId, productId);
   }
 }

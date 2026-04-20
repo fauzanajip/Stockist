@@ -1,8 +1,5 @@
-import 'package:uuid/uuid.dart';
 import '../../domain/entities/cash_record_entity.dart';
 import '../../domain/repositories/cash_record_repository.dart';
-import '../../../core/error/failures.dart';
-import 'package:dartz/dartz.dart';
 
 class CreateOrUpdateCashRecordParams {
   final String eventId;
@@ -25,40 +22,35 @@ class CreateOrUpdateCashRecord {
 
   CreateOrUpdateCashRecord(this.repository);
 
-  Future<Either<Failure, CashRecordEntity>> call(CreateOrUpdateCashRecordParams params) async {
-    final existingResult = await repository.getByEventAndSpg(
+  Future<CashRecordEntity> call(CreateOrUpdateCashRecordParams params) async {
+    final existing = await repository.getByEventAndSpg(
       params.eventId,
       params.spgId,
     );
 
-    return existingResult.fold(
-      (failure) => Left(failure),
-      (existing) {
-        if (existing == null) {
-          return repository.create(
-            CashRecordEntity(
-              id: '',
-              eventId: params.eventId,
-              spgId: params.spgId,
-              cashReceived: params.cashReceived,
-              qrisReceived: params.qrisReceived,
-              note: params.note,
-            ),
-          );
-        } else {
-          return repository.update(
-            CashRecordEntity(
-              id: existing.id,
-              eventId: params.eventId,
-              spgId: params.spgId,
-              cashReceived: params.cashReceived,
-              qrisReceived: params.qrisReceived,
-              note: params.note,
-            ),
-          );
-        }
-      },
-    );
+    if (existing == null) {
+      return await repository.create(
+        CashRecordEntity(
+          id: '',
+          eventId: params.eventId,
+          spgId: params.spgId,
+          cashReceived: params.cashReceived,
+          qrisReceived: params.qrisReceived,
+          note: params.note,
+        ),
+      );
+    } else {
+      return await repository.update(
+        CashRecordEntity(
+          id: existing.id,
+          eventId: params.eventId,
+          spgId: params.spgId,
+          cashReceived: params.cashReceived,
+          qrisReceived: params.qrisReceived,
+          note: params.note,
+        ),
+      );
+    }
   }
 }
 
@@ -67,7 +59,7 @@ class GetCashRecordByEventSpg {
 
   GetCashRecordByEventSpg(this.repository);
 
-  Future<Either<Failure, CashRecordEntity?>> call(String eventId, String spgId) async {
+  Future<CashRecordEntity?> call(String eventId, String spgId) async {
     return await repository.getByEventAndSpg(eventId, spgId);
   }
 }

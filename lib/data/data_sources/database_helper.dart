@@ -1,17 +1,6 @@
-import 'package:sqflite/sqflite.dart';
+import 'package:sqflite/sqflite.dart' hide DatabaseException;
 import 'package:path/path.dart';
-import '../domain/entities/event_entity.dart';
-import '../domain/entities/product_entity.dart';
-import '../domain/entities/spg_entity.dart';
-import '../domain/entities/spb_entity.dart';
-import '../domain/entities/event_spg_entity.dart';
-import '../domain/entities/event_product_entity.dart';
-import '../domain/entities/stock_mutation_entity.dart';
-import '../domain/entities/sales_entity.dart';
-import '../domain/entities/cash_record_entity.dart';
-import '../domain/entities/backup_log_entity.dart';
-import '../core/constants/app_constants.dart';
-import '../core/error/exceptions.dart';
+import '../../../core/constants/app_constants.dart';
 
 class DatabaseHelper {
   DatabaseHelper._privateConstructor();
@@ -184,8 +173,6 @@ class DatabaseHelper {
   }
 
   // Helper methods
-  static String boolToInt(bool value) => value ? '1' : '0';
-  static int intToBool(int value) => value == 1;
   static String dateTimeToString(DateTime dateTime) => dateTime.toIso8601String();
   static DateTime stringToDateTime(String string) => DateTime.parse(string);
 }

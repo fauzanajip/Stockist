@@ -4,8 +4,7 @@ import '../models/spg_model.dart';
 import '../../domain/entities/spg_entity.dart';
 import '../../domain/repositories/spg_repository.dart';
 import '../../../core/error/exceptions.dart';
-import '../../../core/error/failures.dart';
-import 'package:dartz/dartz.dart';
+import 'package:sqflite/sqflite.dart' hide DatabaseException;
 
 class SpgRepositoryImpl implements SpgRepository {
   final DatabaseHelper dbHelper;
@@ -13,21 +12,21 @@ class SpgRepositoryImpl implements SpgRepository {
   SpgRepositoryImpl({required this.dbHelper});
 
   @override
-  Future<Either<Failure, List<SpgEntity>>> getAll() async {
+  Future<List<SpgEntity>> getAll() async {
     try {
       final db = await dbHelper.database;
       final List<Map<String, dynamic>> maps = await db.query(
         'spgs',
         orderBy: 'name ASC',
       );
-      return Right(maps.map((map) => SpgModel.fromMap(map)).toList());
+      return maps.map((map) => SpgModel.fromMap(map)).toList();
     } catch (e) {
-      return const Left(DatabaseFailure(message: 'Gagal mengambil data SPG'));
+      throw const AppDatabaseException(message: 'Gagal mengambil data SPG: $e');
     }
   }
 
   @override
-  Future<Either<Failure, List<SpgEntity>>> getActive() async {
+  Future<List<SpgEntity>> getActive() async {
     try {
       final db = await dbHelper.database;
       final List<Map<String, dynamic>> maps = await db.query(
@@ -35,14 +34,14 @@ class SpgRepositoryImpl implements SpgRepository {
         where: 'deleted_at IS NULL',
         orderBy: 'name ASC',
       );
-      return Right(maps.map((map) => SpgModel.fromMap(map)).toList());
+      return maps.map((map) => SpgModel.fromMap(map)).toList();
     } catch (e) {
-      return const Left(DatabaseFailure(message: 'Gagal mengambil data active SPG'));
+      throw const AppDatabaseException(message: 'Gagal mengambil data active SPG: $e');
     }
   }
 
   @override
-  Future<Either<Failure, SpgEntity?>> getById(String id) async {
+  Future<SpgEntity?> getById(String id) async {
     try {
       final db = await dbHelper.database;
       final List<Map<String, dynamic>> maps = await db.query(
@@ -51,28 +50,28 @@ class SpgRepositoryImpl implements SpgRepository {
         whereArgs: [id],
       );
       if (maps.isNotEmpty) {
-        return Right(SpgModel.fromMap(maps.first));
+        return SpgModel.fromMap(maps.first);
       }
-      return const Right(null);
+      return null;
     } catch (e) {
-      return const Left(DatabaseFailure(message: 'Gagal mengambil data SPG'));
+      throw const AppDatabaseException(message: 'Gagal mengambil data SPG: $e');
     }
   }
 
   @override
-  Future<Either<Failure, SpgEntity>> create(SpgEntity spg) async {
+  Future<SpgEntity> create(SpgEntity spg) async {
     try {
       final db = await dbHelper.database;
       final model = SpgModel.fromEntity(spg);
       await db.insert('spgs', model.toMap());
-      return Right(model);
+      return model;
     } catch (e) {
-      return const Left(DatabaseFailure(message: 'Gagal membuat SPG baru'));
+      throw const AppDatabaseException(message: 'Gagal membuat SPG baru: $e');
     }
   }
 
   @override
-  Future<Either<Failure, SpgEntity>> update(SpgEntity spg) async {
+  Future<SpgEntity> update(SpgEntity spg) async {
     try {
       final db = await dbHelper.database;
       final model = SpgModel.fromEntity(spg).copyWith(
@@ -84,14 +83,14 @@ class SpgRepositoryImpl implements SpgRepository {
         where: 'id = ?',
         whereArgs: [spg.id],
       );
-      return Right(model);
+      return model;
     } catch (e) {
-      return const Left(DatabaseFailure(message: 'Gagal update SPG'));
+      throw const AppDatabaseException(message: 'Gagal update SPG: $e');
     }
   }
 
   @override
-  Future<Either<Failure, void>> delete(String id) async {
+  Future<void> delete(String id) async {
     try {
       final db = await dbHelper.database;
       await db.delete(
@@ -99,14 +98,13 @@ class SpgRepositoryImpl implements SpgRepository {
         where: 'id = ?',
         whereArgs: [id],
       );
-      return const Right(null);
     } catch (e) {
-      return const Left(DatabaseFailure(message: 'Gagal hapus SPG'));
+      throw const AppDatabaseException(message: 'Gagal hapus SPG: $e');
     }
   }
 
   @override
-  Future<Either<Failure, void>> softDelete(String id) async {
+  Future<void> softDelete(String id) async {
     try {
       final db = await dbHelper.database;
       await db.update(
@@ -118,9 +116,8 @@ class SpgRepositoryImpl implements SpgRepository {
         where: 'id = ?',
         whereArgs: [id],
       );
-      return const Right(null);
     } catch (e) {
-      return const Left(DatabaseFailure(message: 'Gagal soft delete SPG'));
+      throw const AppDatabaseException(message: 'Gagal soft delete SPG: $e');
     }
   }
 }

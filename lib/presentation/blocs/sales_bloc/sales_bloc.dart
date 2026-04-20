@@ -18,33 +18,34 @@ class SalesBloc extends Bloc<SalesEvent, SalesState> {
     UpdateSales event,
     Emitter<SalesState> emit,
   ) async {
-    await createOrUpdateSales(
-      CreateOrUpdateSalesParams(
-        eventId: event.eventId,
-        spgId: event.spgId,
-        productId: event.productId,
-        qtySold: event.qtySold,
-      ),
-    );
-    
-    add(LoadSales(eventId: event.eventId, spgId: event.spgId));
+    try {
+      await createOrUpdateSales(
+        CreateOrUpdateSalesParams(
+          eventId: event.eventId,
+          spgId: event.spgId,
+          productId: event.productId,
+          qtySold: event.qtySold,
+        ),
+      );
+      add(LoadSales(eventId: event.eventId, spgId: event.spgId));
+    } catch (e) {
+      // TODO: Emit error state
+    }
   }
 
   Future<void> _onLoadSales(
     LoadSales event,
     Emitter<SalesState> emit,
   ) async {
-    final result = await getSalesByEventSpg(event.eventId, event.spgId);
-    
-    result.fold(
-      (failure) => {},
-      (salesList) {
-        final salesMap = <String, int>{};
-        for (final sales in salesList) {
-          salesMap[sales.productId] = sales.qtySold;
-        }
-        emit(state.copyWith(salesByProduct: salesMap));
-      },
-    );
+    try {
+      final salesList = await getSalesByEventSpg(event.eventId, event.spgId);
+      final salesMap = <String, int>{};
+      for (final sales in salesList) {
+        salesMap[sales.productId] = sales.qtySold;
+      }
+      emit(state.copyWith(salesByProduct: salesMap));
+    } catch (e) {
+      // TODO: Emit error state
+    }
   }
 }

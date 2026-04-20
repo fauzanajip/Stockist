@@ -4,8 +4,8 @@ import '../data_sources/database_helper.dart';
 import '../models/stock_mutation_model.dart';
 import '../../domain/entities/stock_mutation_entity.dart';
 import '../../domain/repositories/stock_mutation_repository.dart';
-import '../../../core/error/failures.dart';
-import 'package:dartz/dartz.dart';
+import '../../../core/error/exceptions.dart';
+import 'package:sqflite/sqflite.dart' hide DatabaseException;
 
 class StockMutationRepositoryImpl implements StockMutationRepository {
   final DatabaseHelper dbHelper;
@@ -13,7 +13,7 @@ class StockMutationRepositoryImpl implements StockMutationRepository {
   StockMutationRepositoryImpl({required this.dbHelper});
 
   @override
-  Future<Either<Failure, List<StockMutationEntity>>> getByEvent(String eventId) async {
+  Future<List<StockMutationEntity>> getByEvent(String eventId) async {
     try {
       final db = await dbHelper.database;
       final List<Map<String, dynamic>> maps = await db.query(
@@ -22,14 +22,14 @@ class StockMutationRepositoryImpl implements StockMutationRepository {
         whereArgs: [eventId],
         orderBy: 'timestamp DESC',
       );
-      return Right(maps.map((map) => StockMutationModel.fromMap(map)).toList());
+      return maps.map((map) => StockMutationModel.fromMap(map)).toList();
     } catch (e) {
-      return const Left(DatabaseFailure(message: 'Gagal mengambil data stock mutations'));
+      throw const AppDatabaseException(message: 'Gagal mengambil data stock mutations: $e');
     }
   }
 
   @override
-  Future<Either<Failure, List<StockMutationEntity>>> getByEventAndSpg(String eventId, String spgId) async {
+  Future<List<StockMutationEntity>> getByEventAndSpg(String eventId, String spgId) async {
     try {
       final db = await dbHelper.database;
       final List<Map<String, dynamic>> maps = await db.query(
@@ -38,14 +38,14 @@ class StockMutationRepositoryImpl implements StockMutationRepository {
         whereArgs: [eventId, spgId],
         orderBy: 'timestamp DESC',
       );
-      return Right(maps.map((map) => StockMutationModel.fromMap(map)).toList());
+      return maps.map((map) => StockMutationModel.fromMap(map)).toList();
     } catch (e) {
-      return const Left(DatabaseFailure(message: 'Gagal mengambil data stock mutations'));
+      throw const AppDatabaseException(message: 'Gagal mengambil data stock mutations: $e');
     }
   }
 
   @override
-  Future<Either<Failure, List<StockMutationEntity>>> getByEventSpgProduct(String eventId, String spgId, String productId) async {
+  Future<List<StockMutationEntity>> getByEventSpgProduct(String eventId, String spgId, String productId) async {
     try {
       final db = await dbHelper.database;
       final List<Map<String, dynamic>> maps = await db.query(
@@ -54,14 +54,14 @@ class StockMutationRepositoryImpl implements StockMutationRepository {
         whereArgs: [eventId, spgId, productId],
         orderBy: 'timestamp DESC',
       );
-      return Right(maps.map((map) => StockMutationModel.fromMap(map)).toList());
+      return maps.map((map) => StockMutationModel.fromMap(map)).toList();
     } catch (e) {
-      return const Left(DatabaseFailure(message: 'Gagal mengambil data stock mutations'));
+      throw const AppDatabaseException(message: 'Gagal mengambil data stock mutations: $e');
     }
   }
 
   @override
-  Future<Either<Failure, StockMutationEntity>> create(StockMutationEntity mutation) async {
+  Future<StockMutationEntity> create(StockMutationEntity mutation) async {
     try {
       final db = await dbHelper.database;
       final model = StockMutationModel(
@@ -76,14 +76,14 @@ class StockMutationRepositoryImpl implements StockMutationRepository {
         createdAt: DateTime.now(),
       );
       await db.insert('stock_mutations', model.toMap());
-      return Right(model);
+      return model;
     } catch (e) {
-      return const Left(DatabaseFailure(message: 'Gagal membuat stock mutation'));
+      throw const AppDatabaseException(message: 'Gagal membuat stock mutation: $e');
     }
   }
 
   @override
-  Future<Either<Failure, void>> delete(String id) async {
+  Future<void> delete(String id) async {
     try {
       final db = await dbHelper.database;
       await db.delete(
@@ -91,14 +91,13 @@ class StockMutationRepositoryImpl implements StockMutationRepository {
         where: 'id = ?',
         whereArgs: [id],
       );
-      return const Right(null);
     } catch (e) {
-      return const Left(DatabaseFailure(message: 'Gagal hapus stock mutation'));
+      throw const AppDatabaseException(message: 'Gagal hapus stock mutation: $e');
     }
   }
 
   @override
-  Future<Either<Failure, int>> getTotalGiven(String eventId, String spgId, String productId) async {
+  Future<int> getTotalGiven(String eventId, String spgId, String productId) async {
     try {
       final db = await dbHelper.database;
       final result = await db.rawQuery('''
@@ -109,31 +108,31 @@ class StockMutationRepositoryImpl implements StockMutationRepository {
       ''', [eventId, spgId, productId]);
       
       if (result.isNotEmpty && result.first['total'] != null) {
-        return Right(result.first['total'] as int);
+        return result.first['total'] as int;
       }
-      return const Right(0);
+      return 0;
     } catch (e) {
-      return const Left(DatabaseFailure(message: 'Gagal menghitung total given'));
+      throw const AppDatabaseException(message: 'Gagal menghitung total given: $e');
     }
   }
 
   @override
-  Future<Either<Failure, int>> getTotalReturn(String eventId, String spgId, String productId) async {
+  Future<int> getTotalReturn(String eventId, String spgId, String productId) async {
     try {
       final db = await dbHelper.database;
       final result = await db.rawQuery('''
         SELECT SUM(qty) as total
         FROM stock_mutations
         WHERE event_id = ? AND spg_id = ? AND product_id = ?
-        AND type = 'return'
+        AND type = 'returnMutation'
       ''', [eventId, spgId, productId]);
       
       if (result.isNotEmpty && result.first['total'] != null) {
-        return Right(result.first['total'] as int);
+        return result.first['total'] as int;
       }
-      return const Right(0);
+      return 0;
     } catch (e) {
-      return const Left(DatabaseFailure(message: 'Gagal menghitung total return'));
+      throw const AppDatabaseException(message: 'Gagal menghitung total return: $e');
     }
   }
 }

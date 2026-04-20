@@ -1,8 +1,6 @@
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/event_entity.dart';
 import '../../domain/repositories/event_repository.dart';
-import '../../../core/error/failures.dart';
-import 'package:dartz/dartz.dart';
 
 class CreateEventParams extends Equatable {
   final String name;
@@ -22,7 +20,7 @@ class CreateEvent {
 
   CreateEvent(this.repository);
 
-  Future<Either<Failure, EventEntity>> call(CreateEventParams params) async {
+  Future<EventEntity> call(CreateEventParams params) async {
     return await repository.create(
       EventEntity(
         id: '',
@@ -39,7 +37,7 @@ class GetAllEvents {
 
   GetAllEvents(this.repository);
 
-  Future<Either<Failure, List<EventEntity>>> call() async {
+  Future<List<EventEntity>> call() async {
     return await repository.getAll();
   }
 }
@@ -49,7 +47,7 @@ class GetEventById {
 
   GetEventById(this.repository);
 
-  Future<Either<Failure, EventEntity?>> call(String id) async {
+  Future<EventEntity?> call(String id) async {
     return await repository.getById(id);
   }
 }
@@ -59,7 +57,7 @@ class CloseEvent {
 
   CloseEvent(this.repository);
 
-  Future<Either<Failure, EventEntity>> call(String id) async {
+  Future<EventEntity> call(String id) async {
     return await repository.closeEvent(id);
   }
 }
@@ -69,7 +67,7 @@ class ReopenEvent {
 
   ReopenEvent(this.repository);
 
-  Future<Either<Failure, EventEntity>> call(String id) async {
+  Future<EventEntity> call(String id) async {
     return await repository.reopenEvent(id);
   }
 }
