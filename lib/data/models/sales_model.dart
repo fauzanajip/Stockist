@@ -54,6 +54,7 @@ class SalesModel extends SalesEntity {
     };
   }
 
+  @override
   SalesModel copyWith({
     String? id,
     String? eventId,

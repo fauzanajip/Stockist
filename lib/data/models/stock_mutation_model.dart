@@ -61,6 +61,7 @@ class StockMutationModel extends StockMutationEntity {
     };
   }
 
+  @override
   StockMutationModel copyWith({
     String? id,
     String? eventId,

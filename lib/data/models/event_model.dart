@@ -50,6 +50,7 @@ class EventModel extends EventEntity {
     };
   }
 
+  @override
   EventModel copyWith({
     String? id,
     String? name,

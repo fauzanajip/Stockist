@@ -34,11 +34,8 @@ class SpbModel extends SpbEntity {
     };
   }
 
-  SpbModel copyWith({
-    String? id,
-    String? name,
-    DateTime? createdAt,
-  }) {
+  @override
+  SpbModel copyWith({String? id, String? name, DateTime? createdAt}) {
     return SpbModel(
       id: id ?? this.id,
       name: name ?? this.name,

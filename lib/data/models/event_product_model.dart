@@ -42,6 +42,7 @@ class EventProductModel extends EventProductEntity {
     };
   }
 
+  @override
   EventProductModel copyWith({
     String? id,
     String? eventId,

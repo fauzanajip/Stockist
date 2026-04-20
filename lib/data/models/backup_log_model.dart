@@ -49,6 +49,7 @@ class BackupLogModel extends BackupLogEntity {
     };
   }
 
+  @override
   BackupLogModel copyWith({
     String? id,
     String? eventId,

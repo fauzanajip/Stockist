@@ -1,10 +1,8 @@
-import 'package:sqflite/sqflite.dart';
 import '../data_sources/database_helper.dart';
 import '../models/spg_model.dart';
 import '../../domain/entities/spg_entity.dart';
 import '../../domain/repositories/spg_repository.dart';
 import '../../../core/error/exceptions.dart';
-import 'package:sqflite/sqflite.dart' hide DatabaseException;
 
 class SpgRepositoryImpl implements SpgRepository {
   final DatabaseHelper dbHelper;

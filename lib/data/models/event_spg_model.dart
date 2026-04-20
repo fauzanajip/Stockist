@@ -42,6 +42,7 @@ class EventSpgModel extends EventSpgEntity {
     };
   }
 
+  @override
   EventSpgModel copyWith({
     String? id,
     String? eventId,

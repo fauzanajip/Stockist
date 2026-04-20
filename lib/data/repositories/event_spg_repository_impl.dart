@@ -1,11 +1,9 @@
-import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
 import '../data_sources/database_helper.dart';
 import '../models/event_spg_model.dart';
 import '../../domain/entities/event_spg_entity.dart';
 import '../../domain/repositories/event_spg_repository.dart';
 import '../../../core/error/exceptions.dart';
-import 'package:sqflite/sqflite.dart' hide DatabaseException;
 
 class EventSpgRepositoryImpl implements EventSpgRepository {
   final DatabaseHelper dbHelper;

@@ -55,6 +55,7 @@ class CashRecordModel extends CashRecordEntity {
     };
   }
 
+  @override
   CashRecordModel copyWith({
     String? id,
     String? eventId,

@@ -33,8 +33,8 @@ class ProductModel extends ProductEntity {
       name: map['name'] as String,
       sku: map['sku'] as String,
       price: (map['price'] as num).toDouble(),
-      deletedAt: map['deleted_at'] != null 
-          ? DatabaseHelper.stringToDateTime(map['deleted_at'] as String) 
+      deletedAt: map['deleted_at'] != null
+          ? DatabaseHelper.stringToDateTime(map['deleted_at'] as String)
           : null,
       createdAt: DatabaseHelper.stringToDateTime(map['created_at'] as String),
       updatedAt: DatabaseHelper.stringToDateTime(map['updated_at'] as String),
@@ -47,12 +47,15 @@ class ProductModel extends ProductEntity {
       'name': name,
       'sku': sku,
       'price': price,
-      'deleted_at': deletedAt != null ? DatabaseHelper.dateTimeToString(deletedAt!) : null,
+      'deleted_at': deletedAt != null
+          ? DatabaseHelper.dateTimeToString(deletedAt!)
+          : null,
       'created_at': DatabaseHelper.dateTimeToString(createdAt),
       'updated_at': DatabaseHelper.dateTimeToString(updatedAt),
     };
   }
 
+  @override
   ProductModel copyWith({
     String? id,
     String? name,

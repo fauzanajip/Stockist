@@ -1,11 +1,9 @@
-import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
 import '../data_sources/database_helper.dart';
 import '../models/event_product_model.dart';
 import '../../domain/entities/event_product_entity.dart';
 import '../../domain/repositories/event_product_repository.dart';
 import '../../../core/error/exceptions.dart';
-import 'package:sqflite/sqflite.dart' hide DatabaseException;
 
 class EventProductRepositoryImpl implements EventProductRepository {
   final DatabaseHelper dbHelper;

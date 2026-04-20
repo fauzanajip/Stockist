@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import '../../../domain/entities/spg_entity.dart';
 
 abstract class SpgEvent extends Equatable {
   const SpgEvent();

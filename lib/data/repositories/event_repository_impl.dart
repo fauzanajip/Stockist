@@ -1,4 +1,3 @@
-import 'package:sqflite/sqflite.dart' hide DatabaseException;
 import '../data_sources/database_helper.dart';
 import '../models/event_model.dart';
 import '../../domain/entities/event_entity.dart';

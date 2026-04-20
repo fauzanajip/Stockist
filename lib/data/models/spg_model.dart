@@ -45,6 +45,7 @@ class SpgModel extends SpgEntity {
     };
   }
 
+  @override
   SpgModel copyWith({
     String? id,
     String? name,
