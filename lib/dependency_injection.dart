@@ -129,10 +129,14 @@ Future<void> initDependencies() async {
   // Use Cases - Sales
   sl.registerLazySingleton(() => CreateOrUpdateSales(sl()));
   sl.registerLazySingleton(() => GetSalesByEventSpg(sl()));
+  sl.registerLazySingleton(() => GetSalesByEvent(sl()));
+
 
   // Use Cases - Cash Record
   sl.registerLazySingleton(() => CreateOrUpdateCashRecord(sl()));
   sl.registerLazySingleton(() => GetCashRecordByEventSpg(sl()));
+  sl.registerLazySingleton(() => GetCashRecordsByEvent(sl()));
+
 
   // Blocs
   sl.registerFactory(
@@ -169,15 +173,28 @@ Future<void> initDependencies() async {
       createStockMutation: sl(),
       getTotalGiven: sl(),
       getTotalReturn: sl(),
+      getStockMutationsByEventSpg: sl(),
+      getStockMutationsByEvent: sl(),
     ),
   );
+
+
   sl.registerFactory(
-    () => SalesBloc(createOrUpdateSales: sl(), getSalesByEventSpg: sl()),
+    () => SalesBloc(
+      createOrUpdateSales: sl(),
+      getSalesByEventSpg: sl(),
+      getSalesByEvent: sl(),
+    ),
   );
+
   sl.registerFactory(
-    () =>
-        CashBloc(createOrUpdateCashRecord: sl(), getCashRecordByEventSpg: sl()),
+    () => CashBloc(
+      createOrUpdateCashRecord: sl(),
+      getCashRecordByEventSpg: sl(),
+      getCashRecordsByEvent: sl(),
+    ),
   );
+
   sl.registerFactory(
     () => EventProductBloc(
       getActiveProducts: sl(),

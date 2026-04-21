@@ -63,3 +63,12 @@ class GetCashRecordByEventSpg {
     return await repository.getByEventAndSpg(eventId, spgId);
   }
 }
+class GetCashRecordsByEvent {
+  final CashRecordRepository repository;
+
+  GetCashRecordsByEvent(this.repository);
+
+  Future<List<CashRecordEntity>> call(String eventId) async {
+    return await repository.getByEvent(eventId);
+  }
+}

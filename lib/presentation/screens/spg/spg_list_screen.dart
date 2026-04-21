@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_theme.dart';
 import '../../../core/utils/formatters.dart' as app_formatters;
 import '../../../domain/entities/event_spg_entity.dart';
-import '../../../domain/entities/spg_entity.dart';
 import '../../../domain/entities/stock_mutation_entity.dart';
 import '../../../core/utils/stock_calculator.dart';
 import '../../blocs/event_spg_bloc/event_spg_bloc.dart';
@@ -22,57 +23,82 @@ import '../../blocs/sales_bloc/sales_state.dart';
 import '../../blocs/cash_bloc/cash_bloc.dart';
 import '../../blocs/cash_bloc/cash_event.dart';
 import '../../blocs/cash_bloc/cash_state.dart';
+import '../../blocs/event_product_bloc/event_product_bloc.dart';
+import '../../blocs/event_product_bloc/event_product_event.dart';
+import '../../blocs/event_product_bloc/event_product_state.dart';
 
-class SpgListScreen extends StatelessWidget {
+class SpgListScreen extends StatefulWidget {
   final String eventId;
 
   const SpgListScreen({super.key, required this.eventId});
 
   @override
+  State<SpgListScreen> createState() => _SpgListScreenState();
+}
+
+class _SpgListScreenState extends State<SpgListScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  void _loadData() {
+    context.read<EventSpgBloc>().add(
+      LoadAvailableSpgs(eventId: widget.eventId),
+    );
+    context.read<SpgBloc>().add(LoadAllSpqs());
+    context.read<StockBloc>().add(LoadStockByEvent(eventId: widget.eventId));
+    context.read<SalesBloc>().add(LoadAllSalesByEvent(eventId: widget.eventId));
+    context.read<CashBloc>().add(LoadAllCashByEvent(eventId: widget.eventId));
+    context.read<EventProductBloc>().add(
+      LoadAvailableProducts(eventId: widget.eventId),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocListener<EventSpgBloc, EventSpgState>(
-      listener: (context, state) {
-        if (state is! EventSpgLoading && 
-            state is! AvailableSpgsLoaded && 
-            state is! AssignedSpgsLoaded) {
-          context.read<EventSpgBloc>().add(LoadAvailableSpgs(eventId: eventId));
-        }
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('SPG List'),
-        ),
-        body: BlocBuilder<EventSpgBloc, EventSpgState>(
-          builder: (context, state) {
-            if (state is EventSpgLoading) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (state is EventSpgError) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.error_outline, size: 64, color: AppColors.error),
-                    const SizedBox(height: 16),
-                    Text('Error: ${state.message}'),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () => context.read<EventSpgBloc>().add(LoadAvailableSpgs(eventId: eventId)),
-                      child: const Text('Retry'),
-                    ),
-                  ],
-                ),
-              );
-            }
-            if (state is AvailableSpgsLoaded) {
-              if (state.assignedSpgs.isEmpty) {
-                return _buildEmptyState(context);
-              }
-              return _buildSpgList(context, state.assignedSpgs);
-            }
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('SPG List'),
+        actions: [
+          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadData),
+        ],
+      ),
+      body: BlocBuilder<EventSpgBloc, EventSpgState>(
+        builder: (context, state) {
+          if (state is EventSpgLoading) {
             return const Center(child: CircularProgressIndicator());
-          },
-        ),
+          }
+          if (state is EventSpgError) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: AppColors.error,
+                  ),
+                  const SizedBox(height: 16),
+                  Text('Error: ${state.message}'),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: _loadData,
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            );
+          }
+          if (state is AvailableSpgsLoaded) {
+            if (state.assignedSpgs.isEmpty) {
+              return _buildEmptyState(context);
+            }
+            return _buildSpgList(context, state.assignedSpgs);
+          }
+          return const Center(child: CircularProgressIndicator());
+        },
       ),
     );
   }
@@ -82,7 +108,11 @@ class SpgListScreen extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.people_outline, size: 64, color: AppColors.onSurfaceVariant),
+          const Icon(
+            Icons.people_outline,
+            size: 64,
+            color: AppColors.onSurfaceVariant,
+          ),
           const SizedBox(height: 16),
           Text(
             'Belum ada SPG di event ini',
@@ -91,9 +121,9 @@ class SpgListScreen extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             'Setup SPG di Event Setup terlebih dahulu',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.onSurfaceVariant,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: AppColors.onSurfaceVariant),
           ),
         ],
       ),
@@ -102,10 +132,13 @@ class SpgListScreen extends StatelessWidget {
 
   Widget _buildSpgList(BuildContext context, List<EventSpgEntity> eventSpgs) {
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       itemCount: eventSpgs.length,
       itemBuilder: (context, index) {
-        return SpgDashboardCard(eventId: eventId, eventSpg: eventSpgs[index]);
+        return SpgDashboardCard(
+          eventId: widget.eventId,
+          eventSpg: eventSpgs[index],
+        );
       },
     );
   }
@@ -121,6 +154,27 @@ class SpgDashboardCard extends StatelessWidget {
     required this.eventSpg,
   });
 
+  Color _getAvatarColor(String name) {
+    final colors = [
+      AppColors.primary,
+      AppColors.secondary,
+      AppColors.success,
+      AppColors.warning,
+      const Color(0xFF673AB7),
+      const Color(0xFF009688),
+    ];
+    return colors[name.length % colors.length];
+  }
+
+  String _getInitials(String name) {
+    if (name.isEmpty) return "S";
+    final parts = name.trim().split(" ");
+    if (parts.length > 1) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return parts[0][0].toUpperCase();
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<SpgBloc, SpgState>(
@@ -128,108 +182,140 @@ class SpgDashboardCard extends StatelessWidget {
         if (spgState is! SpqsLoaded) {
           return const Card(child: ListTile(title: Text('Loading SPG...')));
         }
-        
+
         final spg = spgState.spqs.firstWhere((s) => s.id == eventSpg.spgId);
-        
+
         return Card(
-          margin: const EdgeInsets.only(bottom: 12),
-          child: InkWell(
-            onTap: () => context.pushNamed(
-              'spg_detail',
-              pathParameters: {
-                'eventId': eventId,
-                'spgId': spg.id,
-              },
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          spg.name,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      _buildStatusIndicator(context, eventId, spg.id),
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            children: [
+              Container(
+                height: 4,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      AppColors.secondary,
+                      AppColors.secondary.withOpacity(0.5),
                     ],
                   ),
-                  if (eventSpg.spbId != null) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      'SPB: ${eventSpg.spbId}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 12),
-                  _SpgDashboardStats(eventId: eventId, spgId: spg.id),
-                ],
+                ),
               ),
-            ),
+              InkWell(
+                onTap: () => context.pushNamed(
+                  'spg_detail',
+                  pathParameters: {'eventId': eventId, 'spgId': spg.id},
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 20,
+                            backgroundColor: _getAvatarColor(
+                              spg.name,
+                            ).withOpacity(0.2),
+                            child: Text(
+                              _getInitials(spg.name),
+                              style: TextStyle(
+                                color: _getAvatarColor(spg.name),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  spg.name,
+                                  style: Theme.of(context).textTheme.titleMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 0.2,
+                                      ),
+                                ),
+                                if (eventSpg.spbId != null)
+                                  Text(
+                                    'SPB: ${eventSpg.spbId}',
+                                    style: Theme.of(context).textTheme.bodySmall
+                                        ?.copyWith(
+                                          color: AppColors.onSurfaceVariant,
+                                        ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          _buildStatusChip(context, eventId, spg.id),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      _SpgDashboardStats(eventId: eventId, spgId: spg.id),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         );
       },
     );
   }
 
-  Widget _buildStatusIndicator(BuildContext context, String eventId, String spgId) {
+  Widget _buildStatusChip(BuildContext context, String eventId, String spgId) {
     return BlocBuilder<StockBloc, StockState>(
       builder: (context, stockState) {
         return BlocBuilder<SalesBloc, SalesState>(
           builder: (context, salesState) {
             return BlocBuilder<CashBloc, CashState>(
               builder: (context, cashState) {
-                bool hasData = stockState.mutations.isNotEmpty && 
-                              salesState.salesByProduct.isNotEmpty;
+                bool hasData = stockState.mutations.any(
+                  (m) => m.spgId == spgId,
+                );
                 bool isMatch = false;
-                
+                bool isLoading =
+                    stockState.isLoading ||
+                    salesState.isLoading ||
+                    cashState.isLoading;
+
                 if (hasData) {
-                  final totalGiven = stockState.totalGiven;
-                  final totalTerjual = salesState.salesByProduct.values.fold(0, (sum, val) => sum + val);
-                  final cashTotal = cashState.cashReceived + cashState.qrisReceived;
-                  
+                  final spgSales = salesState.allSales.where(
+                    (s) => s.spgId == spgId,
+                  );
+                  final totalTerjual = spgSales.fold(
+                    0,
+                    (sum, s) => sum + s.qtySold,
+                  );
+                  final spgCash = cashState.allCash
+                      .where((c) => c.spgId == spgId)
+                      .firstOrNull;
+                  final cashTotal =
+                      (spgCash?.cashReceived ?? 0) +
+                      (spgCash?.qrisReceived ?? 0);
+
                   if (totalTerjual > 0) {
                     final expectedCash = totalTerjual * 10000;
-                    final surplus = cashTotal - expectedCash;
-                    isMatch = surplus == 0;
+                    isMatch = (cashTotal - expectedCash) == 0;
                   } else {
                     isMatch = cashTotal == 0;
                   }
                 }
-                
-                if (!hasData) {
-                  return Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.onSurface.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '⏳',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  );
-                }
-                
-                return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: isMatch ? AppColors.primary : AppColors.warning,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    isMatch ? '✅' : '⚠️',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.white,
-                    ),
-                  ),
+
+                if (isLoading) return _chip("Syncing", Colors.grey);
+                if (!hasData)
+                  return _chip("No Data", AppColors.onSurfaceVariant);
+
+                return _chip(
+                  isMatch ? "Ready" : "Review",
+                  isMatch ? AppColors.success : AppColors.warning,
                 );
               },
             );
@@ -238,42 +324,33 @@ class SpgDashboardCard extends StatelessWidget {
       },
     );
   }
+
+  Widget _chip(String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.3), width: 1),
+      ),
+      child: Text(
+        label.toUpperCase(),
+        style: TextStyle(
+          color: color,
+          fontSize: 9,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0.5,
+        ),
+      ),
+    );
+  }
 }
 
-class _SpgDashboardStats extends StatefulWidget {
+class _SpgDashboardStats extends StatelessWidget {
   final String eventId;
   final String spgId;
 
-  const _SpgDashboardStats({
-    required this.eventId,
-    required this.spgId,
-  });
-
-  @override
-  State<_SpgDashboardStats> createState() => _SpgDashboardStatsState();
-}
-
-class _SpgDashboardStatsState extends State<_SpgDashboardStats> {
-  @override
-  void initState() {
-    super.initState();
-    _loadData();
-  }
-
-  void _loadData() {
-    context.read<StockBloc>().add(LoadStockByEventSpg(
-      eventId: widget.eventId,
-      spgId: widget.spgId,
-    ));
-    context.read<SalesBloc>().add(LoadSales(
-      eventId: widget.eventId,
-      spgId: widget.spgId,
-    ));
-    context.read<CashBloc>().add(LoadCashRecord(
-      eventId: widget.eventId,
-      spgId: widget.spgId,
-    ));
-  }
+  const _SpgDashboardStats({required this.eventId, required this.spgId});
 
   @override
   Widget build(BuildContext context) {
@@ -283,16 +360,26 @@ class _SpgDashboardStatsState extends State<_SpgDashboardStats> {
           builder: (context, salesState) {
             return BlocBuilder<CashBloc, CashState>(
               builder: (context, cashState) {
-                final initialQty = stockState.mutations
+                final spgMutations = stockState.mutations
+                    .where((m) => m.spgId == spgId)
+                    .toList();
+                final spgSales = salesState.allSales
+                    .where((s) => s.spgId == spgId)
+                    .toList();
+                final spgCash = cashState.allCash
+                    .where((c) => c.spgId == spgId)
+                    .firstOrNull;
+
+                final initialQty = spgMutations
                     .where((m) => m.type == MutationType.initial)
                     .fold(0, (sum, m) => sum + m.qty);
-                final topupQty = stockState.mutations
+                final topupQty = spgMutations
                     .where((m) => m.type == MutationType.topup)
                     .fold(0, (sum, m) => sum + m.qty);
-                final returnQty = stockState.mutations
+                final returnQty = spgMutations
                     .where((m) => m.type == MutationType.returnMutation)
                     .fold(0, (sum, m) => sum + m.qty);
-                
+
                 final totalGiven = StockCalculator.calculateTotalGiven(
                   initialQty: initialQty,
                   topupQty: topupQty,
@@ -300,31 +387,216 @@ class _SpgDashboardStatsState extends State<_SpgDashboardStats> {
                 final totalReturn = StockCalculator.calculateTotalReturn(
                   returnQty: returnQty,
                 );
-                final totalTerjual = salesState.salesByProduct.values.fold(0, (sum, val) => sum + val);
+                final totalTerjual = spgSales.fold(
+                  0,
+                  (sum, s) => sum + s.qtySold,
+                );
                 final sisaSystem = StockCalculator.calculateSisaSystem(
                   totalDikasih: totalGiven,
                   totalReturn: totalReturn,
                   totalTerjual: totalTerjual,
                 );
-                
-                final cashReceived = cashState.cashReceived;
-                final qrisReceived = cashState.qrisReceived;
-                final totalCash = cashReceived + qrisReceived;
 
-                return Column(
-                  children: [
-                    Row(
+                final totalCash =
+                    (spgCash?.cashReceived ?? 0) + (spgCash?.qrisReceived ?? 0);
+
+                return Theme(
+                  data: Theme.of(
+                    context,
+                  ).copyWith(dividerColor: Colors.transparent),
+                  child: ExpansionTile(
+                    tilePadding: EdgeInsets.zero,
+                    childrenPadding: EdgeInsets.zero,
+                    title: Column(
                       children: [
-                        _buildStatItem('Dikasih', totalGiven.toString(), AppColors.primary),
-                        const SizedBox(width: 16),
-                        _buildStatItem('Terjual', totalTerjual.toString(), AppColors.secondary),
-                        const SizedBox(width: 16),
-                        _buildStatItem('Sisa', sisaSystem.toString(), AppColors.onSurface),
+                        Row(
+                          children: [
+                            _buildStatItem(
+                              context,
+                              'Distributed',
+                              totalGiven.toString(),
+                              AppColors.success,
+                            ),
+                            const SizedBox(width: 12),
+                            _buildStatItem(
+                              context,
+                              'Sold',
+                              totalTerjual.toString(),
+                              AppColors.secondary,
+                            ),
+                            const SizedBox(width: 12),
+                            _buildStatItem(
+                              context,
+                              'Stock',
+                              sisaSystem.toString(),
+                              AppColors.onSurface,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.surfaceContainerHigh,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.account_balance_wallet_outlined,
+                                size: 16,
+                                color: AppColors.secondary,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'TOTAL CASH',
+                                style: Theme.of(context).textTheme.labelSmall
+                                    ?.copyWith(
+                                      color: AppColors.onSurfaceVariant,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                              const Spacer(),
+                              Text(
+                                app_formatters.Formatters.formatCurrency(
+                                  totalCash,
+                                ),
+                                style: Theme.of(context).textTheme.titleSmall
+                                    ?.copyWith(
+                                      color: AppColors.secondary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    _buildCashStatItem('Cash', app_formatters.Formatters.formatCurrency(totalCash)),
-                  ],
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        child: Divider(height: 1),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'PRODUCT BREAKDOWN',
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w900,
+                                  color: AppColors.onSurfaceVariant,
+                                  letterSpacing: 1.0,
+                                ),
+                          ),
+                          const Icon(
+                            Icons.inventory_2_outlined,
+                            size: 14,
+                            color: AppColors.onSurfaceVariant,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      BlocBuilder<EventProductBloc, EventProductState>(
+                        builder: (context, eventProductState) {
+                          if (eventProductState is! AvailableProductsLoaded) {
+                            return const Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: LinearProgressIndicator(minHeight: 2),
+                            );
+                          }
+
+                          final assignedProducts =
+                              eventProductState.assignedProducts;
+                          if (assignedProducts.isEmpty) {
+                            return const Text('No products assigned');
+                          }
+
+                          return Column(
+                            children: assignedProducts.map((ep) {
+                              final product = eventProductState.products
+                                  .firstWhereOrNull(
+                                    (p) => p.id == ep.productId,
+                                  );
+
+                              final prodMutations = spgMutations
+                                  .where((m) => m.productId == ep.productId)
+                                  .toList();
+                              final prodSales = spgSales
+                                  .where((s) => s.productId == ep.productId)
+                                  .toList();
+
+                              final pGiven = prodMutations
+                                  .where(
+                                    (m) =>
+                                        m.type != MutationType.returnMutation,
+                                  )
+                                  .fold(0, (sum, m) => sum + m.qty);
+                              final pReturn = prodMutations
+                                  .where(
+                                    (m) =>
+                                        m.type == MutationType.returnMutation,
+                                  )
+                                  .fold(0, (sum, m) => sum + m.qty);
+                              final pSold = prodSales.fold(
+                                0,
+                                (sum, s) => sum + s.qtySold,
+                              );
+                              final pSisa = pGiven - pReturn - pSold;
+
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 10),
+                                child: Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.surfaceContainerLowest
+                                        .withOpacity(0.5),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        flex: 3,
+                                        child: Text(
+                                          product?.name ?? 'Unknown',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                        ),
+                                      ),
+                                      _badge(
+                                        'D',
+                                        pGiven.toString(),
+                                        AppColors.success,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      _badge(
+                                        'T',
+                                        pSold.toString(),
+                                        AppColors.secondary,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      _badge(
+                                        'S',
+                                        pSisa.toString(),
+                                        AppColors.onSurface,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
                 );
               },
             );
@@ -334,44 +606,65 @@ class _SpgDashboardStatsState extends State<_SpgDashboardStats> {
     );
   }
 
-  Widget _buildStatItem(String label, String value, Color color) {
+  Widget _buildStatItem(
+    BuildContext context,
+    String label,
+    String value,
+    Color color,
+  ) {
     return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Column(
-          children: [
-            Text(
-              label,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: color,
-              ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label.toUpperCase(),
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: AppColors.onSurfaceVariant,
+              fontSize: 9,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.5,
             ),
-            Text(
-              value,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: color,
-                fontWeight: FontWeight.bold,
-              ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              color: color,
+              fontWeight: FontWeight.w900,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildCashStatItem(String label, String value) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Text(
-        '$label: $value',
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          fontWeight: FontWeight.bold,
-          color: AppColors.secondary,
-        ),
+  Widget _badge(String label, String value, Color color) {
+    return Container(
+      width: 42,
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Column(
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 8,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              color: color,
+              fontSize: 11,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ],
       ),
     );
   }

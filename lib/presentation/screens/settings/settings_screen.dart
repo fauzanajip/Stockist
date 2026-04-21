@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_theme.dart';
 import '../../../core/utils/validators.dart';
 import '../../blocs/product_bloc/product_bloc.dart';
@@ -32,11 +31,7 @@ class SettingsScreen extends StatelessWidget {
           ),
         ),
         body: const TabBarView(
-          children: [
-            ProductSettingsTab(),
-            SpgSettingsTab(),
-            SpbSettingsTab(),
-          ],
+          children: [ProductSettingsTab(), SpgSettingsTab(), SpbSettingsTab()],
         ),
       ),
     );
@@ -89,9 +84,9 @@ class _ProductSettingsTabState extends State<ProductSettingsTab> {
             const SnackBar(content: Text('Produk berhasil ditambahkan')),
           );
         } else if (state is ProductError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: ${state.message}')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Error: ${state.message}')));
         }
       },
       child: Column(
@@ -108,7 +103,8 @@ class _ProductSettingsTabState extends State<ProductSettingsTab> {
                       labelText: 'Nama Produk',
                       prefixIcon: Icon(Icons.inventory_2),
                     ),
-                    validator: (value) => Validators.validateRequired(value, 'Nama Produk'),
+                    validator: (value) =>
+                        Validators.validateRequired(value, 'Nama Produk'),
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
@@ -117,7 +113,8 @@ class _ProductSettingsTabState extends State<ProductSettingsTab> {
                       labelText: 'SKU',
                       prefixIcon: Icon(Icons.tag),
                     ),
-                    validator: (value) => Validators.validateRequired(value, 'SKU'),
+                    validator: (value) =>
+                        Validators.validateRequired(value, 'SKU'),
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
@@ -128,7 +125,10 @@ class _ProductSettingsTabState extends State<ProductSettingsTab> {
                       prefixText: 'Rp ',
                       prefixIcon: Icon(Icons.money),
                     ),
-                    validator: (value) => Validators.validatePositiveNumber(value, 'Harga Default'),
+                    validator: (value) => Validators.validatePositiveNumber(
+                      value,
+                      'Harga Default',
+                    ),
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
@@ -151,9 +151,7 @@ class _ProductSettingsTabState extends State<ProductSettingsTab> {
                 }
                 if (state is ProductsLoaded) {
                   if (state.products.isEmpty) {
-                    return const Center(
-                      child: Text('Belum ada produk'),
-                    );
+                    return const Center(child: Text('Belum ada produk'));
                   }
                   return ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -169,7 +167,10 @@ class _ProductSettingsTabState extends State<ProductSettingsTab> {
                           'SKU: ${product.sku} | Rp ${product.price.toInt()}',
                         ),
                         trailing: IconButton(
-                          icon: const Icon(Icons.delete, color: AppColors.error),
+                          icon: const Icon(
+                            Icons.delete,
+                            color: AppColors.error,
+                          ),
                           onPressed: () {
                             context.read<ProductBloc>().add(
                               SoftDeleteProductEvent(id: product.id),
@@ -226,9 +227,9 @@ class _SpgSettingsTabState extends State<SpgSettingsTab> {
             const SnackBar(content: Text('SPG berhasil ditambahkan')),
           );
         } else if (state is SpgError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: ${state.message}')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Error: ${state.message}')));
         }
       },
       child: Column(
@@ -245,7 +246,8 @@ class _SpgSettingsTabState extends State<SpgSettingsTab> {
                       labelText: 'Nama SPG',
                       prefixIcon: Icon(Icons.person),
                     ),
-                    validator: (value) => Validators.validateRequired(value, 'Nama SPG'),
+                    validator: (value) =>
+                        Validators.validateRequired(value, 'Nama SPG'),
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
@@ -268,9 +270,7 @@ class _SpgSettingsTabState extends State<SpgSettingsTab> {
                 }
                 if (state is SpqsLoaded) {
                   if (state.spqs.isEmpty) {
-                    return const Center(
-                      child: Text('Belum ada SPG'),
-                    );
+                    return const Center(child: Text('Belum ada SPG'));
                   }
                   return ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -278,12 +278,13 @@ class _SpgSettingsTabState extends State<SpgSettingsTab> {
                     itemBuilder: (context, index) {
                       final spg = state.spqs[index];
                       return ListTile(
-                        leading: const CircleAvatar(
-                          child: Icon(Icons.person),
-                        ),
+                        leading: const CircleAvatar(child: Icon(Icons.person)),
                         title: Text(spg.name),
                         trailing: IconButton(
-                          icon: const Icon(Icons.delete, color: AppColors.error),
+                          icon: const Icon(
+                            Icons.delete,
+                            color: AppColors.error,
+                          ),
                           onPressed: () {
                             context.read<SpgBloc>().add(
                               SoftDeleteSpqEvent(id: spg.id),
@@ -342,9 +343,9 @@ class _SpbSettingsTabState extends State<SpbSettingsTab> {
         } else if (state is SpbDeleted) {
           context.read<SpbBloc>().add(LoadAllSpbs());
         } else if (state is SpbError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: ${state.message}')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Error: ${state.message}')));
         }
       },
       child: Column(
@@ -361,7 +362,8 @@ class _SpbSettingsTabState extends State<SpbSettingsTab> {
                       labelText: 'Nama SPB',
                       prefixIcon: Icon(Icons.person),
                     ),
-                    validator: (value) => Validators.validateRequired(value, 'Nama SPB'),
+                    validator: (value) =>
+                        Validators.validateRequired(value, 'Nama SPB'),
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
@@ -385,9 +387,7 @@ class _SpbSettingsTabState extends State<SpbSettingsTab> {
                 if (state is SpbsLoaded) {
                   final spbs = state.spbs;
                   if (spbs.isEmpty) {
-                    return const Center(
-                      child: Text('Belum ada SPB'),
-                    );
+                    return const Center(child: Text('Belum ada SPB'));
                   }
                   return ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -395,12 +395,13 @@ class _SpbSettingsTabState extends State<SpbSettingsTab> {
                     itemBuilder: (context, index) {
                       final spb = spbs[index];
                       return ListTile(
-                        leading: const CircleAvatar(
-                          child: Icon(Icons.person),
-                        ),
+                        leading: const CircleAvatar(child: Icon(Icons.person)),
                         title: Text(spb.name),
                         trailing: IconButton(
-                          icon: const Icon(Icons.delete, color: AppColors.error),
+                          icon: const Icon(
+                            Icons.delete,
+                            color: AppColors.error,
+                          ),
                           onPressed: () {
                             context.read<SpbBloc>().add(
                               DeleteSpbEvent(spbId: spb.id),

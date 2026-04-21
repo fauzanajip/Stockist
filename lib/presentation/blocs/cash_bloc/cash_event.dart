@@ -38,3 +38,11 @@ class LoadCashRecord extends CashEvent {
   @override
   List<Object?> get props => [eventId, spgId];
 }
+class LoadAllCashByEvent extends CashEvent {
+  final String eventId;
+
+  const LoadAllCashByEvent({required this.eventId});
+
+  @override
+  List<Object?> get props => [eventId];
+}

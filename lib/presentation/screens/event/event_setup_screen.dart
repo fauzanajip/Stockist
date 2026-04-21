@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_theme.dart';
-import '../../../core/utils/formatters.dart' as app_formatters;
 import '../../../domain/entities/event_product_entity.dart';
 import '../../../domain/entities/event_spg_entity.dart';
 import '../../../domain/entities/product_entity.dart';
@@ -24,7 +23,8 @@ class EventSetupScreen extends StatefulWidget {
   State<EventSetupScreen> createState() => _EventSetupScreenState();
 }
 
-class _EventSetupScreenState extends State<EventSetupScreen> with SingleTickerProviderStateMixin {
+class _EventSetupScreenState extends State<EventSetupScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -41,15 +41,22 @@ class _EventSetupScreenState extends State<EventSetupScreen> with SingleTickerPr
   }
 
   void _loadData() {
-    context.read<EventProductBloc>().add(LoadAvailableProducts(eventId: widget.eventId));
-    context.read<EventSpgBloc>().add(LoadAvailableSpgs(eventId: widget.eventId));
+    context.read<EventProductBloc>().add(
+      LoadAvailableProducts(eventId: widget.eventId),
+    );
+    context.read<EventSpgBloc>().add(
+      LoadAvailableSpgs(eventId: widget.eventId),
+    );
   }
 
   void _saveSetup() {
-    context.goNamed('event_detail', pathParameters: {'eventId': widget.eventId});
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Setup berhasil disimpan')),
+    context.goNamed(
+      'event_detail',
+      pathParameters: {'eventId': widget.eventId},
     );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Setup berhasil disimpan')));
   }
 
   @override
@@ -67,10 +74,7 @@ class _EventSetupScreenState extends State<EventSetupScreen> with SingleTickerPr
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [
-          _buildProductTab(),
-          _buildSpgTab(),
-        ],
+        children: [_buildProductTab(), _buildSpgTab()],
       ),
       bottomNavigationBar: SafeArea(
         child: Padding(
@@ -106,7 +110,11 @@ class _EventSetupScreenState extends State<EventSetupScreen> with SingleTickerPr
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error_outline, size: 64, color: AppColors.error),
+                  const Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: AppColors.error,
+                  ),
                   const SizedBox(height: 16),
                   Text('Error: ${state.message}'),
                   const SizedBox(height: 16),
@@ -124,7 +132,11 @@ class _EventSetupScreenState extends State<EventSetupScreen> with SingleTickerPr
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.inventory_2_outlined, size: 64, color: AppColors.onSurfaceVariant),
+                    const Icon(
+                      Icons.inventory_2_outlined,
+                      size: 64,
+                      color: AppColors.onSurfaceVariant,
+                    ),
                     const SizedBox(height: 16),
                     Text(
                       'Belum ada produk',
@@ -146,9 +158,11 @@ class _EventSetupScreenState extends State<EventSetupScreen> with SingleTickerPr
               itemCount: state.products.length,
               itemBuilder: (context, index) {
                 final product = state.products[index];
-                final isAssigned = state.assignedProducts.any((ep) => ep.productId == product.id);
+                final isAssigned = state.assignedProducts.any(
+                  (ep) => ep.productId == product.id,
+                );
                 EventProductEntity assignedProduct;
-                
+
                 if (isAssigned) {
                   assignedProduct = state.assignedProducts.firstWhere(
                     (ep) => ep.productId == product.id,
@@ -161,7 +175,7 @@ class _EventSetupScreenState extends State<EventSetupScreen> with SingleTickerPr
                     price: product.price,
                   );
                 }
-                
+
                 return ProductAssignmentCard(
                   product: product,
                   eventId: widget.eventId,
@@ -213,7 +227,11 @@ class _EventSetupScreenState extends State<EventSetupScreen> with SingleTickerPr
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.error_outline, size: 64, color: AppColors.error),
+                const Icon(
+                  Icons.error_outline,
+                  size: 64,
+                  color: AppColors.error,
+                ),
                 const SizedBox(height: 16),
                 Text('Error: ${state.message}'),
                 const SizedBox(height: 16),
@@ -231,7 +249,11 @@ class _EventSetupScreenState extends State<EventSetupScreen> with SingleTickerPr
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.people_outline, size: 64, color: AppColors.onSurfaceVariant),
+                  const Icon(
+                    Icons.people_outline,
+                    size: 64,
+                    color: AppColors.onSurfaceVariant,
+                  ),
                   const SizedBox(height: 16),
                   Text(
                     'Belum ada SPG',
@@ -275,7 +297,11 @@ class _EventSetupScreenState extends State<EventSetupScreen> with SingleTickerPr
                     );
                   } else {
                     context.read<EventSpgBloc>().add(
-                      AssignSpg(eventId: widget.eventId, spgId: spg.id, spbId: null),
+                      AssignSpg(
+                        eventId: widget.eventId,
+                        spgId: spg.id,
+                        spbId: null,
+                      ),
                     );
                   }
                 },
@@ -323,8 +349,12 @@ class _ProductAssignmentCardState extends State<ProductAssignmentCard> {
   @override
   void initState() {
     super.initState();
-    _currentPrice = widget.isAssigned ? widget.assignedProduct.price : widget.product.price;
-    _priceController = TextEditingController(text: _currentPrice.toInt().toString());
+    _currentPrice = widget.isAssigned
+        ? widget.assignedProduct.price
+        : widget.product.price;
+    _priceController = TextEditingController(
+      text: _currentPrice.toInt().toString(),
+    );
   }
 
   @override
@@ -350,17 +380,15 @@ class _ProductAssignmentCardState extends State<ProductAssignmentCard> {
                     children: [
                       Text(
                         widget.product.name,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        'SKU: ${widget.product.sku}',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.onSurfaceVariant,
                         ),
                       ),
-                      if (widget.product.sku != null)
-                        Text(
-                          'SKU: ${widget.product.sku}',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.onSurfaceVariant,
-                          ),
-                        ),
                     ],
                   ),
                 ),
@@ -376,9 +404,9 @@ class _ProductAssignmentCardState extends State<ProductAssignmentCard> {
               const SizedBox(height: 12),
               Text(
                 'Harga Produk',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.secondary,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: AppColors.secondary),
               ),
               const SizedBox(height: 4),
               TextField(
@@ -445,23 +473,20 @@ class SpgAssignmentCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                Switch(
-                  value: isAssigned,
-                  onChanged: (_) => onToggle(),
-                ),
+                Switch(value: isAssigned, onChanged: (_) => onToggle()),
               ],
             ),
             if (isAssigned) ...[
               const SizedBox(height: 12),
               Text(
                 'Assign SPB (Opsional)',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.secondary,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: AppColors.secondary),
               ),
               const SizedBox(height: 4),
               DropdownButtonFormField<String>(
-                value: spbId,
+                initialValue: spbId,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   hintText: 'Pilih SPB',

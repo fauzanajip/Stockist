@@ -64,3 +64,12 @@ class GetSalesByEventSpg {
     return await repository.getByEventAndSpg(eventId, spgId);
   }
 }
+class GetSalesByEvent {
+  final SalesRepository repository;
+
+  GetSalesByEvent(this.repository);
+
+  Future<List<SalesEntity>> call(String eventId) async {
+    return await repository.getByEvent(eventId);
+  }
+}

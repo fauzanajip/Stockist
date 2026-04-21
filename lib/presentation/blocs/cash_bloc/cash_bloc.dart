@@ -6,13 +6,16 @@ import 'cash_state.dart';
 class CashBloc extends Bloc<CashEvent, CashState> {
   final CreateOrUpdateCashRecord createOrUpdateCashRecord;
   final GetCashRecordByEventSpg getCashRecordByEventSpg;
+  final GetCashRecordsByEvent getCashRecordsByEvent;
 
   CashBloc({
     required this.createOrUpdateCashRecord,
     required this.getCashRecordByEventSpg,
+    required this.getCashRecordsByEvent,
   }) : super(const CashState()) {
     on<UpdateCashRecord>(_onUpdateCashRecord);
     on<LoadCashRecord>(_onLoadCashRecord);
+    on<LoadAllCashByEvent>(_onLoadAllCashByEvent);
   }
 
   Future<void> _onUpdateCashRecord(
@@ -20,6 +23,7 @@ class CashBloc extends Bloc<CashEvent, CashState> {
     Emitter<CashState> emit,
   ) async {
     try {
+      emit(state.copyWith(isLoading: true, errorMessage: null));
       await createOrUpdateCashRecord(
         CreateOrUpdateCashRecordParams(
           eventId: event.eventId,
@@ -31,7 +35,7 @@ class CashBloc extends Bloc<CashEvent, CashState> {
       );
       add(LoadCashRecord(eventId: event.eventId, spgId: event.spgId));
     } catch (e) {
-      // TODO: Emit error state
+      emit(state.copyWith(isLoading: false, errorMessage: e.toString()));
     }
   }
 
@@ -40,16 +44,45 @@ class CashBloc extends Bloc<CashEvent, CashState> {
     Emitter<CashState> emit,
   ) async {
     try {
-      final cashRecord = await getCashRecordByEventSpg(event.eventId, event.spgId);
+      emit(state.copyWith(isLoading: true, errorMessage: null));
+      final cashRecord = await getCashRecordByEventSpg(
+        event.eventId,
+        event.spgId,
+      );
       if (cashRecord != null) {
-        emit(CashState(
-          cashReceived: cashRecord.cashReceived,
-          qrisReceived: cashRecord.qrisReceived,
-          actualCash: cashRecord.actualCash,
-        ));
+        emit(
+          state.copyWith(
+            isLoading: false,
+            cashReceived: cashRecord.cashReceived,
+            qrisReceived: cashRecord.qrisReceived,
+            actualCash: cashRecord.actualCash,
+          ),
+        );
+      } else {
+        emit(
+          state.copyWith(
+            isLoading: false,
+            cashReceived: 0,
+            qrisReceived: 0,
+            actualCash: 0,
+          ),
+        );
       }
     } catch (e) {
-      // TODO: Emit error state
+      emit(state.copyWith(isLoading: false, errorMessage: e.toString()));
+    }
+  }
+
+  Future<void> _onLoadAllCashByEvent(
+    LoadAllCashByEvent event,
+    Emitter<CashState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(isLoading: true, errorMessage: null));
+      final allCash = await getCashRecordsByEvent(event.eventId);
+      emit(state.copyWith(isLoading: false, allCash: allCash));
+    } catch (e) {
+      emit(state.copyWith(isLoading: false, errorMessage: e.toString()));
     }
   }
 }

@@ -36,3 +36,11 @@ class LoadSales extends SalesEvent {
   @override
   List<Object?> get props => [eventId, spgId];
 }
+class LoadAllSalesByEvent extends SalesEvent {
+  final String eventId;
+
+  const LoadAllSalesByEvent({required this.eventId});
+
+  @override
+  List<Object?> get props => [eventId];
+}
