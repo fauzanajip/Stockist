@@ -2,7 +2,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../domain/usecases/spg_usecases.dart' as spg_usecase;
 import '../../../domain/usecases/spb_usecases.dart' as spb_usecase;
 import '../../../domain/usecases/event_spg_usecases.dart' as event_spg_usecase;
-import '../../../domain/entities/event_spg_entity.dart';
 import 'event_spg_event.dart';
 import 'event_spg_state.dart';
 
@@ -35,11 +34,13 @@ class EventSpgBloc extends Bloc<EventSpgEvent, EventSpgState> {
       final availableSpgs = await getActiveSpgs();
       final assignedSpgs = await getEventSpgs(event.eventId);
       final spbs = await getAllSpbs();
-      emit(AvailableSpgsLoaded(
-        spgs: availableSpgs,
-        assignedSpgs: assignedSpgs,
-        spbs: spbs,
-      ));
+      emit(
+        AvailableSpgsLoaded(
+          spgs: availableSpgs,
+          assignedSpgs: assignedSpgs,
+          spbs: spbs,
+        ),
+      );
     } catch (e) {
       emit(EventSpgError(message: e.toString()));
     }
@@ -51,19 +52,23 @@ class EventSpgBloc extends Bloc<EventSpgEvent, EventSpgState> {
   ) async {
     try {
       emit(EventSpgLoading());
-      await assignSpgToEvent(event_spg_usecase.AssignSpgToEventParams(
-        eventId: event.eventId,
-        spgId: event.spgId,
-        spbId: event.spbId,
-      ));
+      await assignSpgToEvent(
+        event_spg_usecase.AssignSpgToEventParams(
+          eventId: event.eventId,
+          spgId: event.spgId,
+          spbId: event.spbId,
+        ),
+      );
       final availableSpgs = await getActiveSpgs();
       final assignedSpgs = await getEventSpgs(event.eventId);
       final spbs = await getAllSpbs();
-      emit(AvailableSpgsLoaded(
-        spgs: availableSpgs,
-        assignedSpgs: assignedSpgs,
-        spbs: spbs,
-      ));
+      emit(
+        AvailableSpgsLoaded(
+          spgs: availableSpgs,
+          assignedSpgs: assignedSpgs,
+          spbs: spbs,
+        ),
+      );
     } catch (e) {
       emit(EventSpgError(message: e.toString()));
     }
@@ -89,11 +94,13 @@ class EventSpgBloc extends Bloc<EventSpgEvent, EventSpgState> {
     try {
       emit(EventSpgLoading());
       for (final spg in event.assignedSpgs) {
-        await assignSpgToEvent(event_spg_usecase.AssignSpgToEventParams(
-          eventId: event.eventId,
-          spgId: spg.spgId,
-          spbId: spg.spbId,
-        ));
+        await assignSpgToEvent(
+          event_spg_usecase.AssignSpgToEventParams(
+            eventId: event.eventId,
+            spgId: spg.spgId,
+            spbId: spg.spbId,
+          ),
+        );
       }
       emit(AllSpgsSaved());
     } catch (e) {

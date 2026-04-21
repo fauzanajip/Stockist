@@ -3,6 +3,14 @@ abstract class AppException implements Exception {
   final Exception? originalException;
 
   const AppException({required this.message, this.originalException});
+  
+  @override
+  String toString() {
+    if (originalException != null) {
+      return '$message: $originalException';
+    }
+    return message;
+  }
 }
 
 class AppDatabaseException extends AppException {

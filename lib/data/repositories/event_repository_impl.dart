@@ -19,7 +19,10 @@ class EventRepositoryImpl implements EventRepository {
       );
       return maps.map((map) => EventModel.fromMap(map)).toList();
     } catch (e) {
-      throw AppDatabaseException(message: 'Gagal mengambil data events');
+      throw AppDatabaseException(
+        message: 'Gagal mengambil data events',
+        originalException: e as Exception,
+      );
     }
   }
 
@@ -37,7 +40,10 @@ class EventRepositoryImpl implements EventRepository {
       }
       return null;
     } catch (e) {
-      throw AppDatabaseException(message: 'Gagal mengambil data event');
+      throw AppDatabaseException(
+        message: 'Gagal mengambil data event',
+        originalException: e as Exception,
+      );
     }
   }
 
@@ -49,7 +55,10 @@ class EventRepositoryImpl implements EventRepository {
       await db.insert('events', model.toMap());
       return model;
     } catch (e) {
-      throw AppDatabaseException(message: 'Gagal membuat event baru');
+      throw AppDatabaseException(
+        message: 'Gagal membuat event baru',
+        originalException: e is Exception ? e : Exception(e.toString()),
+      );
     }
   }
 

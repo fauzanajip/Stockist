@@ -1,6 +1,4 @@
 import 'package:equatable/equatable.dart';
-import '../../../domain/entities/spg_entity.dart';
-import '../../../domain/entities/spb_entity.dart';
 import '../../../domain/entities/event_spg_entity.dart';
 
 abstract class EventSpgEvent extends Equatable {
@@ -33,11 +31,7 @@ class AssignSpg extends EventSpgEvent {
   final String spgId;
   final String? spbId;
 
-  const AssignSpg({
-    required this.eventId,
-    required this.spgId,
-    this.spbId,
-  });
+  const AssignSpg({required this.eventId, required this.spgId, this.spbId});
 
   @override
   List<Object?> get props => [eventId, spgId, spbId];
@@ -56,10 +50,7 @@ class UpdateEventSpgSpb extends EventSpgEvent {
   final String eventSpgId;
   final String? spbId;
 
-  const UpdateEventSpgSpb({
-    required this.eventSpgId,
-    required this.spbId,
-  });
+  const UpdateEventSpgSpb({required this.eventSpgId, required this.spbId});
 
   @override
   List<Object?> get props => [eventSpgId, spbId];

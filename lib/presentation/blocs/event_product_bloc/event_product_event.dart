@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import '../../../domain/entities/product_entity.dart';
 import '../../../domain/entities/event_product_entity.dart';
 
 abstract class EventProductEvent extends Equatable {

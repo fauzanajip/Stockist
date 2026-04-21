@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../domain/usecases/product_usecases.dart' as product_usecase;
-import '../../../domain/usecases/event_product_usecases.dart' as event_product_usecase;
-import '../../../domain/entities/event_product_entity.dart';
+import '../../../domain/usecases/event_product_usecases.dart'
+    as event_product_usecase;
 import 'event_product_event.dart';
 import 'event_product_state.dart';
 
@@ -31,10 +31,12 @@ class EventProductBloc extends Bloc<EventProductEvent, EventProductState> {
       emit(EventProductLoading());
       final availableProducts = await getActiveProducts();
       final assignedProducts = await getProductsByEvent(event.eventId);
-      emit(AvailableProductsLoaded(
-        products: availableProducts,
-        assignedProducts: assignedProducts,
-      ));
+      emit(
+        AvailableProductsLoaded(
+          products: availableProducts,
+          assignedProducts: assignedProducts,
+        ),
+      );
     } catch (e) {
       emit(EventProductError(message: e.toString()));
     }
@@ -46,17 +48,21 @@ class EventProductBloc extends Bloc<EventProductEvent, EventProductState> {
   ) async {
     try {
       emit(EventProductLoading());
-      await assignProductToEvent(event_product_usecase.AssignProductToEventParams(
-        eventId: event.eventId,
-        productId: event.productId,
-        price: event.price,
-      ));
+      await assignProductToEvent(
+        event_product_usecase.AssignProductToEventParams(
+          eventId: event.eventId,
+          productId: event.productId,
+          price: event.price,
+        ),
+      );
       final availableProducts = await getActiveProducts();
       final assignedProducts = await getProductsByEvent(event.eventId);
-      emit(AvailableProductsLoaded(
-        products: availableProducts,
-        assignedProducts: assignedProducts,
-      ));
+      emit(
+        AvailableProductsLoaded(
+          products: availableProducts,
+          assignedProducts: assignedProducts,
+        ),
+      );
     } catch (e) {
       emit(EventProductError(message: e.toString()));
     }
@@ -82,11 +88,13 @@ class EventProductBloc extends Bloc<EventProductEvent, EventProductState> {
     try {
       emit(EventProductLoading());
       for (final product in event.assignedProducts) {
-        await assignProductToEvent(event_product_usecase.AssignProductToEventParams(
-          eventId: event.eventId,
-          productId: product.productId,
-          price: product.price,
-        ));
+        await assignProductToEvent(
+          event_product_usecase.AssignProductToEventParams(
+            eventId: event.eventId,
+            productId: product.productId,
+            price: product.price,
+          ),
+        );
       }
       emit(AllProductsSaved());
     } catch (e) {

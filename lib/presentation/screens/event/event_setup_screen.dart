@@ -33,23 +33,15 @@ class EventSetupScreen extends StatefulWidget {
 class _EventSetupScreenState extends State<EventSetupScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  Map<String, double> _selectedProductPrices = {};
-  Map<String, String?> _selectedSpgSpbs = {};
-  List<String> _selectedProductIds = [];
-  List<String> _selectedSpgIds = [];
+  final Map<String, double> _selectedProductPrices = {};
+  final Map<String, String?> _selectedSpgSpbs = {};
+  final List<String> _selectedProductIds = [];
+  final List<String> _selectedSpgIds = [];
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    _loadData();
-  }
-
-  void _loadData() {
-    context.read<ProductBloc>().add(LoadActiveProducts());
-    context.read<SpgBloc>().add(LoadActiveSpqs());
-    context.read<EventProductBloc>().add(LoadAvailableProducts(eventId: widget.eventId));
-    context.read<EventSpgBloc>().add(LoadAvailableSpgs(eventId: widget.eventId));
   }
 
   @override
@@ -71,10 +63,13 @@ class _EventSetupScreenState extends State<EventSetupScreen>
           create: (context) => sl<SpgBloc>()..add(LoadActiveSpqs()),
         ),
         BlocProvider<EventProductBloc>(
-          create: (context) => sl<EventProductBloc>()..add(LoadAvailableProducts(eventId: eventId)),
+          create: (context) =>
+              sl<EventProductBloc>()
+                ..add(LoadAvailableProducts(eventId: eventId)),
         ),
         BlocProvider<EventSpgBloc>(
-          create: (context) => sl<EventSpgBloc>()..add(LoadAvailableSpgs(eventId: eventId)),
+          create: (context) =>
+              sl<EventSpgBloc>()..add(LoadAvailableSpgs(eventId: eventId)),
         ),
       ],
       child: Scaffold(
@@ -90,10 +85,7 @@ class _EventSetupScreenState extends State<EventSetupScreen>
         ),
         body: TabBarView(
           controller: _tabController,
-          children: [
-            _buildProductTab(),
-            _buildSpgTab(),
-          ],
+          children: [_buildProductTab(), _buildSpgTab()],
         ),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: _saveSetup,
@@ -109,7 +101,8 @@ class _EventSetupScreenState extends State<EventSetupScreen>
       builder: (context, productState) {
         return BlocBuilder<EventProductBloc, EventProductState>(
           builder: (context, eventProductState) {
-            if (productState is ProductLoading || eventProductState is EventProductLoading) {
+            if (productState is ProductLoading ||
+                eventProductState is EventProductLoading) {
               return const Center(child: CircularProgressIndicator());
             }
 
@@ -118,11 +111,14 @@ class _EventSetupScreenState extends State<EventSetupScreen>
             }
 
             if (productState is ProductsLoaded) {
-              final assignedProducts = eventProductState is AvailableProductsLoaded
+              final assignedProducts =
+                  eventProductState is AvailableProductsLoaded
                   ? eventProductState.assignedProducts
                   : <EventProductEntity>[];
 
-              final assignedProductIds = assignedProducts.map((p) => p.productId).toList();
+              final assignedProductIds = assignedProducts
+                  .map((p) => p.productId)
+                  .toList();
 
               for (final assigned in assignedProducts) {
                 if (!_selectedProductIds.contains(assigned.productId)) {
@@ -144,9 +140,8 @@ class _EventSetupScreenState extends State<EventSetupScreen>
                         const Spacer(),
                         Text(
                           '${_selectedProductIds.length} dipilih',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppColors.primary,
-                          ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: AppColors.primary),
                         ),
                       ],
                     ),
@@ -156,18 +151,25 @@ class _EventSetupScreenState extends State<EventSetupScreen>
                       itemCount: productState.products.length,
                       itemBuilder: (context, index) {
                         final product = productState.products[index];
-                        final isSelected = _selectedProductIds.contains(product.id);
-                        final defaultPrice = _selectedProductPrices[product.id] ?? product.price;
+                        final isSelected = _selectedProductIds.contains(
+                          product.id,
+                        );
+                        final defaultPrice =
+                            _selectedProductPrices[product.id] ?? product.price;
 
                         return Card(
-                          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
                           child: CheckboxListTile(
                             value: isSelected,
                             onChanged: (value) {
                               setState(() {
                                 if (value == true) {
                                   _selectedProductIds.add(product.id);
-                                  _selectedProductPrices[product.id] = product.price;
+                                  _selectedProductPrices[product.id] =
+                                      product.price;
                                 } else {
                                   _selectedProductIds.remove(product.id);
                                   _selectedProductPrices.remove(product.id);
@@ -183,17 +185,25 @@ class _EventSetupScreenState extends State<EventSetupScreen>
                                 ? InkWell(
                                     onTap: () => _showPriceDialog(product),
                                     child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 6,
+                                      ),
                                       decoration: BoxDecoration(
-                                        color: AppColors.primary.withOpacity(0.2),
+                                        color: AppColors.primary.withOpacity(
+                                          0.2,
+                                        ),
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: Text(
                                         'Rp ${defaultPrice.toInt()}',
-                                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                          color: AppColors.primary,
-                                          fontWeight: FontWeight.w500,
-                                        ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(
+                                              color: AppColors.primary,
+                                              fontWeight: FontWeight.w500,
+                                            ),
                                       ),
                                     ),
                                   )
@@ -257,9 +267,8 @@ class _EventSetupScreenState extends State<EventSetupScreen>
                         const Spacer(),
                         Text(
                           '${_selectedSpgIds.length} dipilih',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppColors.primary,
-                          ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: AppColors.primary),
                         ),
                       ],
                     ),
@@ -272,7 +281,10 @@ class _EventSetupScreenState extends State<EventSetupScreen>
                         final isSelected = _selectedSpgIds.contains(spg.id);
 
                         return Card(
-                          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
                           child: ListTile(
                             leading: Checkbox(
                               value: isSelected,
@@ -292,21 +304,26 @@ class _EventSetupScreenState extends State<EventSetupScreen>
                             title: Text(spg.name),
                             trailing: isSelected
                                 ? DropdownButton<String?>(
-                                  value: _selectedSpgSpbs[spg.id],
-                                  hint: const Text('SPB'),
-                                  items: [
-                                    const DropdownMenuItem(value: null, child: Text('Tanpa SPB')),
-                                    ...spbs.map((spb) => DropdownMenuItem(
-                                      value: spb.id,
-                                      child: Text(spb.name),
-                                    )),
-                                  ],
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _selectedSpgSpbs[spg.id] = value;
-                                    });
-                                  },
-                                )
+                                    value: _selectedSpgSpbs[spg.id],
+                                    hint: const Text('SPB'),
+                                    items: [
+                                      const DropdownMenuItem(
+                                        value: null,
+                                        child: Text('Tanpa SPB'),
+                                      ),
+                                      ...spbs.map(
+                                        (spb) => DropdownMenuItem(
+                                          value: spb.id,
+                                          child: Text(spb.name),
+                                        ),
+                                      ),
+                                    ],
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _selectedSpgSpbs[spg.id] = value;
+                                      });
+                                    },
+                                  )
                                 : null,
                           ),
                         );
@@ -326,7 +343,9 @@ class _EventSetupScreenState extends State<EventSetupScreen>
 
   void _showPriceDialog(ProductEntity product) {
     final priceController = TextEditingController(
-      text: (_selectedProductPrices[product.id] ?? product.price).toInt().toString(),
+      text: (_selectedProductPrices[product.id] ?? product.price)
+          .toInt()
+          .toString(),
     );
 
     showDialog(
@@ -348,7 +367,8 @@ class _EventSetupScreenState extends State<EventSetupScreen>
           ),
           ElevatedButton(
             onPressed: () {
-              final price = double.tryParse(priceController.text) ?? product.price;
+              final price =
+                  double.tryParse(priceController.text) ?? product.price;
               setState(() {
                 _selectedProductPrices[product.id] = price;
               });
@@ -363,16 +383,16 @@ class _EventSetupScreenState extends State<EventSetupScreen>
 
   void _saveSetup() {
     if (_selectedProductIds.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Pilih minimal 1 produk')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Pilih minimal 1 produk')));
       return;
     }
 
     if (_selectedSpgIds.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Pilih minimal 1 SPG')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Pilih minimal 1 SPG')));
       return;
     }
 
@@ -394,14 +414,15 @@ class _EventSetupScreenState extends State<EventSetupScreen>
       );
     }).toList();
 
-    context.read<EventProductBloc>().add(SaveAllAssignedProducts(
-      eventId: eventId,
-      assignedProducts: assignedProducts,
-    ));
-    context.read<EventSpgBloc>().add(SaveAllAssignedSpgs(
-      eventId: eventId,
-      assignedSpgs: assignedSpgs,
-    ));
+    context.read<EventProductBloc>().add(
+      SaveAllAssignedProducts(
+        eventId: eventId,
+        assignedProducts: assignedProducts,
+      ),
+    );
+    context.read<EventSpgBloc>().add(
+      SaveAllAssignedSpgs(eventId: eventId, assignedSpgs: assignedSpgs),
+    );
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
