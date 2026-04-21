@@ -8,4 +8,5 @@ abstract class EventRepository {
   Future<void> delete(String id);
   Future<EventEntity> closeEvent(String id);
   Future<EventEntity> reopenEvent(String id);
+  Future<void> setActiveEvent(String id);
 }

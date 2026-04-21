@@ -140,4 +140,24 @@ class EventRepositoryImpl implements EventRepository {
       throw AppDatabaseException(message: 'Gagal reopen event');
     }
   }
+
+  @override
+  Future<void> setActiveEvent(String id) async {
+    try {
+      final db = await dbHelper.database;
+      await db.transaction((txn) async {
+        // Reset all
+        await txn.update('events', {'is_active': 0});
+        // Set new active
+        await txn.update(
+          'events',
+          {'is_active': 1},
+          where: 'id = ?',
+          whereArgs: [id],
+        );
+      });
+    } catch (e) {
+      throw AppDatabaseException(message: 'Gagal mengatur event aktif');
+    }
+  }
 }

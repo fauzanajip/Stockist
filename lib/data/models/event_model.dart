@@ -11,6 +11,7 @@ class EventModel extends EventEntity {
     required super.name,
     required super.date,
     required super.status,
+    super.isActive,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -22,6 +23,7 @@ class EventModel extends EventEntity {
       name: entity.name,
       date: entity.date,
       status: entity.status,
+      isActive: entity.isActive,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     );
@@ -36,6 +38,7 @@ class EventModel extends EventEntity {
         (e) => e.name == map['status'],
         orElse: () => EventStatus.open,
       ),
+      isActive: (map['is_active'] as int? ?? 0) == 1,
       createdAt: DatabaseHelper.stringToDateTime(map['created_at'] as String),
       updatedAt: DatabaseHelper.stringToDateTime(map['updated_at'] as String),
     );
@@ -47,6 +50,7 @@ class EventModel extends EventEntity {
       'name': name,
       'date': DatabaseHelper.dateTimeToString(date),
       'status': status.name,
+      'is_active': isActive ? 1 : 0,
       'created_at': DatabaseHelper.dateTimeToString(createdAt),
       'updated_at': DatabaseHelper.dateTimeToString(updatedAt),
     };
@@ -58,6 +62,7 @@ class EventModel extends EventEntity {
     String? name,
     DateTime? date,
     EventStatus? status,
+    bool? isActive,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -66,6 +71,7 @@ class EventModel extends EventEntity {
       name: name ?? this.name,
       date: date ?? this.date,
       status: status ?? this.status,
+      isActive: isActive ?? this.isActive,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

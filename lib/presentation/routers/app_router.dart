@@ -2,7 +2,6 @@ import 'package:go_router/go_router.dart';
 import '../../presentation/screens/home/home_screen.dart';
 import '../../presentation/screens/event/create_event_screen.dart';
 import '../../presentation/screens/event/event_setup_screen.dart';
-import '../../presentation/screens/event/event_detail_screen.dart';
 import '../../presentation/screens/spg/spg_list_screen.dart';
 import '../../presentation/screens/spg/spg_detail_screen.dart';
 import '../../presentation/screens/spg/spg_closing_screen.dart';
@@ -13,6 +12,10 @@ import '../../presentation/screens/sales/sales_input_screen.dart';
 import '../../presentation/screens/cash/cash_input_screen.dart';
 import '../../presentation/screens/settings/backup_screen.dart';
 import '../../presentation/screens/settings/settings_screen.dart';
+import '../../presentation/screens/settings/event_focus_screen.dart';
+import '../../presentation/screens/settings/product_master_screen.dart';
+import '../../presentation/screens/settings/spg_master_screen.dart';
+import '../../presentation/screens/settings/spb_master_screen.dart';
 
 class AppRouter {
   AppRouter._();
@@ -27,7 +30,7 @@ class AppRouter {
         name: 'home',
         builder: (context, state) => const HomeScreen(),
       ),
-      
+
       // Event Routes
       GoRoute(
         path: '/event/create',
@@ -42,15 +45,6 @@ class AppRouter {
           return EventSetupScreen(eventId: eventId);
         },
       ),
-      GoRoute(
-        path: '/event/:eventId',
-        name: 'event_detail',
-        builder: (context, state) {
-          final eventId = state.pathParameters['eventId']!;
-          return EventDetailScreen(eventId: eventId);
-        },
-      ),
-      
       // SPG Routes
       GoRoute(
         path: '/event/:eventId/spg',
@@ -78,7 +72,7 @@ class AppRouter {
           return SpgClosingScreen(eventId: eventId, spgId: spgId);
         },
       ),
-      
+
       // Stock Routes
       GoRoute(
         path: '/event/:eventId/spg/:spgId/initial',
@@ -107,7 +101,7 @@ class AppRouter {
           return ReturnScreen(eventId: eventId, spgId: spgId);
         },
       ),
-      
+
       // Sales Routes
       GoRoute(
         path: '/event/:eventId/spg/:spgId/sales',
@@ -118,7 +112,7 @@ class AppRouter {
           return SalesInputScreen(eventId: eventId, spgId: spgId);
         },
       ),
-      
+
       // Cash Routes
       GoRoute(
         path: '/event/:eventId/spg/:spgId/cash',
@@ -129,7 +123,7 @@ class AppRouter {
           return CashInputScreen(eventId: eventId, spgId: spgId);
         },
       ),
-      
+
       // Settings Routes
       GoRoute(
         path: '/settings/backup',
@@ -140,6 +134,28 @@ class AppRouter {
         path: '/settings',
         name: 'settings',
         builder: (context, state) => const SettingsScreen(),
+        routes: [
+          GoRoute(
+            path: 'focus',
+            name: 'event_focus',
+            builder: (context, state) => const EventFocusScreen(),
+          ),
+          GoRoute(
+            path: 'products',
+            name: 'product_master',
+            builder: (context, state) => const ProductMasterScreen(),
+          ),
+          GoRoute(
+            path: 'spg',
+            name: 'spg_master',
+            builder: (context, state) => const SpgMasterScreen(),
+          ),
+          GoRoute(
+            path: 'spb',
+            name: 'spb_master',
+            builder: (context, state) => const SpbMasterScreen(),
+          ),
+        ],
       ),
     ],
   );

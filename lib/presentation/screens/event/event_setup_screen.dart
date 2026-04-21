@@ -118,10 +118,7 @@ class _EventSetupScreenState extends State<EventSetupScreen>
       }
     }
 
-    context.goNamed(
-      'event_detail',
-      pathParameters: {'eventId': widget.eventId},
-    );
+    context.goNamed('home');
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text('Setup berhasil disimpan')));

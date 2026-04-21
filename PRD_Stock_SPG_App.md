@@ -2,7 +2,7 @@
 
 ## Mobile Offline Stock & SPG Reconciliation App
 
-**Versi:** 2.3 — Draft & Save Mechanism  
+**Versi:** 2.4 — Dashboard-First & Consolidation  
 **Tanggal:** April 2026
 
 ---
@@ -437,22 +437,14 @@ User input tambahan:
 
 ---
 
-### 7.1 Home Screen (Event Dashboard)
+### 7.1 Home Screen (Active Event Dashboard)
 
-List SPG per event:
+Halaman utama aplikasi yang berfungsi sebagai **pusat kendali (Command Center)** untuk event yang sedang aktif.
 
-```
-[ Nama SPG ]
-Dikasih: XX  |  Terjual: XX  |  Sisa: XX
-Cash: Rp XXX
-Status: ✅ / ⚠️
-Last Update: HH:mm
-```
-
-**Kriteria Status:**
-
-- ✅ Semua produk closing: selisih fisik = 0, surplus = 0
-- ⚠️ Ada selisih stok atau selisih cash, atau belum semua produk diupdate
+- **Auto-Detection**: Jika ada event yang diset aktif, sistem langsung menampilkan `EventDashboardView`.
+- **Statistik Real-time**: Menampilkan ringkasan Dikasih, Terjual, Sisa, dan Cash per SPG secara langsung.
+- **Export directly**: Tombol **Export Excel** tersedia langsung di AppBar untuk kemudahan pelaporan cepat.
+- **Empty State**: Jika belum ada event aktif, menampilkan panduan (CTA) untuk memilih event fokus atau membuat event baru.
 
 ---
 
@@ -647,6 +639,7 @@ Summary:
 
 | Versi | Perubahan                                                                                                                                                                                                                                                 |
 | ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v2.4  | Implementasi **Dashboard-First Architecture**; Konsolidasi `EventDetailScreen` ke dalam `HomeScreen`; Penyelarasan alur navigasi; Integrasi penuh fitur **Export Excel** langsung di Dashboard utama.                                                     |
 | v2.3  | Implementasi **Draft & Save Mechanism** pada Event Setup; Fitur **Search & Filter** untuk skalabilitas data besar; **Data Integrity Protection** (mencegah unassign jika ada history transaksi); **Optimasi Home Screen** dengan Pull-to-refresh.           |
 | v2.2  | Tambah flow **Global Event Stock Tracking** (Distributor → Event); Update `StockMutationEntity` untuk mendukung tipe `distributor_to_event`; Update flow 6.2 Setup Data untuk input stok awal distributor.                                                |
 | v2.1  | Opsi B fleksibel: tambah tabel `event_spg` dan `event_product`; SPG & Product jadi master data global; harga produk per-event di `event_product.price`; `spb_id` dipindah ke `event_spg`; update user flow 6.2 setup data; update formula `expected_cash` |

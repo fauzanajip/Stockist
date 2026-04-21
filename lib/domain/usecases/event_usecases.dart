@@ -71,3 +71,13 @@ class ReopenEvent {
     return await repository.reopenEvent(id);
   }
 }
+
+class SetEventActiveUseCase {
+  final EventRepository repository;
+
+  SetEventActiveUseCase(this.repository);
+
+  Future<void> call(String id) async {
+    return await repository.setActiveEvent(id);
+  }
+}

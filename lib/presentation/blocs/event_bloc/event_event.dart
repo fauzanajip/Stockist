@@ -48,3 +48,12 @@ class ReopenCurrentEvent extends EventEvent {
   @override
   List<Object?> get props => [id];
 }
+
+class SetEventActive extends EventEvent {
+  final String id;
+
+  const SetEventActive({required this.id});
+
+  @override
+  List<Object?> get props => [id];
+}

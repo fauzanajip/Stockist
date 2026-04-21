@@ -3,7 +3,7 @@ class AppConstants {
 
   // Database
   static const String databaseName = 'stockist.db';
-  static const int databaseVersion = 1;
+  static const int databaseVersion = 2;
 
   // Preferences
   static const String lastBackupKey = 'last_backup_timestamp';

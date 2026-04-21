@@ -83,6 +83,7 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton(() => GetEventById(sl()));
   sl.registerLazySingleton(() => CloseEvent(sl()));
   sl.registerLazySingleton(() => ReopenEvent(sl()));
+  sl.registerLazySingleton(() => SetEventActiveUseCase(sl()));
 
   // Use Cases - Product
   sl.registerLazySingleton(() => GetAllProducts(sl()));
@@ -146,6 +147,7 @@ Future<void> initDependencies() async {
       createEvent: sl(),
       closeEvent: sl(),
       reopenEvent: sl(),
+      setEventActive: sl(),
     ),
   );
   sl.registerFactory(

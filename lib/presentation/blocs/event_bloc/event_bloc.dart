@@ -9,6 +9,7 @@ class EventBloc extends Bloc<EventEvent, EventState> {
   final CreateEvent createEvent;
   final CloseEvent closeEvent;
   final ReopenEvent reopenEvent;
+  final SetEventActiveUseCase setEventActive;
 
   EventBloc({
     required this.getAllEvents,
@@ -16,12 +17,14 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     required this.createEvent,
     required this.closeEvent,
     required this.reopenEvent,
+    required this.setEventActive,
   }) : super(EventInitial()) {
     on<LoadAllEvents>(_onLoadAllEvents);
     on<LoadEventById>(_onLoadEventById);
     on<CreateNewEvent>(_onCreateNewEvent);
     on<CloseCurrentEvent>(_onCloseCurrentEvent);
     on<ReopenCurrentEvent>(_onReopenCurrentEvent);
+    on<SetEventActive>(_onSetEventActive);
   }
 
   Future<void> _onLoadAllEvents(
@@ -63,6 +66,10 @@ class EventBloc extends Bloc<EventEvent, EventState> {
       final newEvent = await createEvent(
         CreateEventParams(name: event.name, date: event.date),
       );
+      
+      // Auto-activate the newly created event
+      await setEventActive(newEvent.id);
+      
       emit(EventCreated(event: newEvent));
       add(LoadAllEvents());
     } catch (e) {
@@ -90,6 +97,18 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     try {
       final reopenedEvent = await reopenEvent(event.id);
       emit(EventReopened(event: reopenedEvent));
+      add(LoadAllEvents());
+    } catch (e) {
+      emit(EventError(message: e.toString()));
+    }
+  }
+
+  Future<void> _onSetEventActive(
+    SetEventActive event,
+    Emitter<EventState> emit,
+  ) async {
+    try {
+      await setEventActive(event.id);
       add(LoadAllEvents());
     } catch (e) {
       emit(EventError(message: e.toString()));
