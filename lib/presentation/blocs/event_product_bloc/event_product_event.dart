@@ -63,11 +63,11 @@ class UpdateEventProductPrice extends EventProductEvent {
   List<Object?> get props => [eventProductId, price];
 }
 
-class SaveAllAssignedProducts extends EventProductEvent {
+class SyncEventProducts extends EventProductEvent {
   final String eventId;
   final List<EventProductEntity> assignedProducts;
 
-  const SaveAllAssignedProducts({
+  const SyncEventProducts({
     required this.eventId,
     required this.assignedProducts,
   });

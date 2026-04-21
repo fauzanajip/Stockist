@@ -56,11 +56,11 @@ class UpdateEventSpgSpb extends EventSpgEvent {
   List<Object?> get props => [eventSpgId, spbId];
 }
 
-class SaveAllAssignedSpgs extends EventSpgEvent {
+class SyncEventSpgs extends EventSpgEvent {
   final String eventId;
   final List<EventSpgEntity> assignedSpgs;
 
-  const SaveAllAssignedSpgs({
+  const SyncEventSpgs({
     required this.eventId,
     required this.assignedSpgs,
   });

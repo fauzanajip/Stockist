@@ -13,7 +13,7 @@
 | 7   | Implement Sales Input Screen - update qty_sold per product    | ⏳ Pending | `sales_input_screen.dart`          |
 | 8   | Implement Cash Input Screen - cash_received + qris_received   | ⏳ Pending | `cash_input_screen.dart`           |
 | 9   | Implement Closing Screen with summary table & validation      | ⏳ Pending | `spg_closing_screen.dart`          |
-| 10  | Global Event Stock Tracking (Stock from Distributor)          | ⏳ Pending | `event_setup_screen.dart`          |
+| 10  | Global Event Stock Tracking (Stock from Distributor)          | ✅ DONE    | `event_setup_screen.dart`          |
 
 ## Medium Priority - Features
 
@@ -40,8 +40,8 @@
 
 ## Progress Summary
 
-- ✅ Completed: 16/21 (76%)
-- ⏳ Pending: 5/21 (24%)
+- ✅ Completed: 17/21 (81%)
+- ⏳ Pending: 4/21 (19%)
 
 ## PRD Reference
 
@@ -94,7 +94,9 @@
     - Added **Per-Product Detailed Tracking**: Collapsible breakdown showing Distributed, Sold, and Remaining for every product.
     - **Premium UI Overhaul**: Upgraded `SpgListScreen` and `SpgDetailScreen` to a modern dashboard aesthetic with accent bars, dynamic avatars, and professional status chips.
     - **Status Chips (READY/REVIEW)**: Automated validation logic for cash against expected sales.
-15. **Event Module UI Overhaul**:
-    - **Event Detail Screen**: Added a global **Event Summary Dashboard** (Total Distributed, Total Sold, Total Revenue) and premium header design.
-    - **Event Setup Screen**: Redesigned assignment cards for products and SPGs with modern visuals, improved TabBar styling, and interactive input layouts.
     - **Visual Unity**: Ensured all screens across the event management flow share the same premium dark mode aesthetic.
+16. **Event Setup Overhaul (Search, Draft & Integrity)**:
+    - **Draft & Save**: Implemented in-memory drafting for Event Setup, so changes are only committed to the DB on "Simpan Setup".
+    - **Searchable UI**: Added search capability (Names & SKU) and "Show Active Only" filters for handling large datasets.
+    - **History Guard**: Prevented unassigning Products/SPGs if transactions exist for data integrity.
+    - **Warehouse Stock Sync**: Dynamic delta-based stock updates for Global Event Stock.

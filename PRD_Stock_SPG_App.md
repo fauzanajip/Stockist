@@ -2,7 +2,7 @@
 
 ## Mobile Offline Stock & SPG Reconciliation App
 
-**Versi:** 2.2 — Global Stock Support  
+**Versi:** 2.3 — Draft & Save Mechanism  
 **Tanggal:** April 2026
 
 ---
@@ -325,7 +325,9 @@ surplus = actual_cash - expected_cash
 
 - Pilih produk dari master (bisa pilih semua atau sebagian)
 - Set harga produk untuk event ini (default dari `product.price`, bisa di-override)
-- **Input Stok Awal dari Distributor**: Input jumlah fisik barang yang diterima di lokasi event untuk setiap produk.
+- **Input Stok Awal distributor**: Menetapkan jumlah stok masuk ke gudang event.
+- **Drafting Mechanism**: Seluruh perubahan tersimpan di memori sementara. Data baru masuk ke DB utama saat tombol **"SIMPAN SETUP"** ditekan.
+- **Data Integrity**: Mencegah unassign jika sudah ada history transaksi.
 - Produk yang dipilih tersimpan di `event_product`
 
 **Assign SPG ke Event:**
@@ -468,6 +470,8 @@ Actions:
 
 ### 7.3 Input UX Rules
 
+- **Search & Filter (Scalability)**:
+  - Halaman Setup dilengkapi dengan **Search Bar** (Nama/SKU) & toggle **"Filter Active Only"**.
 - Min tap — numeric keypad langsung muncul
 - Default ke pilihan terakhir (SPG / produk)
 - Big touch area (lapangan-friendly)
@@ -643,6 +647,7 @@ Summary:
 
 | Versi | Perubahan                                                                                                                                                                                                                                                 |
 | ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v2.3  | Implementasi **Draft & Save Mechanism** pada Event Setup; Fitur **Search & Filter** untuk skalabilitas data besar; **Data Integrity Protection** (mencegah unassign jika ada history transaksi).                                                           |
 | v2.2  | Tambah flow **Global Event Stock Tracking** (Distributor → Event); Update `StockMutationEntity` untuk mendukung tipe `distributor_to_event`; Update flow 6.2 Setup Data untuk input stok awal distributor.                                                |
 | v2.1  | Opsi B fleksibel: tambah tabel `event_spg` dan `event_product`; SPG & Product jadi master data global; harga produk per-event di `event_product.price`; `spb_id` dipindah ke `event_spg`; update user flow 6.2 setup data; update formula `expected_cash` |
 | v2.0  | Tambah `qris_received` di Cash Record; perbaiki formula surplus; definisikan kriteria status ✅/⚠️; perjelas closing flow (re-open, validasi); soft delete SPG & Product; detail export Excel; minimum Android version; pilih JSON sebagai format backup  |
