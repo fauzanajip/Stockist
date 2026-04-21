@@ -5,7 +5,7 @@
 | # | Task | Status | File |
 |---|------|--------|------|
 | 1 | Implement Create Event Screen - call bloc | ✅ DONE | `create_event_screen.dart` |
-| 2 | Implement Event Setup Screen - assign produk & SPG | ⏳ Pending | `event_setup_screen.dart` |
+| 2 | Implement Event Setup Screen - assign produk & SPG | ✅ DONE | `event_setup_screen.dart` |
 | 3 | Implement SPG List Screen with dashboard view (PRD 7.1) | ⏳ Pending | `spg_list_screen.dart` |
 | 4 | Implement Initial Distribution Screen - input qty per product | ⏳ Pending | `initial_distribution_screen.dart` |
 | 5 | Implement Topup Screen - add stock to SPG | ⏳ Pending | `topup_screen.dart` |
@@ -27,22 +27,22 @@
 
 | # | Task | Status | Location |
 |---|------|--------|----------|
-| 14 | Fix StockBloc error states | ⏳ Pending | Lines 39, 60, 81, 94 |
-| 15 | Fix SPGBloc implementation | ⏳ Pending | Lines 16, 24 |
+| 14 | Fix StockBloc error states | ✅ DONE | Lines 39, 60, 81, 94 |
+| 15 | Fix SPGBloc implementation | ✅ DONE | Lines 16, 24 |
 | 16 | Fix SalesBloc error states | ⏳ Pending | Lines 33, 49 |
 | 17 | Fix CashBloc error states | ⏳ Pending | Lines 34, 52 |
-| 18 | Fix ProductBloc implementation | ⏳ Pending | Lines 16, 24 |
+| 18 | Fix ProductBloc implementation | ✅ DONE | Lines 16, 24 |
 | 19 | Add status indicators (✅/⚠️) based on selisih & surplus | ⏳ Pending | Home screen & SPG cards |
 
 ---
 
 ## Progress Summary
-- ✅ Completed: 1/19 (5%)
-- ⏳ Pending: 18/19 (95%)
+- ✅ Completed: 5/19 (26%)
+- ⏳ Pending: 14/19 (74%)
 
 ## PRD Reference
 - PRD Section 6.1: Create Event flow ✅
-- PRD Section 6.2: Setup Data (Event Setup) ⏳
+- PRD Section 6.2: Setup Data (Event Setup) ✅
 - PRD Section 6.3-6.8: Stock & Sales operations ⏳
 - PRD Section 7.1: Home Screen Dashboard ⏳
 - PRD Section 8: Export Excel ⏳

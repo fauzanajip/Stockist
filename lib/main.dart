@@ -5,6 +5,10 @@ import 'core/constants/app_theme.dart';
 import 'presentation/routers/app_router.dart';
 import 'presentation/blocs/event_bloc/event_bloc.dart';
 import 'presentation/blocs/event_bloc/event_event.dart';
+import 'presentation/blocs/product_bloc/product_bloc.dart';
+import 'presentation/blocs/product_bloc/product_event.dart';
+import 'presentation/blocs/spg_bloc/spg_bloc.dart';
+import 'presentation/blocs/spg_bloc/spg_event.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,6 +27,12 @@ class StockistApp extends StatelessWidget {
       providers: [
         BlocProvider<EventBloc>(
           create: (context) => sl<EventBloc>()..add(LoadAllEvents()),
+        ),
+        BlocProvider<ProductBloc>(
+          create: (context) => sl<ProductBloc>()..add(LoadActiveProducts()),
+        ),
+        BlocProvider<SpgBloc>(
+          create: (context) => sl<SpgBloc>()..add(LoadActiveSpqs()),
         ),
       ],
       child: MaterialApp.router(

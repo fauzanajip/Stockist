@@ -49,3 +49,13 @@ class GetProductsByEvent {
     return await repository.getByEvent(eventId);
   }
 }
+
+class GetEventProducts {
+  final EventProductRepository repository;
+
+  GetEventProducts(this.repository);
+
+  Future<List<EventProductEntity>> call(String eventId) async {
+    return await repository.getByEvent(eventId);
+  }
+}

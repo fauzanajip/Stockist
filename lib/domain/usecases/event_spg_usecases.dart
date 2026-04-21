@@ -49,3 +49,13 @@ class GetSpgsByEvent {
     return await repository.getByEvent(eventId);
   }
 }
+
+class GetEventSpgs {
+  final EventSpgRepository repository;
+
+  GetEventSpgs(this.repository);
+
+  Future<List<EventSpgEntity>> call(String eventId) async {
+    return await repository.getByEvent(eventId);
+  }
+}

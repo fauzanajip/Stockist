@@ -45,10 +45,10 @@ class DeleteProduct extends ProductEvent {
   List<Object?> get props => [id];
 }
 
-class SoftDeleteProduct extends ProductEvent {
+class SoftDeleteProductEvent extends ProductEvent {
   final String id;
 
-  const SoftDeleteProduct({required this.id});
+  const SoftDeleteProductEvent({required this.id});
 
   @override
   List<Object?> get props => [id];

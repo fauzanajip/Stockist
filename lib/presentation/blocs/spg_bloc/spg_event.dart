@@ -29,10 +29,10 @@ class DeleteSpq extends SpgEvent {
   List<Object?> get props => [id];
 }
 
-class SoftDeleteSpq extends SpgEvent {
+class SoftDeleteSpqEvent extends SpgEvent {
   final String id;
 
-  const SoftDeleteSpq({required this.id});
+  const SoftDeleteSpqEvent({required this.id});
 
   @override
   List<Object?> get props => [id];

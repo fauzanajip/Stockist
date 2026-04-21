@@ -21,6 +21,9 @@ import '../domain/repositories/sales_repository.dart';
 import '../domain/repositories/cash_record_repository.dart';
 import '../domain/repositories/backup_log_repository.dart';
 import '../domain/usecases/event_usecases.dart';
+import '../domain/usecases/product_usecases.dart';
+import '../domain/usecases/spg_usecases.dart';
+import '../domain/usecases/spb_usecases.dart';
 import '../domain/usecases/event_product_usecases.dart';
 import '../domain/usecases/event_spg_usecases.dart';
 import '../domain/usecases/stock_mutation_usecases.dart';
@@ -32,7 +35,8 @@ import '../presentation/blocs/product_bloc/product_bloc.dart';
 import '../presentation/blocs/stock_bloc/stock_bloc.dart';
 import '../presentation/blocs/sales_bloc/sales_bloc.dart';
 import '../presentation/blocs/cash_bloc/cash_bloc.dart';
-// TODO: Add event_product_bloc and event_spg_bloc when needed
+import '../presentation/blocs/event_spg_bloc/event_spg_bloc.dart';
+import '../presentation/blocs/event_product_bloc/event_product_bloc.dart';
 
 final sl = GetIt.instance;
 
@@ -72,30 +76,59 @@ Future<void> initDependencies() async {
     () => BackupLogRepositoryImpl(dbHelper: sl()),
   );
 
-  // Use Cases
+  // Use Cases - Event
   sl.registerLazySingleton(() => CreateEvent(sl()));
   sl.registerLazySingleton(() => GetAllEvents(sl()));
   sl.registerLazySingleton(() => GetEventById(sl()));
   sl.registerLazySingleton(() => CloseEvent(sl()));
   sl.registerLazySingleton(() => ReopenEvent(sl()));
   
+  // Use Cases - Product
+  sl.registerLazySingleton(() => GetAllProducts(sl()));
+  sl.registerLazySingleton(() => GetActiveProducts(sl()));
+  sl.registerLazySingleton(() => GetProductById(sl()));
+  sl.registerLazySingleton(() => CreateProduct(sl()));
+  sl.registerLazySingleton(() => UpdateProduct(sl()));
+  sl.registerLazySingleton(() => SoftDeleteProduct(sl()));
+  
+  // Use Cases - SPG
+  sl.registerLazySingleton(() => GetAllSpgs(sl()));
+  sl.registerLazySingleton(() => GetActiveSpgs(sl()));
+  sl.registerLazySingleton(() => GetSpgById(sl()));
+  sl.registerLazySingleton(() => CreateSpg(sl()));
+  sl.registerLazySingleton(() => UpdateSpg(sl()));
+  sl.registerLazySingleton(() => SoftDeleteSpg(sl()));
+  
+  // Use Cases - SPB
+  sl.registerLazySingleton(() => GetAllSpbs(sl()));
+  sl.registerLazySingleton(() => GetSpbById(sl()));
+  sl.registerLazySingleton(() => CreateSpb(sl()));
+  sl.registerLazySingleton(() => DeleteSpb(sl()));
+  
+  // Use Cases - Event Product
   sl.registerLazySingleton(() => AssignProductToEvent(sl()));
   sl.registerLazySingleton(() => RemoveProductFromEvent(sl()));
   sl.registerLazySingleton(() => GetProductsByEvent(sl()));
+  sl.registerLazySingleton(() => GetEventProducts(sl()));
   
+  // Use Cases - Event SPG
   sl.registerLazySingleton(() => AssignSpgToEvent(sl()));
   sl.registerLazySingleton(() => RemoveSpgFromEvent(sl()));
   sl.registerLazySingleton(() => GetSpgsByEvent(sl()));
+  sl.registerLazySingleton(() => GetEventSpgs(sl()));
   
+  // Use Cases - Stock Mutation
   sl.registerLazySingleton(() => CreateStockMutation(sl()));
   sl.registerLazySingleton(() => GetStockMutationsByEvent(sl()));
   sl.registerLazySingleton(() => GetStockMutationsByEventSpg(sl()));
   sl.registerLazySingleton(() => GetTotalGiven(sl()));
   sl.registerLazySingleton(() => GetTotalReturn(sl()));
   
+  // Use Cases - Sales
   sl.registerLazySingleton(() => CreateOrUpdateSales(sl()));
   sl.registerLazySingleton(() => GetSalesByEventSpg(sl()));
   
+  // Use Cases - Cash Record
   sl.registerLazySingleton(() => CreateOrUpdateCashRecord(sl()));
   sl.registerLazySingleton(() => GetCashRecordByEventSpg(sl()));
 
@@ -110,10 +143,21 @@ Future<void> initDependencies() async {
     ),
   );
   sl.registerFactory(
-    () => SpgBloc(),
+    () => ProductBloc(
+      getAllProducts: sl(),
+      getActiveProducts: sl(),
+      createProduct: sl(),
+      updateProduct: sl(),
+      softDeleteProduct: sl(),
+    ),
   );
   sl.registerFactory(
-    () => ProductBloc(),
+    () => SpgBloc(
+      getAllSpgs: sl(),
+      getActiveSpgs: sl(),
+      createSpg: sl(),
+      softDeleteSpg: sl(),
+    ),
   );
   sl.registerFactory(
     () => StockBloc(
@@ -132,6 +176,23 @@ Future<void> initDependencies() async {
     () => CashBloc(
       createOrUpdateCashRecord: sl(),
       getCashRecordByEventSpg: sl(),
+    ),
+  );
+  sl.registerFactory(
+    () => EventProductBloc(
+      getActiveProducts: sl(),
+      getProductsByEvent: sl(),
+      assignProductToEvent: sl(),
+      removeProductFromEvent: sl(),
+    ),
+  );
+  sl.registerFactory(
+    () => EventSpgBloc(
+      getActiveSpgs: sl(),
+      getEventSpgs: sl(),
+      getAllSpbs: sl(),
+      assignSpgToEvent: sl(),
+      removeSpgFromEvent: sl(),
     ),
   );
 }
