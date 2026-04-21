@@ -26,7 +26,7 @@ class BackupScreen extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: AppColors.primary.withOpacity(0.2),
+                            color: AppColors.primary.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: const Icon(Icons.backup, color: AppColors.primary),
@@ -69,7 +69,7 @@ class BackupScreen extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: AppColors.secondary.withOpacity(0.2),
+                            color: AppColors.secondary.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: const Icon(Icons.restore, color: AppColors.secondary),
