@@ -1,3 +1,4 @@
+import 'package:uuid/uuid.dart';
 import '../../domain/entities/product_entity.dart';
 import '../data_sources/database_helper.dart';
 
@@ -16,8 +17,9 @@ class ProductModel extends ProductEntity {
   });
 
   factory ProductModel.fromEntity(ProductEntity entity) {
+    final uuid = const Uuid().v4();
     return ProductModel(
-      id: entity.id,
+      id: entity.id.isEmpty ? uuid : entity.id,
       name: entity.name,
       sku: entity.sku,
       price: entity.price,

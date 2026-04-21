@@ -1,3 +1,4 @@
+import 'package:uuid/uuid.dart';
 import '../../domain/entities/sales_entity.dart';
 import '../data_sources/database_helper.dart';
 
@@ -16,8 +17,9 @@ class SalesModel extends SalesEntity {
   });
 
   factory SalesModel.fromEntity(SalesEntity entity) {
+    final uuid = const Uuid().v4();
     return SalesModel(
-      id: entity.id,
+      id: entity.id.isEmpty ? uuid : entity.id,
       eventId: entity.eventId,
       spgId: entity.spgId,
       productId: entity.productId,

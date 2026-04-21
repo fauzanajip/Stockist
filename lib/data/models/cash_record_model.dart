@@ -1,3 +1,4 @@
+import 'package:uuid/uuid.dart';
 import '../../domain/entities/cash_record_entity.dart';
 import '../data_sources/database_helper.dart';
 
@@ -17,8 +18,9 @@ class CashRecordModel extends CashRecordEntity {
   });
 
   factory CashRecordModel.fromEntity(CashRecordEntity entity) {
+    final uuid = const Uuid().v4();
     return CashRecordModel(
-      id: entity.id,
+      id: entity.id.isEmpty ? uuid : entity.id,
       eventId: entity.eventId,
       spgId: entity.spgId,
       cashReceived: entity.cashReceived,

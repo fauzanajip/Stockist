@@ -1,3 +1,4 @@
+import 'package:uuid/uuid.dart';
 import '../../domain/entities/stock_mutation_entity.dart';
 import '../data_sources/database_helper.dart';
 
@@ -17,8 +18,9 @@ class StockMutationModel extends StockMutationEntity {
   });
 
   factory StockMutationModel.fromEntity(StockMutationEntity entity) {
+    final uuid = const Uuid().v4();
     return StockMutationModel(
-      id: entity.id,
+      id: entity.id.isEmpty ? uuid : entity.id,
       eventId: entity.eventId,
       spgId: entity.spgId,
       productId: entity.productId,

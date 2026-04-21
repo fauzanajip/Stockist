@@ -1,3 +1,4 @@
+import 'package:uuid/uuid.dart';
 import '../../domain/entities/event_product_entity.dart';
 import '../data_sources/database_helper.dart';
 
@@ -13,8 +14,9 @@ class EventProductModel extends EventProductEntity {
   });
 
   factory EventProductModel.fromEntity(EventProductEntity entity) {
+    final uuid = const Uuid().v4();
     return EventProductModel(
-      id: entity.id,
+      id: entity.id.isEmpty ? uuid : entity.id,
       eventId: entity.eventId,
       productId: entity.productId,
       price: entity.price,

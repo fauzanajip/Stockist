@@ -1,3 +1,4 @@
+import 'package:uuid/uuid.dart';
 import '../../domain/entities/event_spg_entity.dart';
 import '../data_sources/database_helper.dart';
 
@@ -13,8 +14,9 @@ class EventSpgModel extends EventSpgEntity {
   });
 
   factory EventSpgModel.fromEntity(EventSpgEntity entity) {
+    final uuid = const Uuid().v4();
     return EventSpgModel(
-      id: entity.id,
+      id: entity.id.isEmpty ? uuid : entity.id,
       eventId: entity.eventId,
       spgId: entity.spgId,
       spbId: entity.spbId,

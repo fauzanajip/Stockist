@@ -1,3 +1,4 @@
+import 'package:uuid/uuid.dart';
 import '../../domain/entities/spg_entity.dart';
 import '../data_sources/database_helper.dart';
 
@@ -14,8 +15,9 @@ class SpgModel extends SpgEntity {
   });
 
   factory SpgModel.fromEntity(SpgEntity entity) {
+    final uuid = const Uuid().v4();
     return SpgModel(
-      id: entity.id,
+      id: entity.id.isEmpty ? uuid : entity.id,
       name: entity.name,
       deletedAt: entity.deletedAt,
       createdAt: DateTime.now(),
