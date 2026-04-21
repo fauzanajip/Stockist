@@ -17,10 +17,7 @@ import '../blocs/event_product_bloc/event_product_state.dart';
 class EventDashboardView extends StatelessWidget {
   final EventEntity event;
 
-  const EventDashboardView({
-    super.key,
-    required this.event,
-  });
+  const EventDashboardView({super.key, required this.event});
 
   @override
   Widget build(BuildContext context) {
@@ -272,11 +269,13 @@ class EventDashboardView extends StatelessWidget {
             _buildSectionLabel(context, 'PRODUCT PERFORMANCE'),
             const SizedBox(height: 16),
             ...epState.assignedProducts.map((ep) {
-              final product = epState.products.firstWhere(
+              final product = epState.products.cast<dynamic>().firstWhere(
                 (p) => p.id == ep.productId,
+                orElse: () => null,
               );
+              if (product == null) return const SizedBox.shrink();
               return _buildProductRow(context, product, ep);
-            }).toList(),
+            }),
           ],
         );
       },

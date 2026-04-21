@@ -49,9 +49,9 @@ class _HomeScreenState extends State<HomeScreen> {
     final state = context.read<EventBloc>().state;
     if (state is EventsLoaded) {
       final activeEvent = state.events.cast<EventEntity?>().firstWhere(
-            (e) => e?.isActive ?? false,
-            orElse: () => null,
-          );
+        (e) => e?.isActive ?? false,
+        orElse: () => null,
+      );
       if (activeEvent != null) {
         _triggerEventDataLoad(activeEvent.id);
       }
@@ -62,7 +62,9 @@ class _HomeScreenState extends State<HomeScreen> {
     context.read<StockBloc>().add(LoadStockByEvent(eventId: eventId));
     context.read<SalesBloc>().add(LoadAllSalesByEvent(eventId: eventId));
     context.read<CashBloc>().add(LoadAllCashByEvent(eventId: eventId));
-    context.eventProductBloc?.add(LoadAvailableProducts(eventId: eventId));
+    context.read<EventProductBloc>().add(
+      LoadAvailableProducts(eventId: eventId),
+    );
     context.read<EventSpgBloc>().add(LoadAvailableSpgs(eventId: eventId));
 
     // Load data needed for export
@@ -109,9 +111,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
       await ExcelExportService.shareExcel(filePath);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal mengekspor: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Gagal mengekspor: $e')));
     }
   }
 
@@ -121,9 +123,9 @@ class _HomeScreenState extends State<HomeScreen> {
       listener: (context, state) {
         if (state is EventsLoaded) {
           final activeEvent = state.events.cast<EventEntity?>().firstWhere(
-                (e) => e?.isActive ?? false,
-                orElse: () => null,
-              );
+            (e) => e?.isActive ?? false,
+            orElse: () => null,
+          );
           if (activeEvent != null) {
             _triggerEventDataLoad(activeEvent.id);
           }
@@ -132,9 +134,9 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (context, state) {
         final activeEvent = (state is EventsLoaded)
             ? state.events.cast<EventEntity?>().firstWhere(
-                  (e) => e?.isActive ?? false,
-                  orElse: () => null,
-                )
+                (e) => e?.isActive ?? false,
+                orElse: () => null,
+              )
             : null;
 
         return Scaffold(
@@ -160,7 +162,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildBody(
-      BuildContext context, EventState state, EventEntity? activeEvent) {
+    BuildContext context,
+    EventState state,
+    EventEntity? activeEvent,
+  ) {
     if (state is EventLoading || state is EventInitial) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -259,8 +264,4 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-}
-
-extension on BuildContext {
-  EventProductBloc? get eventProductBloc => read<EventProductBloc>();
 }

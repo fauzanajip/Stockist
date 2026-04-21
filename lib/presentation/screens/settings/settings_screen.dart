@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import '../../blocs/event_bloc/event_bloc.dart';
+import '../../blocs/event_bloc/event_event.dart';
 import '../../../core/constants/app_theme.dart';
 
 class SettingsScreen extends StatelessWidget {

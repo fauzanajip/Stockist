@@ -43,15 +43,13 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
           context.goNamed('home');
         } else if (state is EventError) {
           setState(() => _isLoading = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: ${state.message}')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Error: ${state.message}')));
         }
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Create Event'),
-        ),
+        appBar: AppBar(title: const Text('Create Event')),
         body: Padding(
           padding: const EdgeInsets.all(16),
           child: Form(
@@ -78,7 +76,10 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                 const SizedBox(height: 24),
                 Card(
                   child: ListTile(
-                    leading: const Icon(Icons.calendar_today, color: AppColors.secondary),
+                    leading: const Icon(
+                      Icons.calendar_today,
+                      color: AppColors.secondary,
+                    ),
                     title: const Text('Tanggal Event'),
                     subtitle: Text(
                       app_formatters.Formatters.formatDate(_selectedDate),
@@ -89,7 +90,9 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                       final date = await showDatePicker(
                         context: context,
                         initialDate: _selectedDate,
-                        firstDate: DateTime.now().subtract(const Duration(days: 30)),
+                        firstDate: DateTime.now().subtract(
+                          const Duration(days: 30),
+                        ),
                         lastDate: DateTime.now().add(const Duration(days: 365)),
                       );
                       if (date != null) {
