@@ -5,7 +5,6 @@ import 'package:collection/collection.dart';
 import 'package:stockist/core/utils/formatters.dart' as app_formatters;
 import 'package:stockist/domain/entities/stock_mutation_entity.dart';
 import '../../../core/constants/app_theme.dart';
-import '../../../core/utils/stock_calculator.dart';
 import '../../blocs/stock_bloc/stock_bloc.dart';
 import '../../blocs/stock_bloc/stock_event.dart';
 import '../../blocs/stock_bloc/stock_state.dart';

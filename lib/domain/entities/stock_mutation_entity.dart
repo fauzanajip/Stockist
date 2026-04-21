@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-enum MutationType { initial, topup, returnMutation }
+enum MutationType { initial, topup, returnMutation, distributorToEvent }
 
 class StockMutationEntity extends Equatable {
   final String id;

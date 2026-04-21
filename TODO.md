@@ -13,34 +13,35 @@
 | 7   | Implement Sales Input Screen - update qty_sold per product    | ⏳ Pending | `sales_input_screen.dart`          |
 | 8   | Implement Cash Input Screen - cash_received + qris_received   | ⏳ Pending | `cash_input_screen.dart`           |
 | 9   | Implement Closing Screen with summary table & validation      | ⏳ Pending | `spg_closing_screen.dart`          |
+| 10  | Global Event Stock Tracking (Stock from Distributor)          | ⏳ Pending | `event_setup_screen.dart`          |
 
 ## Medium Priority - Features
 
 | #   | Task                                                          | Status  | Notes                                       |
 | --- | ------------------------------------------------------------- | ------- | ------------------------------------------- |
-| 10  | Add business logic calculations (total_dikasih, surplus, etc) | ✅ DONE | `stock_calculator.dart` - PRD Section 5     |
-| 11  | Implement Export Excel functionality                          | ✅ DONE | `excel_export_service.dart` - PRD Section 8 |
-| 12  | Implement Backup JSON (Export database)                       | ✅ DONE | `backup_service.dart` - PRD Section 6.9     |
-| 13  | Implement Restore JSON (Import backup)                        | ✅ DONE | `backup_service.dart` - PRD Section 6.9     |
-| 14  | Settings Screen - Master Data Management                      | ✅ DONE | Add Product, SPG, SPB with BLoC integration |
+| 11  | Add business logic calculations (total_dikasih, surplus, etc) | ✅ DONE | `stock_calculator.dart` - PRD Section 5     |
+| 12  | Implement Export Excel functionality                          | ✅ DONE | Fully integrated in `EventDetailScreen`     |
+| 13  | Implement Backup JSON (Export database)                       | ✅ DONE | `backup_service.dart` - PRD Section 6.9     |
+| 14  | Implement Restore JSON (Import backup)                        | ✅ DONE | `backup_service.dart` - PRD Section 6.9     |
+| 15  | Settings Screen - Master Data Management                      | ✅ DONE | Add Product, SPG, SPB with BLoC integration |
 
 ## Low Priority - Bloc Fixes
 
 | #   | Task                                                     | Status     | Location                |
 | --- | -------------------------------------------------------- | ---------- | ----------------------- |
-| 14  | Fix StockBloc error states                               | ✅ DONE    | Lines 39, 60, 81, 94    |
-| 15  | Fix SPGBloc implementation                               | ✅ DONE    | Lines 16, 24            |
-| 16  | Fix SalesBloc error states                               | ⏳ Pending | Lines 33, 49            |
-| 17  | Fix CashBloc error states                                | ⏳ Pending | Lines 34, 52            |
-| 18  | Fix ProductBloc implementation                           | ✅ DONE    | Lines 16, 24            |
-| 19  | Add status indicators (READY/REVIEW) based on data match    | ✅ DONE    | SpgList & SpgDetail     |
+| 16  | Fix StockBloc error states                               | ✅ DONE    | Lines 39, 60, 81, 94    |
+| 17  | Fix SPGBloc implementation                               | ✅ DONE    | Lines 16, 24            |
+| 18  | Fix SalesBloc error states                               | ⏳ Pending | Lines 33, 49            |
+| 19  | Fix CashBloc error states                                | ⏳ Pending | Lines 34, 52            |
+| 20  | Fix ProductBloc implementation                           | ✅ DONE    | Lines 16, 24            |
+| 21  | Add status indicators (READY/REVIEW) based on data match    | ✅ DONE    | SpgList & SpgDetail     |
 
 ---
 
 ## Progress Summary
 
-- ✅ Completed: 14/19 (74%)
-- ⏳ Pending: 5/19 (26%)
+- ✅ Completed: 16/21 (76%)
+- ⏳ Pending: 5/21 (24%)
 
 ## PRD Reference
 
@@ -48,7 +49,7 @@
 - PRD Section 6.2: Setup Data (Event Setup) ✅
 - PRD Section 6.3-6.8: Stock & Sales operations ⏳ (UI done, missing BLoC integration)
 - PRD Section 7.1: Home Screen Dashboard ✅ (Now with per-product detailed stats)
-- PRD Section 8: Export Excel ✅ (Service created, needs UI wiring)
+- PRD Section 8: Export Excel ✅ (Fully integrated and functional)
 - PRD Section 6.9: Backup ✅ (Service created, needs UI wiring)
 
 ## Completed Features (Last Update)
@@ -93,3 +94,7 @@
     - Added **Per-Product Detailed Tracking**: Collapsible breakdown showing Distributed, Sold, and Remaining for every product.
     - **Premium UI Overhaul**: Upgraded `SpgListScreen` and `SpgDetailScreen` to a modern dashboard aesthetic with accent bars, dynamic avatars, and professional status chips.
     - **Status Chips (READY/REVIEW)**: Automated validation logic for cash against expected sales.
+15. **Event Module UI Overhaul**:
+    - **Event Detail Screen**: Added a global **Event Summary Dashboard** (Total Distributed, Total Sold, Total Revenue) and premium header design.
+    - **Event Setup Screen**: Redesigned assignment cards for products and SPGs with modern visuals, improved TabBar styling, and interactive input layouts.
+    - **Visual Unity**: Ensured all screens across the event management flow share the same premium dark mode aesthetic.

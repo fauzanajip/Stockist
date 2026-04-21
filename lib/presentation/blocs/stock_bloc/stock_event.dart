@@ -82,3 +82,18 @@ class LoadStockByEvent extends StockEvent {
   @override
   List<Object?> get props => [eventId];
 }
+
+class CreateDistributorStock extends StockEvent {
+  final String eventId;
+  final String productId;
+  final int qty;
+
+  const CreateDistributorStock({
+    required this.eventId,
+    required this.productId,
+    required this.qty,
+  });
+
+  @override
+  List<Object?> get props => [eventId, productId, qty];
+}

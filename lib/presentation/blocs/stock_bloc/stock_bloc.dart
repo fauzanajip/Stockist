@@ -23,6 +23,28 @@ class StockBloc extends Bloc<StockEvent, StockState> {
     on<CreateReturn>(_onCreateReturn);
     on<LoadStockByEventSpg>(_onLoadStockByEventSpg);
     on<LoadStockByEvent>(_onLoadStockByEvent);
+    on<CreateDistributorStock>(_onCreateDistributorStock);
+  }
+
+  Future<void> _onCreateDistributorStock(
+    CreateDistributorStock event,
+    Emitter<StockState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(isLoading: true, errorMessage: null));
+      await createStockMutation(
+        CreateStockMutationParams(
+          eventId: event.eventId,
+          spgId: 'WAREHOUSE', // Special ID for global event stock
+          productId: event.productId,
+          qty: event.qty,
+          type: MutationType.distributorToEvent,
+        ),
+      );
+      add(LoadStockByEvent(eventId: event.eventId));
+    } catch (e) {
+      emit(state.copyWith(isLoading: false, errorMessage: e.toString()));
+    }
   }
 
   Future<void> _onLoadStockByEvent(

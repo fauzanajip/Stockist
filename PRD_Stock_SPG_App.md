@@ -2,7 +2,7 @@
 
 ## Mobile Offline Stock & SPG Reconciliation App
 
-**Versi:** 2.1 — Revised  
+**Versi:** 2.2 — Global Stock Support  
 **Tanggal:** April 2026
 
 ---
@@ -13,8 +13,8 @@
 
 Dalam event penjualan rokok, stokist bertanggung jawab untuk:
 
-- Menerima stok dari distributor
-- Mendistribusikan stok ke SPG
+- **Menerima stok dari distributor (Global Event Stock)**
+- Mendistribusikan stok ke SPG (Sales Stock)
 - Mencatat pergerakan stok (awal & tambahan)
 - Memvalidasi jumlah penjualan
 - Melakukan rekonsiliasi uang cash saat closing
@@ -80,14 +80,14 @@ Membangun aplikasi mobile offline untuk:
 ### 3.1 Data Flow
 
 ```
-Distributor → Stockist → SPG → Customer
+Distributor → Event (Global Stock) → SPG (Sales Stock) → Customer
 ```
 
-App hanya fokus:
+App mencatat:
 
-```
-Stockist ↔ SPG
-```
+1. **Terima dari Distributor**: Distributor → Event
+2. **Distribusi Sales**: Event → SPG
+3. **Mutasi Samping**: Gudang Event ↔ SPG
 
 ---
 
@@ -185,14 +185,15 @@ name
 ```
 id
 event_id
-spg_id
+spg_id     ← jika distributor_to_event, gunakan ID khusus 'WAREHOUSE'
 product_id
 qty
-type (initial | topup | return)
+type (distributor_to_event | initial | topup | return)
 timestamp
 note (nullable)
 ```
 
+> ✅ Tambahan: `distributor_to_event` untuk mencatat stok yang masuk ke lokasi event sebelum dibagikan.  
 > ✅ Tambahan: `note` opsional untuk keterangan khusus (misal: "retur karena basi").
 
 ---
@@ -324,6 +325,7 @@ surplus = actual_cash - expected_cash
 
 - Pilih produk dari master (bisa pilih semua atau sebagian)
 - Set harga produk untuk event ini (default dari `product.price`, bisa di-override)
+- **Input Stok Awal dari Distributor**: Input jumlah fisik barang yang diterima di lokasi event untuk setiap produk.
 - Produk yang dipilih tersimpan di `event_product`
 
 **Assign SPG ke Event:**
@@ -641,6 +643,7 @@ Summary:
 
 | Versi | Perubahan                                                                                                                                                                                                                                                 |
 | ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v2.2  | Tambah flow **Global Event Stock Tracking** (Distributor → Event); Update `StockMutationEntity` untuk mendukung tipe `distributor_to_event`; Update flow 6.2 Setup Data untuk input stok awal distributor.                                                |
 | v2.1  | Opsi B fleksibel: tambah tabel `event_spg` dan `event_product`; SPG & Product jadi master data global; harga produk per-event di `event_product.price`; `spb_id` dipindah ke `event_spg`; update user flow 6.2 setup data; update formula `expected_cash` |
 | v2.0  | Tambah `qris_received` di Cash Record; perbaiki formula surplus; definisikan kriteria status ✅/⚠️; perjelas closing flow (re-open, validasi); soft delete SPG & Product; detail export Excel; minimum Android version; pilih JSON sebagai format backup  |
 | v1.0  | Initial PRD                                                                                                                                                                                                                                               |
