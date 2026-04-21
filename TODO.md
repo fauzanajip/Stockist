@@ -36,13 +36,15 @@
 | 20  | Fix CashBloc error states                                | ⏳ Pending | Lines 34, 52            |
 | 21  | Fix ProductBloc implementation                           | ✅ DONE    | Lines 16, 24            |
 | 22  | Add status indicators (READY/REVIEW) based on data match    | ✅ DONE    | SpgList & SpgDetail     |
+| 23  | Fix DatePicker error in Event Setup                      | ✅ DONE    | Localization fix        |
+| 24  | Add 'Reset Semua Data' (Clean Wipe) with warning dialog   | ✅ DONE    | Danger Zone in Settings |
 
 ---
 
 ## Progress Summary
 
-- ✅ Completed: 19/22 (86%)
-- ⏳ Pending: 3/22 (14%)
+- ✅ Completed: 21/24 (88%)
+- ⏳ Pending: 3/24 (12%)
 
 ## PRD Reference
 
@@ -52,6 +54,7 @@
 - PRD Section 7.1: Home Screen (Active Event Dashboard) ✅ (Consolidated & Auto-detect)
 - PRD Section 8: Export Excel ✅ (Directly in main Dashboard)
 - PRD Section 6.9: Backup ✅ (Service created, needs UI wiring)
+- **Danger Zone**: Reset All Data feature implemented (with 2-step confirmation) ✅
 
 ## Completed Features (Last Update)
 
@@ -87,9 +90,9 @@
    - Status indicator (✅/⚠️) based on surplus/selisih
    - Navigate to SPG detail on tap
 10. **Settings Screen** - Master Data Management with 3 tabs:
-   - Tab Produk: Add product (name, SKU, default price), list all products, soft delete
-   - Tab SPG: Add SPG (name), list all SPGs, soft delete
-   - Tab SPB: Add SPB (name), list all SPBs, delete
+    - Tab Produk: Add product (name, SKU, default price), list all products, soft delete
+    - Tab SPG: Add SPG (name), list all SPGs, soft delete
+    - Tab SPB: Add SPB (name), list all SPBs, delete
 11. **Bloc Providers** - Added all blocs to MultiBlocProvider in main.dart
 12. **SpbBloc** - New bloc for SPB management (LoadAll, Create, Delete)
 13. **UpdateEventProductPrice Use Case** - Added for dynamic price updates
@@ -105,3 +108,8 @@
 17. **Home Screen Optimization**:
     - **Reactivity Fix**: Converted to StatefulWidget with automatic `LoadAllEvents` on init.
     - **Pull-to-Refresh**: Added RefreshIndicator for manual data syncing.
+18. **Reset All Data (Danger Zone)**:
+    - Fitur penghapusan seluruh database (Master & Transaksi).
+    - Dialog peringatan konfirmasi 2 langkah untuk keamanan data.
+    - Terintegrasi di halaman Pengaturan bawah kategori "DANGER ZONE".
+19. **Localization Fix**: Added `MaterialLocalizations` and `GlobalWidgetsLocalizations` to support DatePicker on all devices.

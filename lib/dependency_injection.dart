@@ -148,6 +148,7 @@ Future<void> initDependencies() async {
       closeEvent: sl(),
       reopenEvent: sl(),
       setEventActive: sl(),
+      databaseHelper: sl(),
     ),
   );
   sl.registerFactory(

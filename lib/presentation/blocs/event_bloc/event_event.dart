@@ -57,3 +57,5 @@ class SetEventActive extends EventEvent {
   @override
   List<Object?> get props => [id];
 }
+
+class ResetAllData extends EventEvent {}

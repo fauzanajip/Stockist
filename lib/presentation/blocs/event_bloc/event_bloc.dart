@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../domain/usecases/event_usecases.dart';
+import '../../../data/data_sources/database_helper.dart';
 import 'event_event.dart';
 import 'event_state.dart';
 
@@ -10,6 +11,7 @@ class EventBloc extends Bloc<EventEvent, EventState> {
   final CloseEvent closeEvent;
   final ReopenEvent reopenEvent;
   final SetEventActiveUseCase setEventActive;
+  final DatabaseHelper databaseHelper;
 
   EventBloc({
     required this.getAllEvents,
@@ -18,6 +20,7 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     required this.closeEvent,
     required this.reopenEvent,
     required this.setEventActive,
+    required this.databaseHelper,
   }) : super(EventInitial()) {
     on<LoadAllEvents>(_onLoadAllEvents);
     on<LoadEventById>(_onLoadEventById);
@@ -25,6 +28,20 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     on<CloseCurrentEvent>(_onCloseCurrentEvent);
     on<ReopenCurrentEvent>(_onReopenCurrentEvent);
     on<SetEventActive>(_onSetEventActive);
+    on<ResetAllData>(_onResetAllData);
+  }
+
+  Future<void> _onResetAllData(
+    ResetAllData event,
+    Emitter<EventState> emit,
+  ) async {
+    try {
+      emit(EventLoading());
+      await databaseHelper.clearAllData();
+      add(LoadAllEvents());
+    } catch (e) {
+      emit(EventError(message: e.toString()));
+    }
   }
 
   Future<void> _onLoadAllEvents(

@@ -67,6 +67,16 @@ class SettingsScreen extends StatelessWidget {
             color: AppColors.onSurfaceVariant,
             onTap: () => context.pushNamed('spb_master'),
           ),
+          const SizedBox(height: 32),
+          _buildCategory(context, 'DANGER ZONE'),
+          _buildMenuTile(
+            context,
+            icon: Icons.delete_forever_outlined,
+            title: 'Reset Semua Data',
+            subtitle: 'Hapus seluruh data & master permanen',
+            color: AppColors.error,
+            onTap: () => _showResetConfirmation(context),
+          ),
           const SizedBox(height: 40),
           Center(
             child: Text(
@@ -78,6 +88,43 @@ class SettingsScreen extends StatelessWidget {
                 letterSpacing: 2,
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showResetConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text(
+          'Reset Semua Data?',
+          style: TextStyle(fontWeight: FontWeight.w900),
+        ),
+        content: const Text(
+          'Aksi ini akan menghapus seluruh data event, produk, SPG, dan transaksi secara permanen. Pastikan Anda sudah membackup data jika diperlukan.',
+          style: TextStyle(fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('BATAL'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              context.read<EventBloc>().add(ResetAllData());
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Seluruh data berhasil dihapus')),
+              );
+              context.goNamed('home');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('RESET SEKARANG'),
           ),
         ],
       ),

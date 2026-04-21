@@ -173,6 +173,22 @@ class DatabaseHelper {
     }
   }
 
+  Future<void> clearAllData() async {
+    final db = await database;
+    await db.transaction((txn) async {
+      await txn.delete('backup_logs');
+      await txn.delete('cash_records');
+      await txn.delete('sales');
+      await txn.delete('stock_mutations');
+      await txn.delete('event_products');
+      await txn.delete('event_spgs');
+      await txn.delete('spbs');
+      await txn.delete('spgs');
+      await txn.delete('products');
+      await txn.delete('events');
+    });
+  }
+
   // Helper methods
   static String dateTimeToString(DateTime dateTime) => dateTime.toIso8601String();
   static DateTime stringToDateTime(String string) => DateTime.parse(string);
