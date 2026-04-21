@@ -8,8 +8,24 @@ import '../../blocs/event_bloc/event_bloc.dart';
 import '../../blocs/event_bloc/event_event.dart';
 import '../../blocs/event_bloc/event_state.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Ensure data is fresh when entering Home
+    context.read<EventBloc>().add(LoadAllEvents());
+  }
+
+  Future<void> _onRefresh() async {
+    context.read<EventBloc>().add(LoadAllEvents());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,21 +45,28 @@ class HomeScreen extends StatelessWidget {
       ),
       body: BlocBuilder<EventBloc, EventState>(
         builder: (context, state) {
-          if (state is EventLoading) {
+          if (state is EventLoading || state is EventInitial) {
             return const Center(child: CircularProgressIndicator());
           }
           if (state is EventsLoaded) {
-            if (state.events.isEmpty) {
-              return _buildEmptyState(context);
-            }
-            return _buildEventList(context, state.events);
+            return RefreshIndicator(
+              onRefresh: _onRefresh,
+              child:
+                  state.events.isEmpty
+                      ? _buildEmptyState(context)
+                      : _buildEventList(context, state.events),
+            );
           }
           if (state is EventError) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error_outline, size: 64, color: AppColors.error),
+                  const Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: AppColors.error,
+                  ),
                   const SizedBox(height: 16),
                   Text('Error: ${state.message}'),
                   const SizedBox(height: 16),
@@ -55,7 +78,7 @@ class HomeScreen extends StatelessWidget {
               ),
             );
           }
-          return _buildEmptyState(context);
+          return const Center(child: CircularProgressIndicator());
         },
       ),
       floatingActionButton: FloatingActionButton(
@@ -66,28 +89,39 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildEmptyState(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.event_note, size: 64, color: AppColors.onSurfaceVariant),
-          const SizedBox(height: 16),
-          Text(
-            'Belum ada event',
-            style: Theme.of(context).textTheme.headlineSmall,
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      children: [
+        SizedBox(height: MediaQuery.of(context).size.height * 0.2),
+        Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.event_note,
+                size: 64,
+                color: AppColors.onSurfaceVariant,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Belum ada event',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Klik + untuk membuat event baru',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Klik + untuk membuat event baru',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   Widget _buildEventList(BuildContext context, List<EventEntity> events) {
     return ListView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(16),
       itemCount: events.length,
       itemBuilder: (context, index) {
@@ -96,7 +130,10 @@ class HomeScreen extends StatelessWidget {
           margin: const EdgeInsets.only(bottom: 12),
           child: ListTile(
             leading: CircleAvatar(
-              backgroundColor: event.status == 'OPEN' ? AppColors.primary : AppColors.onSurfaceVariant,
+              backgroundColor:
+                  event.status == 'OPEN'
+                      ? AppColors.primary
+                      : AppColors.onSurfaceVariant,
               child: Icon(
                 event.status == 'OPEN' ? Icons.event : Icons.event_busy,
                 color: Colors.white,
@@ -111,10 +148,11 @@ class HomeScreen extends StatelessWidget {
               style: Theme.of(context).textTheme.bodySmall,
             ),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-            onTap: () => context.pushNamed(
-              'event_detail',
-              pathParameters: {'eventId': event.id},
-            ),
+            onTap:
+                () => context.pushNamed(
+                  'event_detail',
+                  pathParameters: {'eventId': event.id},
+                ),
           ),
         );
       },

@@ -100,3 +100,7 @@
     - **Searchable UI**: Added search capability (Names & SKU) and "Show Active Only" filters for handling large datasets.
     - **History Guard**: Prevented unassigning Products/SPGs if transactions exist for data integrity.
     - **Warehouse Stock Sync**: Dynamic delta-based stock updates for Global Event Stock.
+17. **Home Screen Optimization**:
+    - **Reactivity Fix**: Converted to StatefulWidget with automatic `LoadAllEvents` on init.
+    - **Pull-to-Refresh**: Added RefreshIndicator for manual data syncing.
+    - **State Guard**: Improved handling of initial loading states to prevent flickering or false empty states.
