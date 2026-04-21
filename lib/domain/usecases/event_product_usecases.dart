@@ -59,3 +59,16 @@ class GetEventProducts {
     return await repository.getByEvent(eventId);
   }
 }
+
+class UpdateEventProductPrice {
+  final EventProductRepository repository;
+
+  UpdateEventProductPrice(this.repository);
+
+  Future<void> call({
+    required String eventProductId,
+    required double price,
+  }) async {
+    await repository.updatePrice(eventProductId, price);
+  }
+}

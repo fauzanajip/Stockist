@@ -10,6 +10,12 @@ import 'presentation/blocs/product_bloc/product_bloc.dart';
 import 'presentation/blocs/product_bloc/product_event.dart';
 import 'presentation/blocs/spg_bloc/spg_bloc.dart';
 import 'presentation/blocs/spg_bloc/spg_event.dart';
+import 'presentation/blocs/stock_bloc/stock_bloc.dart';
+import 'presentation/blocs/sales_bloc/sales_bloc.dart';
+import 'presentation/blocs/cash_bloc/cash_bloc.dart';
+import 'presentation/blocs/event_spg_bloc/event_spg_bloc.dart';
+import 'presentation/blocs/event_product_bloc/event_product_bloc.dart';
+import 'presentation/blocs/spb_bloc/spb_bloc.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,6 +40,24 @@ class StockistApp extends StatelessWidget {
         ),
         BlocProvider<SpgBloc>(
           create: (context) => sl<SpgBloc>()..add(LoadActiveSpqs()),
+        ),
+        BlocProvider<SpbBloc>(
+          create: (context) => sl<SpbBloc>(),
+        ),
+        BlocProvider<StockBloc>(
+          create: (context) => sl<StockBloc>(),
+        ),
+        BlocProvider<SalesBloc>(
+          create: (context) => sl<SalesBloc>(),
+        ),
+        BlocProvider<CashBloc>(
+          create: (context) => sl<CashBloc>(),
+        ),
+        BlocProvider<EventSpgBloc>(
+          create: (context) => sl<EventSpgBloc>(),
+        ),
+        BlocProvider<EventProductBloc>(
+          create: (context) => sl<EventProductBloc>(),
         ),
       ],
       child: MaterialApp.router(

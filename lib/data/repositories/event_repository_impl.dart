@@ -17,7 +17,7 @@ class EventRepositoryImpl implements EventRepository {
         'events',
         orderBy: 'date DESC',
       );
-      return maps.map((map) => EventModel.fromMap(map)).toList();
+      return maps.map<EventEntity>((map) => EventModel.fromMap(map)).toList();
     } catch (e) {
       throw AppDatabaseException(
         message: 'Gagal mengambil data events',

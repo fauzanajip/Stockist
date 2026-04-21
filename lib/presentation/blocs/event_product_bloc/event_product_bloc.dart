@@ -10,16 +10,19 @@ class EventProductBloc extends Bloc<EventProductEvent, EventProductState> {
   final event_product_usecase.GetProductsByEvent getProductsByEvent;
   final event_product_usecase.AssignProductToEvent assignProductToEvent;
   final event_product_usecase.RemoveProductFromEvent removeProductFromEvent;
+  final event_product_usecase.UpdateEventProductPrice updateEventProductPrice;
 
   EventProductBloc({
     required this.getActiveProducts,
     required this.getProductsByEvent,
     required this.assignProductToEvent,
     required this.removeProductFromEvent,
+    required this.updateEventProductPrice,
   }) : super(EventProductInitial()) {
     on<LoadAvailableProducts>(_onLoadAvailableProducts);
     on<AssignProduct>(_onAssignProduct);
     on<UnassignProduct>(_onUnassignProduct);
+    on<UpdateEventProductPrice>(_onUpdateEventProductPrice);
     on<SaveAllAssignedProducts>(_onSaveAllAssignedProducts);
   }
 
@@ -76,6 +79,20 @@ class EventProductBloc extends Bloc<EventProductEvent, EventProductState> {
       emit(EventProductLoading());
       await removeProductFromEvent(event.eventProductId);
       emit(ProductUnassigned());
+    } catch (e) {
+      emit(EventProductError(message: e.toString()));
+    }
+  }
+
+  Future<void> _onUpdateEventProductPrice(
+    UpdateEventProductPrice event,
+    Emitter<EventProductState> emit,
+  ) async {
+    try {
+      await updateEventProductPrice(
+        eventProductId: event.eventProductId,
+        price: event.price,
+      );
     } catch (e) {
       emit(EventProductError(message: e.toString()));
     }

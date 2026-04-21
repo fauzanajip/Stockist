@@ -6,7 +6,7 @@
 |---|------|--------|------|
 | 1 | Implement Create Event Screen - call bloc | ✅ DONE | `create_event_screen.dart` |
 | 2 | Implement Event Setup Screen - assign produk & SPG | ✅ DONE | `event_setup_screen.dart` |
-| 3 | Implement SPG List Screen with dashboard view (PRD 7.1) | ⏳ Pending | `spg_list_screen.dart` |
+| 3 | Implement SPG List Screen with dashboard view (PRD 7.1) | ✅ DONE | `spg_list_screen.dart` |
 | 4 | Implement Initial Distribution Screen - input qty per product | ⏳ Pending | `initial_distribution_screen.dart` |
 | 5 | Implement Topup Screen - add stock to SPG | ⏳ Pending | `topup_screen.dart` |
 | 6 | Implement Return Screen - return stock from SPG | ⏳ Pending | `return_screen.dart` |
@@ -22,6 +22,7 @@
 | 11 | Implement Export Excel functionality | ✅ DONE | `excel_export_service.dart` - PRD Section 8 |
 | 12 | Implement Backup JSON (Export database) | ✅ DONE | `backup_service.dart` - PRD Section 6.9 |
 | 13 | Implement Restore JSON (Import backup) | ✅ DONE | `backup_service.dart` - PRD Section 6.9 |
+| 14 | Settings Screen - Master Data Management | ✅ DONE | Add Product, SPG, SPB with BLoC integration |
 
 ## Low Priority - Bloc Fixes
 
@@ -37,14 +38,14 @@
 ---
 
 ## Progress Summary
-- ✅ Completed: 10/19 (53%)
-- ⏳ Pending: 9/19 (47%)
+- ✅ Completed: 13/19 (68%)
+- ⏳ Pending: 6/19 (32%)
 
 ## PRD Reference
 - PRD Section 6.1: Create Event flow ✅
 - PRD Section 6.2: Setup Data (Event Setup) ✅
 - PRD Section 6.3-6.8: Stock & Sales operations ⏳ (UI done, missing BLoC integration)
-- PRD Section 7.1: Home Screen Dashboard ⏳
+- PRD Section 7.1: Home Screen Dashboard ✅
 - PRD Section 8: Export Excel ✅ (Service created, needs UI wiring)
 - PRD Section 6.9: Backup ✅ (Service created, needs UI wiring)
 
@@ -53,3 +54,34 @@
 2. ExcelExportService - multi-sheet export with summary + detail sheets
 3. BackupService - export/import JSON via Android Share Sheet
 4. All placeholder screens created with Industrial Brutalism dark mode design
+5. **Create Event Screen** - Full BLoC integration:
+   - Form validation (nama event min 3 karakter)
+   - Date picker for event date
+   - Loading state during creation
+   - Navigate to Home after success
+   - Error handling with SnackBar
+6. **Event Setup Screen** - Full implementation with tab navigation:
+   - Tab Produk: Assign/unassign products with custom price per event
+   - Tab SPG: Assign/unassign SPGs with optional SPB assignment
+   - Real-time switch toggles with BLoC state management
+   - Price input field for assigned products (editable)
+   - SPB dropdown for SPG assignment
+   - Save setup button that navigates to event detail
+7. **Home Screen** - Event list with BlocBuilder:
+   - Display all events from database
+   - Empty state if no events
+   - Navigate to event detail on tap
+   - Settings icon in app bar
+8. **SPG List Screen** - Dashboard view per SPG with:
+   - Total dikasih, terjual, sisa calculations
+   - Cash received display
+   - Status indicator (✅/⚠️) based on surplus/selisih
+   - Navigate to SPG detail on tap
+9. **Settings Screen** - Master Data Management with 3 tabs:
+   - Tab Produk: Add product (name, SKU, default price), list all products, soft delete
+   - Tab SPG: Add SPG (name), list all SPGs, soft delete
+   - Tab SPB: Add SPB (name), list all SPBs, delete
+10. **Bloc Providers** - Added all blocs to MultiBlocProvider in main.dart
+11. **SpbBloc** - New bloc for SPB management (LoadAll, Create, Delete)
+12. **UpdateEventProductPrice Use Case** - Added for dynamic price updates
+13. **Router** - Added /settings route for master data management

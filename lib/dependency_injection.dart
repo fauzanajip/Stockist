@@ -37,6 +37,7 @@ import '../presentation/blocs/sales_bloc/sales_bloc.dart';
 import '../presentation/blocs/cash_bloc/cash_bloc.dart';
 import '../presentation/blocs/event_spg_bloc/event_spg_bloc.dart';
 import '../presentation/blocs/event_product_bloc/event_product_bloc.dart';
+import '../presentation/blocs/spb_bloc/spb_bloc.dart';
 
 final sl = GetIt.instance;
 
@@ -82,7 +83,7 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton(() => GetEventById(sl()));
   sl.registerLazySingleton(() => CloseEvent(sl()));
   sl.registerLazySingleton(() => ReopenEvent(sl()));
-  
+
   // Use Cases - Product
   sl.registerLazySingleton(() => GetAllProducts(sl()));
   sl.registerLazySingleton(() => GetActiveProducts(sl()));
@@ -90,7 +91,7 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton(() => CreateProduct(sl()));
   sl.registerLazySingleton(() => UpdateProduct(sl()));
   sl.registerLazySingleton(() => SoftDeleteProduct(sl()));
-  
+
   // Use Cases - SPG
   sl.registerLazySingleton(() => GetAllSpgs(sl()));
   sl.registerLazySingleton(() => GetActiveSpgs(sl()));
@@ -98,36 +99,37 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton(() => CreateSpg(sl()));
   sl.registerLazySingleton(() => UpdateSpg(sl()));
   sl.registerLazySingleton(() => SoftDeleteSpg(sl()));
-  
+
   // Use Cases - SPB
   sl.registerLazySingleton(() => GetAllSpbs(sl()));
   sl.registerLazySingleton(() => GetSpbById(sl()));
   sl.registerLazySingleton(() => CreateSpb(sl()));
   sl.registerLazySingleton(() => DeleteSpb(sl()));
-  
+
   // Use Cases - Event Product
   sl.registerLazySingleton(() => AssignProductToEvent(sl()));
   sl.registerLazySingleton(() => RemoveProductFromEvent(sl()));
   sl.registerLazySingleton(() => GetProductsByEvent(sl()));
   sl.registerLazySingleton(() => GetEventProducts(sl()));
-  
+  sl.registerLazySingleton(() => UpdateEventProductPrice(sl()));
+
   // Use Cases - Event SPG
   sl.registerLazySingleton(() => AssignSpgToEvent(sl()));
   sl.registerLazySingleton(() => RemoveSpgFromEvent(sl()));
   sl.registerLazySingleton(() => GetSpgsByEvent(sl()));
   sl.registerLazySingleton(() => GetEventSpgs(sl()));
-  
+
   // Use Cases - Stock Mutation
   sl.registerLazySingleton(() => CreateStockMutation(sl()));
   sl.registerLazySingleton(() => GetStockMutationsByEvent(sl()));
   sl.registerLazySingleton(() => GetStockMutationsByEventSpg(sl()));
   sl.registerLazySingleton(() => GetTotalGiven(sl()));
   sl.registerLazySingleton(() => GetTotalReturn(sl()));
-  
+
   // Use Cases - Sales
   sl.registerLazySingleton(() => CreateOrUpdateSales(sl()));
   sl.registerLazySingleton(() => GetSalesByEventSpg(sl()));
-  
+
   // Use Cases - Cash Record
   sl.registerLazySingleton(() => CreateOrUpdateCashRecord(sl()));
   sl.registerLazySingleton(() => GetCashRecordByEventSpg(sl()));
@@ -160,6 +162,9 @@ Future<void> initDependencies() async {
     ),
   );
   sl.registerFactory(
+    () => SpbBloc(getAllSpbs: sl(), createSpb: sl(), deleteSpb: sl()),
+  );
+  sl.registerFactory(
     () => StockBloc(
       createStockMutation: sl(),
       getTotalGiven: sl(),
@@ -167,16 +172,11 @@ Future<void> initDependencies() async {
     ),
   );
   sl.registerFactory(
-    () => SalesBloc(
-      createOrUpdateSales: sl(),
-      getSalesByEventSpg: sl(),
-    ),
+    () => SalesBloc(createOrUpdateSales: sl(), getSalesByEventSpg: sl()),
   );
   sl.registerFactory(
-    () => CashBloc(
-      createOrUpdateCashRecord: sl(),
-      getCashRecordByEventSpg: sl(),
-    ),
+    () =>
+        CashBloc(createOrUpdateCashRecord: sl(), getCashRecordByEventSpg: sl()),
   );
   sl.registerFactory(
     () => EventProductBloc(
@@ -184,6 +184,7 @@ Future<void> initDependencies() async {
       getProductsByEvent: sl(),
       assignProductToEvent: sl(),
       removeProductFromEvent: sl(),
+      updateEventProductPrice: sl(),
     ),
   );
   sl.registerFactory(

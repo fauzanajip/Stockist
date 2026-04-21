@@ -18,7 +18,7 @@ class SpbRepositoryImpl implements SpbRepository {
         'spbs',
         orderBy: 'name ASC',
       );
-      return maps.map((map) => SpbModel.fromMap(map)).toList();
+      return maps.map<SpbEntity>((map) => SpbModel.fromMap(map)).toList();
     } catch (e) {
       throw AppDatabaseException(message: 'Gagal mengambil data SPB: $e');
     }

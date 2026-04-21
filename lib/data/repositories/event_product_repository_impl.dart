@@ -19,7 +19,7 @@ class EventProductRepositoryImpl implements EventProductRepository {
         where: 'event_id = ?',
         whereArgs: [eventId],
       );
-      return maps.map((map) => EventProductModel.fromMap(map)).toList();
+      return maps.map<EventProductEntity>((map) => EventProductModel.fromMap(map)).toList();
     } catch (e) {
       throw AppDatabaseException(message: 'Gagal mengambil data Event Product: $e');
     }
@@ -75,6 +75,21 @@ class EventProductRepositoryImpl implements EventProductRepository {
       return model;
     } catch (e) {
       throw AppDatabaseException(message: 'Gagal update Event Product: $e');
+    }
+  }
+
+  @override
+  Future<void> updatePrice(String id, double price) async {
+    try {
+      final db = await dbHelper.database;
+      await db.update(
+        'event_products',
+        {'price': price},
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+    } catch (e) {
+      throw AppDatabaseException(message: 'Gagal update harga Event Product: $e');
     }
   }
 

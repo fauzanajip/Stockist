@@ -12,6 +12,7 @@ import '../../presentation/screens/stock/return_screen.dart';
 import '../../presentation/screens/sales/sales_input_screen.dart';
 import '../../presentation/screens/cash/cash_input_screen.dart';
 import '../../presentation/screens/settings/backup_screen.dart';
+import '../../presentation/screens/settings/settings_screen.dart';
 
 class AppRouter {
   AppRouter._();
@@ -134,6 +135,11 @@ class AppRouter {
         path: '/settings/backup',
         name: 'backup',
         builder: (context, state) => const BackupScreen(),
+      ),
+      GoRoute(
+        path: '/settings',
+        name: 'settings',
+        builder: (context, state) => const SettingsScreen(),
       ),
     ],
   );

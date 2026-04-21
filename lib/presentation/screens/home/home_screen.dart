@@ -18,6 +18,10 @@ class HomeScreen extends StatelessWidget {
         title: const Text('Stockist'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () => context.pushNamed('settings'),
+          ),
+          IconButton(
             icon: const Icon(Icons.backup),
             onPressed: () => context.pushNamed('backup'),
           ),

@@ -17,7 +17,7 @@ class ProductRepositoryImpl implements ProductRepository {
         'products',
         orderBy: 'name ASC',
       );
-      return maps.map((map) => ProductModel.fromMap(map)).toList();
+      return maps.map<ProductEntity>((map) => ProductModel.fromMap(map)).toList();
     } catch (e) {
       throw AppDatabaseException(message: 'Gagal mengambil data products: $e');
     }
@@ -32,7 +32,7 @@ class ProductRepositoryImpl implements ProductRepository {
         where: 'deleted_at IS NULL',
         orderBy: 'name ASC',
       );
-      return maps.map((map) => ProductModel.fromMap(map)).toList();
+      return maps.map<ProductEntity>((map) => ProductModel.fromMap(map)).toList();
     } catch (e) {
       throw AppDatabaseException(message: 'Gagal mengambil data active products: $e');
     }

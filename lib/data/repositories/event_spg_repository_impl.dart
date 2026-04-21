@@ -19,7 +19,7 @@ class EventSpgRepositoryImpl implements EventSpgRepository {
         where: 'event_id = ?',
         whereArgs: [eventId],
       );
-      return maps.map((map) => EventSpgModel.fromMap(map)).toList();
+      return maps.map<EventSpgEntity>((map) => EventSpgModel.fromMap(map)).toList();
     } catch (e) {
       throw AppDatabaseException(message: 'Gagal mengambil data Event SPG: $e');
     }

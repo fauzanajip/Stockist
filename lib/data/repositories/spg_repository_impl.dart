@@ -17,7 +17,7 @@ class SpgRepositoryImpl implements SpgRepository {
         'spgs',
         orderBy: 'name ASC',
       );
-      return maps.map((map) => SpgModel.fromMap(map)).toList();
+      return maps.map<SpgEntity>((map) => SpgModel.fromMap(map)).toList();
     } catch (e) {
       throw AppDatabaseException(message: 'Gagal mengambil data SPG: $e');
     }
@@ -32,7 +32,7 @@ class SpgRepositoryImpl implements SpgRepository {
         where: 'deleted_at IS NULL',
         orderBy: 'name ASC',
       );
-      return maps.map((map) => SpgModel.fromMap(map)).toList();
+      return maps.map<SpgEntity>((map) => SpgModel.fromMap(map)).toList();
     } catch (e) {
       throw AppDatabaseException(message: 'Gagal mengambil data active SPG: $e');
     }

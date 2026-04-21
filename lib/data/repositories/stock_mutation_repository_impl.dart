@@ -20,7 +20,7 @@ class StockMutationRepositoryImpl implements StockMutationRepository {
         whereArgs: [eventId],
         orderBy: 'timestamp DESC',
       );
-      return maps.map((map) => StockMutationModel.fromMap(map)).toList();
+      return maps.map<StockMutationEntity>((map) => StockMutationModel.fromMap(map)).toList();
     } catch (e) {
       throw AppDatabaseException(message: 'Gagal mengambil data stock mutations: $e');
     }
@@ -36,7 +36,7 @@ class StockMutationRepositoryImpl implements StockMutationRepository {
         whereArgs: [eventId, spgId],
         orderBy: 'timestamp DESC',
       );
-      return maps.map((map) => StockMutationModel.fromMap(map)).toList();
+      return maps.map<StockMutationEntity>((map) => StockMutationModel.fromMap(map)).toList();
     } catch (e) {
       throw AppDatabaseException(message: 'Gagal mengambil data stock mutations: $e');
     }
@@ -52,7 +52,7 @@ class StockMutationRepositoryImpl implements StockMutationRepository {
         whereArgs: [eventId, spgId, productId],
         orderBy: 'timestamp DESC',
       );
-      return maps.map((map) => StockMutationModel.fromMap(map)).toList();
+      return maps.map<StockMutationEntity>((map) => StockMutationModel.fromMap(map)).toList();
     } catch (e) {
       throw AppDatabaseException(message: 'Gagal mengambil data stock mutations: $e');
     }
