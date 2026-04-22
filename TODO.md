@@ -8,11 +8,11 @@
 | 2   | Implement Event Setup Screen - assign produk & SPG            | ✅ DONE    | `event_setup_screen.dart`          |
 | 3   | Implement SPG List Screen with dashboard view (PRD 7.1)       | ✅ DONE    | `spg_list_screen.dart`             |
 | 4   | Implement Initial Distribution Screen - input qty per product | ✅ DONE    | `initial_distribution_screen.dart` |
-| 5   | Implement Topup Screen - add stock to SPG                     | ⏳ Pending | `topup_screen.dart`                |
-| 6   | Implement Return Screen - return stock from SPG               | ⏳ Pending | `return_screen.dart`               |
-| 7   | Implement Sales Input Screen - update qty_sold per product    | ⏳ Pending | `sales_input_screen.dart`          |
-| 8   | Implement Cash Input Screen - cash_received + qris_received   | ⏳ Pending | `cash_input_screen.dart`           |
-| 9   | Implement Closing Screen with summary table & validation      | ⏳ Pending | `spg_closing_screen.dart`          |
+| 5   | Implement Topup Screen - add stock to SPG                     | ✅ DONE    | `topup_screen.dart`                |
+| 6   | Implement Return Screen - return stock from SPG               | ✅ DONE    | `return_screen.dart`               |
+| 7   | Implement Sales Input Screen - update qty_sold per product    | ✅ DONE    | `sales_input_screen.dart`          |
+| 8   | Implement Cash Input Screen - cash_received + qris_received   | ✅ DONE    | `cash_input_screen.dart`           |
+| 9   | Implement Closing Screen with summary table & validation      | ✅ DONE    | `spg_closing_screen.dart`          |
 | 10  | Global Event Stock Tracking (Stock from Distributor)          | ✅ DONE    | `event_setup_screen.dart`          |
 
 ## Medium Priority - Features
@@ -21,8 +21,8 @@
 | --- | ------------------------------------------------------------- | ------- | ------------------------------------------- |
 | 11  | Add business logic calculations (total_dikasih, surplus, etc) | ✅ DONE | `stock_calculator.dart` - PRD Section 5     |
 | 12  | Implement Export Excel functionality                          | ✅ DONE | Fully integrated in `HomeScreen` Dashboard   |
-| 13  | Implement Backup JSON (Export database)                       | ✅ DONE | `backup_service.dart` - PRD Section 6.9     |
-| 14  | Implement Restore JSON (Import backup)                        | ✅ DONE | `backup_service.dart` - PRD Section 6.9     |
+| 13  | Implement Backup JSON (Export database)                       | ✅ DONE | `backup_service.dart` - PRD Section 6.10     |
+| 14  | Implement Restore JSON (Import backup)                        | ✅ DONE | `backup_service.dart` - PRD Section 6.10     |
 | 15  | Settings Screen - Master Data Management                      | ✅ DONE | Add Product, SPG, SPB with BLoC integration |
 
 ## Low Priority - Bloc Fixes
@@ -39,21 +39,31 @@
 | 23  | Fix DatePicker error in Event Setup                      | ✅ DONE    | Localization fix        |
 | 24  | Add 'Reset Semua Data' (Clean Wipe) with warning dialog   | ✅ DONE    | Danger Zone in Settings |
 
+## Low Priority - Stock Distribution Audit
+
+| #   | Task                                                          | Status     | Notes                                       |
+| --- | ------------------------------------------------------------- | ---------- | ------------------------------------------- |
+| 25  | Create Stock History Screen (reusable from Home & SPG Detail) | ⏳ Pending | Entry points: MANAGEMENT section & SETUP section |
+| 26  | Add UpdateStockMutation event & handler with validation       | ⏳ Pending | Validate: newQty >= (totalSold + totalReturn - otherDistributions) |
+| 27  | Add DeleteStockMutation event & handler with validation       | ⏳ Pending | Validate: (otherDistributions - totalReturn) >= totalSold |
+| 28  | Add update() method to StockMutationRepository                | ⏳ Pending | Implement in repository impl                |
+
 ---
 
 ## Progress Summary
 
-- ✅ Completed: 21/24 (88%)
-- ⏳ Pending: 3/24 (12%)
+- ✅ Completed: 20/28 (71%)
+- ⏳ Pending: 8/28 (29%)
 
 ## PRD Reference
 
 - PRD Section 6.1: Create Event flow ✅
 - PRD Section 6.2: Setup Data (Event Setup) ✅
-- PRD Section 6.3-6.8: Stock & Sales operations ⏳ (UI done, missing BLoC integration)
+- PRD Section 6.3-6.8: Stock & Sales operations ✅ (All screens implemented with BLoC integration)
+- PRD Section 6.9: Edit & Delete Distribusi ⏳ (Tasks #25-28 pending)
+- PRD Section 6.10: Backup ✅ (Service created, needs UI wiring)
 - PRD Section 7.1: Home Screen (Active Event Dashboard) ✅ (Consolidated & Auto-detect)
 - PRD Section 8: Export Excel ✅ (Directly in main Dashboard)
-- PRD Section 6.9: Backup ✅ (Service created, needs UI wiring)
 - **Danger Zone**: Reset All Data feature implemented (with 2-step confirmation) ✅
 
 ## Completed Features (Last Update)
@@ -113,3 +123,67 @@
     - Dialog peringatan konfirmasi 2 langkah untuk keamanan data.
     - Terintegrasi di halaman Pengaturan bawah kategori "DANGER ZONE".
 19. **Localization Fix**: Added `MaterialLocalizations` and `GlobalWidgetsLocalizations` to support DatePicker on all devices.
+20. **Topup Screen** - Full BLoC integration:
+    - Product selection from assigned products in event.
+    - Quantity input with increment/decrement buttons.
+    - Optional note field for additional information.
+    - Submit via `CreateTopup` event to StockBloc.
+    - Success feedback and auto-pop navigation.
+21. **Return Screen** - Full BLoC integration with validation:
+    - Product selection showing available qty to return (based on stock in hand).
+    - Warning header with caution message (PRD 6.7: different color styling).
+    - Max return validation - cannot exceed (total_given - total_returned).
+    - Quantity input with increment/decrement buttons (max limit enforced).
+    - Optional note field for retur reason.
+    - Submit via `CreateReturn` event to StockBloc.
+    - Products with no stock available shown as "N/A" (disabled for selection).
+22. **Sales Input Screen** - Full BLoC integration:
+    - List all assigned products with current stock info.
+    - Show previous qty_sold (if exists) for reference.
+    - Quantity input with max validation (cannot exceed stock in hand).
+    - Batch submit via `UpdateSales` events to SalesBloc.
+    - Replace value behavior (PRD 6.5: previous_qty tracked in DB).
+23. **Cash Input Screen** - Full BLoC integration:
+    - Input for Cash Tunai (cash_received).
+    - Input for QRIS (qris_received, boleh 0).
+    - Expected Cash calculation displayed based on sales × price.
+    - Total Actual Cash summary (cash + qris).
+    - Optional note field.
+    - Submit via `UpdateCashRecord` event to CashBloc.
+24. **Closing Screen** - Full BLoC integration with PRD 6.8 requirements:
+    - Summary table per product: Dikasih, Return, Terjual, Sisa System, Sisa Real (input), Selisih.
+    - Selisih Fisik calculation: sisa_system - sisa_real.
+    - Cash summary: Expected Cash, Cash Tunai, QRIS, Total Actual, Surplus/Selisih.
+    - Status indicator: ✅ if no selisih & surplus = 0, ⚠️ otherwise.
+    - Validation before closing: all products have sales data & cash is input.
+    - Visual highlighting for products with selisih (warning color).
+    - Closing button disabled until validation passes.
+
+## Upcoming Features (Planned)
+
+25. **Stock History Screen** - Riwayat Distribusi (Audit):
+    - Reusable screen accessible from Home Dashboard (MANAGEMENT) & SPG Detail (SETUP).
+    - Parameter `spgId` optional: null = show all mutations, non-null = filter specific SPG.
+    - Filter chips: [All] [Initial] [Topup] [Return].
+    - Card list showing: Product, Type, Qty, Timestamp, SPG.
+    - Tap card for edit dialog with qty counter.
+    - Swipe-to-delete or long-press menu for delete action.
+    - Validation before edit/delete to prevent negative stock.
+
+26. **Edit Stock Mutation** - Validation Logic:
+    - Use case: `UpdateStockMutation` with params (mutationId, newQty).
+    - Validation formula: `newQty >= (totalSold + totalReturn - otherDistributions)`.
+    - Error message: "Qty tidak bisa lebih kecil dari yang sudah terjual".
+    - Bloc event: `UpdateStockMutation` added to StockBloc.
+
+27. **Delete Stock Mutation** - Validation Logic:
+    - Use case: `DeleteStockMutation` with params (mutationId).
+    - Validation formula: `(otherDistributions - totalReturn) >= totalSold`.
+    - Error message: "Tidak bisa hapus, stok sudah ada yang terjual".
+    - Confirmation dialog before delete (destructive action).
+    - Bloc event: `DeleteStockMutation` added to StockBloc.
+
+28. **Stock Mutation Repository Update**:
+    - Add `update()` method to `StockMutationRepository` interface.
+    - Implement `update()` in `StockMutationRepositoryImpl`.
+    - Update mutation record in SQLite: `UPDATE stock_mutations SET qty = ? WHERE id = ?`.

@@ -83,7 +83,7 @@ class SettingsScreen extends StatelessWidget {
           const SizedBox(height: 40),
           Center(
             child: Text(
-              'Stockist App v2.4',
+              'Stockist App v1.0',
               style: TextStyle(
                 fontSize: 10,
                 color: AppColors.onSurface.withOpacity(0.3),

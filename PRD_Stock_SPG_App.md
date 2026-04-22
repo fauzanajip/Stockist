@@ -2,7 +2,7 @@
 
 ## Mobile Offline Stock & SPG Reconciliation App
 
-**Versi:** 2.4 — Dashboard-First & Consolidation  
+**Versi:** 2.7 — Complete Stock Audit & Edit  
 **Tanggal:** April 2026
 
 ---
@@ -194,7 +194,9 @@ note (nullable)
 ```
 
 > ✅ Tambahan: `distributor_to_event` untuk mencatat stok yang masuk ke lokasi event sebelum dibagikan.  
-> ✅ Tambahan: `note` opsional untuk keterangan khusus (misal: "retur karena basi").
+> ✅ Tambahan: `note` opsional untuk keterangan khusus (misal: "retur karena basi").  
+> ✅ Mutation records dapat di-edit atau di-delete dengan validasi.  
+> ⚠️ Tidak boleh mengubah qty jika menyebabkan `sisa_system` negatif.
 
 ---
 
@@ -421,7 +423,35 @@ User input tambahan:
 
 ---
 
-### 6.9 Local Backup (Keamanan Data)
+### 6.9 Edit & Delete Distribusi (AUDIT)
+
+**Riwayat Distribusi Screen:**
+
+- Menampilkan semua mutation records (initial, topup, return)
+- Filter by type, product, SPG
+- Entry points:
+  - Home Dashboard → MANAGEMENT section → "Riwayat Distribusi" (view all SPG)
+  - SPG Detail → SETUP section → "Riwayat Distribusi" (view specific SPG)
+- Reusable screen dengan parameter `spgId` (optional)
+
+**Edit Mutation:**
+
+- Ubah qty distribusi yang sudah ada
+- Validation: `newQty >= (totalSold + totalReturn - otherDistributions)`
+- Jika invalid: tampilkan error "Qty tidak bisa lebih kecil dari yang sudah terjual"
+- Tap card untuk edit → dialog dengan qty counter
+
+**Delete Mutation:**
+
+- Hapus record distribusi
+- Validation: `(otherDistributions - totalReturn) >= totalSold`
+- Jika invalid: tampilkan error "Tidak bisa hapus, stok sudah ada yang terjual"
+- Konfirmasi dialog sebelum delete (destructive action)
+- Swipe-to-delete atau long-press menu
+
+---
+
+### 6.10 Local Backup (Keamanan Data)
 
 - User masuk ke Menu Settings/Backup
 - Klik tombol **"Ekspor Data Event"**
@@ -446,16 +476,30 @@ Halaman utama aplikasi yang berfungsi sebagai **pusat kendali (Command Center)**
 - **Export directly**: Tombol **Export Excel** tersedia langsung di AppBar untuk kemudahan pelaporan cepat.
 - **Empty State**: Jika belum ada event aktif, menampilkan panduan (CTA) untuk memilih event fokus atau membuat event baru.
 
+**Management Section:**
+
+- 👥 **Daftar SPG** — absensi dan performa individu
+- ⚙️ **Setup Event** — konfigurasi produk & petugas
+- 📋 **Riwayat Distribusi** — audit semua mutation records (all SPG)
+
 ---
 
 ### 7.2 SPG Detail Screen
 
-Actions:
+**Transactions Section:**
 
 - ➕ **Tambah Stok** (hijau)
 - 🔄 **Retur Stok** (merah/kuning)
 - 📊 **Update Sales**
 - 💰 **Input Cash**
+
+**Setup Section:**
+
+- 📋 **Distribusi Awal** — set stok awal untuk event ini
+- 📋 **Riwayat Distribusi** — audit & edit/delete mutation records
+
+**Closing:**
+
 - 🔒 **Closing SPG**
 
 ---
@@ -639,7 +683,9 @@ Summary:
 
 | Versi | Perubahan                                                                                                                                                                                                                                                 |
 | ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| v2.4  | Implementasi **Dashboard-First Architecture**; Konsolidasi `EventDetailScreen` ke dalam `HomeScreen`; Penyelarasan alur navigasi; Integrasi penuh fitur **Export Excel** langsung di Dashboard utama; Fitur **Reset Semua Data** (Clean Wipe) di kategori Danger Zone. |
+| v2.7  | Add **Edit & Delete Stock Distribution** feature with validation (PRD 6.9); Stock History Screen reusable from Home Dashboard & SPG Detail; Validation logic to prevent negative stock; Update TODO.md tasks #25-28.                                       |
+| v2.6  | Implementasi lengkap **Sales Input**, **Cash Input**, dan **Closing Screen** dengan full BLoC integration; Validasi closing per PRD 6.8 (selisih fisik & surplus); Status indicator ✅/⚠️; Progress 83% completion.                                       |
+| v2.5  | Implementasi **Topup Screen** & **Return Screen** dengan full BLoC integration; Validasi max return berdasarkan stock in hand; UI warning styling untuk retur (PRD 6.7); Progress menuju 96% completion.                                                  |
 | v2.3  | Implementasi **Draft & Save Mechanism** pada Event Setup; Fitur **Search & Filter** untuk skalabilitas data besar; **Data Integrity Protection** (mencegah unassign jika ada history transaksi); **Optimasi Home Screen** dengan Pull-to-refresh.           |
 | v2.2  | Tambah flow **Global Event Stock Tracking** (Distributor → Event); Update `StockMutationEntity` untuk mendukung tipe `distributor_to_event`; Update flow 6.2 Setup Data untuk input stok awal distributor.                                                |
 | v2.1  | Opsi B fleksibel: tambah tabel `event_spg` dan `event_product`; SPG & Product jadi master data global; harga produk per-event di `event_product.price`; `spb_id` dipindah ke `event_spg`; update user flow 6.2 setup data; update formula `expected_cash` |
