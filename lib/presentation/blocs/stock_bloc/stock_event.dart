@@ -97,3 +97,37 @@ class CreateDistributorStock extends StockEvent {
   @override
   List<Object?> get props => [eventId, productId, qty];
 }
+
+class UpdateStockMutation extends StockEvent {
+  final String mutationId;
+  final String eventId;
+  final String spgId;
+  final String productId;
+  final int newQty;
+
+  const UpdateStockMutation({
+    required this.mutationId,
+    required this.eventId,
+    required this.spgId,
+    required this.productId,
+    required this.newQty,
+  });
+
+  @override
+  List<Object?> get props => [mutationId, eventId, spgId, productId, newQty];
+}
+
+class DeleteStockMutation extends StockEvent {
+  final String mutationId;
+  final String eventId;
+  final String spgId;
+
+  const DeleteStockMutation({
+    required this.mutationId,
+    required this.eventId,
+    required this.spgId,
+  });
+
+  @override
+  List<Object?> get props => [mutationId, eventId, spgId];
+}

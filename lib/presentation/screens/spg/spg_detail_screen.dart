@@ -395,13 +395,26 @@ class _SpgDetailScreenState extends State<SpgDetailScreen> {
   }
 
   Widget _buildSetupAction(BuildContext context) {
-    return _buildListButton(
-      context,
-      icon: Icons.app_registration,
-      label: 'Distribusi Awal',
-      subtitle: 'Set stok awal untuk event ini',
-      color: AppColors.primary,
-      route: 'initial_distribution',
+    return Column(
+      children: [
+        _buildListButton(
+          context,
+          icon: Icons.app_registration,
+          label: 'Distribusi Awal',
+          subtitle: 'Set stok awal untuk event ini',
+          color: AppColors.primary,
+          route: 'initial_distribution',
+        ),
+        const SizedBox(height: 12),
+        _buildListButton(
+          context,
+          icon: Icons.history_outlined,
+          label: 'Riwayat Distribusi',
+          subtitle: 'Audit & edit mutation records',
+          color: AppColors.secondary,
+          route: 'stock_history_spg',
+        ),
+      ],
     );
   }
 

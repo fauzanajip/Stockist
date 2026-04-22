@@ -20,7 +20,6 @@ import '../../blocs/sales_bloc/sales_bloc.dart';
 import '../../blocs/sales_bloc/sales_event.dart';
 import '../../blocs/sales_bloc/sales_state.dart';
 import '../../../domain/entities/stock_mutation_entity.dart';
-import '../../../domain/entities/sales_entity.dart';
 
 class EventSetupScreen extends StatefulWidget {
   final String eventId;
@@ -46,11 +45,8 @@ class _EventSetupScreenState extends State<EventSetupScreen>
   final Map<String, EventSpgEntity> _draftSpgs = {};
   final Map<String, int> _draftStocks = {};
 
-  // History State for Integrity
-  List<StockMutationEntity> _allMutations = [];
-  List<SalesEntity> _allSales = [];
-
   bool _isInitialized = false;
+  bool _spgInitialized = false;
 
   @override
   void initState() {
@@ -323,15 +319,18 @@ class _EventSetupScreenState extends State<EventSetupScreen>
                                     price: product.price,
                                   );
 
-                            // DATA INTEGRITY CHECK
+                            // DATA INTEGRITY CHECK - must filter by event!
                             final hasHistory =
                                 stockState.mutations.any(
                                   (m) =>
                                       m.productId == product.id &&
+                                      m.eventId == widget.eventId &&
                                       m.spgId != 'WAREHOUSE',
                                 ) ||
                                 salesState.allSales.any(
-                                  (s) => s.productId == product.id,
+                                  (s) =>
+                                      s.productId == product.id &&
+                                      s.eventId == widget.eventId,
                                 );
 
                             return ProductAssignmentCard(
@@ -393,13 +392,11 @@ class _EventSetupScreenState extends State<EventSetupScreen>
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (state is AvailableSpgsLoaded) {
-                  // Initialize drafts if not done (SPG specific)
-                  // Note: _isInitialized is set in Product tab, but we also
-                  // need to ensure SPGs are synced if this tab is opened first.
-                  for (var es in state.assignedSpgs) {
-                    if (!_draftSpgs.containsKey(es.spgId)) {
+                  if (!_spgInitialized) {
+                    for (var es in state.assignedSpgs) {
                       _draftSpgs[es.spgId] = es;
                     }
+                    _spgInitialized = true;
                   }
 
                   final filteredSpgs = state.spgs.where((s) {
@@ -438,13 +435,17 @@ class _EventSetupScreenState extends State<EventSetupScreen>
                                     spgId: spg.id,
                                   );
 
-                            // DATA INTEGRITY CHECK
+                            // DATA INTEGRITY CHECK - must filter by event!
                             final hasHistory =
                                 stockState.mutations.any(
-                                  (m) => m.spgId == spg.id,
+                                  (m) =>
+                                      m.spgId == spg.id &&
+                                      m.eventId == widget.eventId,
                                 ) ||
                                 salesState.allSales.any(
-                                  (s) => s.spgId == spg.id,
+                                  (s) =>
+                                      s.spgId == spg.id &&
+                                      s.eventId == widget.eventId,
                                 );
 
                             return SpgAssignmentCard(

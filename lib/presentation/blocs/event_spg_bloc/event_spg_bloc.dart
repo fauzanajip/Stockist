@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../domain/entities/event_spg_entity.dart';
 import '../../../domain/usecases/spg_usecases.dart' as spg_usecase;
 import '../../../domain/usecases/spb_usecases.dart' as spb_usecase;
 import '../../../domain/usecases/event_spg_usecases.dart' as event_spg_usecase;
@@ -11,6 +12,7 @@ class EventSpgBloc extends Bloc<EventSpgEvent, EventSpgState> {
   final spb_usecase.GetAllSpbs getAllSpbs;
   final event_spg_usecase.AssignSpgToEvent assignSpgToEvent;
   final event_spg_usecase.RemoveSpgFromEvent removeSpgFromEvent;
+  final event_spg_usecase.UpdateEventSpg updateEventSpg;
 
   EventSpgBloc({
     required this.getActiveSpgs,
@@ -18,6 +20,7 @@ class EventSpgBloc extends Bloc<EventSpgEvent, EventSpgState> {
     required this.getAllSpbs,
     required this.assignSpgToEvent,
     required this.removeSpgFromEvent,
+    required this.updateEventSpg,
   }) : super(EventSpgInitial()) {
     on<LoadAvailableSpgs>(_onLoadAvailableSpgs);
     on<AssignSpg>(_onAssignSpg);
@@ -134,13 +137,16 @@ class EventSpgBloc extends Bloc<EventSpgEvent, EventSpgState> {
             ),
           );
         } else {
-          // Update SPB if changed
-          if (existing.first.spbId != draft.spbId) {
-             // We need an update SPB usecase if we want to do it cleanly, 
-             // but here we can just re-assign or use an update usecase if provided.
-             // Looking at the bloc, we have UpdateEventSpgSpb event.
-             // I'll assume we can use the same assign logic or a specific update.
-             // Since I don't see updateSpg in usecases, I might need to check if assign handles update.
+          final existingSpg = existing.first;
+          if (existingSpg.spbId != draft.spbId) {
+            await updateEventSpg(
+              EventSpgEntity(
+                id: existingSpg.id,
+                eventId: existingSpg.eventId,
+                spgId: existingSpg.spgId,
+                spbId: draft.spbId,
+              ),
+            );
           }
         }
       }

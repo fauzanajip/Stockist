@@ -389,6 +389,18 @@ class EventDashboardView extends StatelessWidget {
         const SizedBox(height: 12),
         _buildActionTile(
           context,
+          icon: Icons.history_outlined,
+          title: 'Riwayat Distribusi',
+          subtitle: 'Audit semua mutation records',
+          color: AppColors.secondary,
+          onTap: () => context.pushNamed(
+            'stock_history',
+            pathParameters: {'eventId': event.id},
+          ),
+        ),
+        const SizedBox(height: 12),
+        _buildActionTile(
+          context,
           icon: Icons.settings_outlined,
           title: 'Setup Event',
           subtitle: 'Konfigurasi produk & petugas',

@@ -73,3 +73,13 @@ class GetSalesByEvent {
     return await repository.getByEvent(eventId);
   }
 }
+
+class GetTotalSold {
+  final SalesRepository repository;
+
+  GetTotalSold(this.repository);
+
+  Future<int> call(String eventId, String spgId, String productId) async {
+    return await repository.getTotalSold(eventId, spgId, productId);
+  }
+}

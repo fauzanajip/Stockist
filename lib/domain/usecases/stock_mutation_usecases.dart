@@ -79,3 +79,23 @@ class GetTotalReturn {
     return await repository.getTotalReturn(eventId, spgId, productId);
   }
 }
+
+class UpdateStockMutationQty {
+  final StockMutationRepository repository;
+
+  UpdateStockMutationQty(this.repository);
+
+  Future<StockMutationEntity> call(String id, int qty) async {
+    return await repository.update(id, qty);
+  }
+}
+
+class DeleteStockMutationRecord {
+  final StockMutationRepository repository;
+
+  DeleteStockMutationRecord(this.repository);
+
+  Future<void> call(String id) async {
+    return await repository.delete(id);
+  }
+}

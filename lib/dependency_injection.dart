@@ -119,6 +119,7 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton(() => RemoveSpgFromEvent(sl()));
   sl.registerLazySingleton(() => GetSpgsByEvent(sl()));
   sl.registerLazySingleton(() => GetEventSpgs(sl()));
+  sl.registerLazySingleton(() => UpdateEventSpg(sl()));
 
   // Use Cases - Stock Mutation
   sl.registerLazySingleton(() => CreateStockMutation(sl()));
@@ -126,18 +127,19 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton(() => GetStockMutationsByEventSpg(sl()));
   sl.registerLazySingleton(() => GetTotalGiven(sl()));
   sl.registerLazySingleton(() => GetTotalReturn(sl()));
+  sl.registerLazySingleton(() => UpdateStockMutationQty(sl()));
+  sl.registerLazySingleton(() => DeleteStockMutationRecord(sl()));
 
   // Use Cases - Sales
   sl.registerLazySingleton(() => CreateOrUpdateSales(sl()));
   sl.registerLazySingleton(() => GetSalesByEventSpg(sl()));
   sl.registerLazySingleton(() => GetSalesByEvent(sl()));
-
+  sl.registerLazySingleton(() => GetTotalSold(sl()));
 
   // Use Cases - Cash Record
   sl.registerLazySingleton(() => CreateOrUpdateCashRecord(sl()));
   sl.registerLazySingleton(() => GetCashRecordByEventSpg(sl()));
   sl.registerLazySingleton(() => GetCashRecordsByEvent(sl()));
-
 
   // Blocs
   sl.registerFactory(
@@ -178,9 +180,11 @@ Future<void> initDependencies() async {
       getTotalReturn: sl(),
       getStockMutationsByEventSpg: sl(),
       getStockMutationsByEvent: sl(),
+      updateStockMutationQty: sl(),
+      deleteStockMutationRecord: sl(),
+      getTotalSold: sl(),
     ),
   );
-
 
   sl.registerFactory(
     () => SalesBloc(
@@ -214,6 +218,7 @@ Future<void> initDependencies() async {
       getAllSpbs: sl(),
       assignSpgToEvent: sl(),
       removeSpgFromEvent: sl(),
+      updateEventSpg: sl(),
     ),
   );
 }

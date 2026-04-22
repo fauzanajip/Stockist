@@ -95,6 +95,30 @@ class StockMutationRepositoryImpl implements StockMutationRepository {
   }
 
   @override
+  Future<StockMutationEntity> update(String id, int qty) async {
+    try {
+      final db = await dbHelper.database;
+      await db.update(
+        'stock_mutations',
+        {'qty': qty},
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+      final result = await db.query(
+        'stock_mutations',
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+      if (result.isEmpty) {
+        throw AppDatabaseException(message: 'Mutation not found after update');
+      }
+      return StockMutationModel.fromMap(result.first);
+    } catch (e) {
+      throw AppDatabaseException(message: 'Gagal update stock mutation: $e');
+    }
+  }
+
+  @override
   Future<int> getTotalGiven(String eventId, String spgId, String productId) async {
     try {
       final db = await dbHelper.database;

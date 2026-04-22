@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_theme.dart';
 import '../../../core/utils/formatters.dart' as app_formatters;
 import '../../../domain/entities/event_spg_entity.dart';
+import '../../../domain/entities/spb_entity.dart';
 import '../../../domain/entities/stock_mutation_entity.dart';
 import '../../../core/utils/stock_calculator.dart';
 import '../../blocs/event_spg_bloc/event_spg_bloc.dart';
@@ -95,7 +96,7 @@ class _SpgListScreenState extends State<SpgListScreen> {
             if (state.assignedSpgs.isEmpty) {
               return _buildEmptyState(context);
             }
-            return _buildSpgList(context, state.assignedSpgs);
+            return _buildSpgList(context, state.assignedSpgs, state.spbs);
           }
           return const Center(child: CircularProgressIndicator());
         },
@@ -130,7 +131,7 @@ class _SpgListScreenState extends State<SpgListScreen> {
     );
   }
 
-  Widget _buildSpgList(BuildContext context, List<EventSpgEntity> eventSpgs) {
+  Widget _buildSpgList(BuildContext context, List<EventSpgEntity> eventSpgs, List<SpbEntity> spbs) {
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       itemCount: eventSpgs.length,
@@ -138,6 +139,7 @@ class _SpgListScreenState extends State<SpgListScreen> {
         return SpgDashboardCard(
           eventId: widget.eventId,
           eventSpg: eventSpgs[index],
+          spbs: spbs,
         );
       },
     );
@@ -147,11 +149,13 @@ class _SpgListScreenState extends State<SpgListScreen> {
 class SpgDashboardCard extends StatelessWidget {
   final String eventId;
   final EventSpgEntity eventSpg;
+  final List<SpbEntity> spbs;
 
   const SpgDashboardCard({
     super.key,
     required this.eventId,
     required this.eventSpg,
+    required this.spbs,
   });
 
   Color _getAvatarColor(String name) {
@@ -244,12 +248,20 @@ class SpgDashboardCard extends StatelessWidget {
                                       ),
                                 ),
                                 if (eventSpg.spbId != null)
-                                  Text(
-                                    'SPB: ${eventSpg.spbId}',
-                                    style: Theme.of(context).textTheme.bodySmall
-                                        ?.copyWith(
-                                          color: AppColors.onSurfaceVariant,
-                                        ),
+                                  Builder(
+                                    builder: (context) {
+                                      final spb = spbs.firstWhereOrNull(
+                                        (s) => s.id == eventSpg.spbId,
+                                      );
+                                      final spbName = spb?.name ?? eventSpg.spbId!;
+                                      return Text(
+                                        'SPB: $spbName',
+                                        style: Theme.of(context).textTheme.bodySmall
+                                            ?.copyWith(
+                                              color: AppColors.onSurfaceVariant,
+                                            ),
+                                      );
+                                    },
                                   ),
                               ],
                             ),

@@ -43,24 +43,34 @@
 
 | #   | Task                                                          | Status     | Notes                                       |
 | --- | ------------------------------------------------------------- | ---------- | ------------------------------------------- |
-| 25  | Create Stock History Screen (reusable from Home & SPG Detail) | ⏳ Pending | Entry points: MANAGEMENT section & SETUP section |
-| 26  | Add UpdateStockMutation event & handler with validation       | ⏳ Pending | Validate: newQty >= (totalSold + totalReturn - otherDistributions) |
-| 27  | Add DeleteStockMutation event & handler with validation       | ⏳ Pending | Validate: (otherDistributions - totalReturn) >= totalSold |
-| 28  | Add update() method to StockMutationRepository                | ⏳ Pending | Implement in repository impl                |
+| 25  | Create Stock History Screen (reusable from Home & SPG Detail) | ✅ DONE    | Entry points: MANAGEMENT section & SETUP section |
+| 26  | Add UpdateStockMutation event & handler with validation       | ✅ DONE    | Validate: newQty >= (totalSold + totalReturn - otherDistributions) |
+| 27  | Add DeleteStockMutation event & handler with validation       | ✅ DONE    | Validate: (otherDistributions - totalReturn) >= totalSold |
+| 28  | Add update() method to StockMutationRepository                | ✅ DONE    | Implement in repository impl                |
+
+## Bug Fixes (Session 2026-04-23)
+
+| #   | Bug                                                          | Status     | Fix                                         |
+| --- | ------------------------------------------------------------ | ---------- | ------------------------------------------- |
+| 29  | Warehouse mutation delete shows wrong error                  | ✅ DONE    | Skip validation for distributorToEvent type |
+| 30  | Integrity check not filtering by eventId                     | ✅ DONE    | Added eventId filter for Product & SPG check |
+| 31  | SPG switch re-adds removed SPG on rebuild                    | ✅ DONE    | Added _spgInitialized flag                  |
+| 32  | SPB assignment not saved on re-open                           | ✅ DONE    | Added UpdateEventSpg usecase & handler      |
+| 33  | SPG List shows SPB ID instead of name                        | ✅ DONE    | Pass spbs list & lookup name by ID          |
 
 ---
 
 ## Progress Summary
 
-- ✅ Completed: 20/28 (71%)
-- ⏳ Pending: 8/28 (29%)
+- ✅ Completed: 29/33 (88%)
+- ⏳ Pending: 4/33 (12%)
 
 ## PRD Reference
 
 - PRD Section 6.1: Create Event flow ✅
 - PRD Section 6.2: Setup Data (Event Setup) ✅
 - PRD Section 6.3-6.8: Stock & Sales operations ✅ (All screens implemented with BLoC integration)
-- PRD Section 6.9: Edit & Delete Distribusi ⏳ (Tasks #25-28 pending)
+- PRD Section 6.9: Edit & Delete Distribusi ✅ (Tasks #25-28 completed)
 - PRD Section 6.10: Backup ✅ (Service created, needs UI wiring)
 - PRD Section 7.1: Home Screen (Active Event Dashboard) ✅ (Consolidated & Auto-detect)
 - PRD Section 8: Export Excel ✅ (Directly in main Dashboard)
@@ -161,7 +171,7 @@
 
 ## Upcoming Features (Planned)
 
-25. **Stock History Screen** - Riwayat Distribusi (Audit):
+25. **Stock History Screen** - Riwayat Distribusi (Audit): ✅ DONE
     - Reusable screen accessible from Home Dashboard (MANAGEMENT) & SPG Detail (SETUP).
     - Parameter `spgId` optional: null = show all mutations, non-null = filter specific SPG.
     - Filter chips: [All] [Initial] [Topup] [Return].
@@ -170,20 +180,20 @@
     - Swipe-to-delete or long-press menu for delete action.
     - Validation before edit/delete to prevent negative stock.
 
-26. **Edit Stock Mutation** - Validation Logic:
-    - Use case: `UpdateStockMutation` with params (mutationId, newQty).
+26. **Edit Stock Mutation** - Validation Logic: ✅ DONE
+    - Use case: `UpdateStockMutationQty` with params (id, qty).
     - Validation formula: `newQty >= (totalSold + totalReturn - otherDistributions)`.
     - Error message: "Qty tidak bisa lebih kecil dari yang sudah terjual".
     - Bloc event: `UpdateStockMutation` added to StockBloc.
 
-27. **Delete Stock Mutation** - Validation Logic:
-    - Use case: `DeleteStockMutation` with params (mutationId).
+27. **Delete Stock Mutation** - Validation Logic: ✅ DONE
+    - Use case: `DeleteStockMutationRecord` with params (id).
     - Validation formula: `(otherDistributions - totalReturn) >= totalSold`.
     - Error message: "Tidak bisa hapus, stok sudah ada yang terjual".
     - Confirmation dialog before delete (destructive action).
     - Bloc event: `DeleteStockMutation` added to StockBloc.
 
-28. **Stock Mutation Repository Update**:
+28. **Stock Mutation Repository Update**: ✅ DONE
     - Add `update()` method to `StockMutationRepository` interface.
     - Implement `update()` in `StockMutationRepositoryImpl`.
     - Update mutation record in SQLite: `UPDATE stock_mutations SET qty = ? WHERE id = ?`.

@@ -8,6 +8,7 @@ import '../../presentation/screens/spg/spg_closing_screen.dart';
 import '../../presentation/screens/stock/initial_distribution_screen.dart';
 import '../../presentation/screens/stock/topup_screen.dart';
 import '../../presentation/screens/stock/return_screen.dart';
+import '../../presentation/screens/stock/stock_history_screen.dart';
 import '../../presentation/screens/sales/sales_input_screen.dart';
 import '../../presentation/screens/cash/cash_input_screen.dart';
 import '../../presentation/screens/settings/backup_screen.dart';
@@ -99,6 +100,23 @@ class AppRouter {
           final eventId = state.pathParameters['eventId']!;
           final spgId = state.pathParameters['spgId']!;
           return ReturnScreen(eventId: eventId, spgId: spgId);
+        },
+      ),
+      GoRoute(
+        path: '/event/:eventId/spg/:spgId/history',
+        name: 'stock_history_spg',
+        builder: (context, state) {
+          final eventId = state.pathParameters['eventId']!;
+          final spgId = state.pathParameters['spgId']!;
+          return StockHistoryScreen(eventId: eventId, spgId: spgId);
+        },
+      ),
+      GoRoute(
+        path: '/event/:eventId/history',
+        name: 'stock_history',
+        builder: (context, state) {
+          final eventId = state.pathParameters['eventId']!;
+          return StockHistoryScreen(eventId: eventId);
         },
       ),
 

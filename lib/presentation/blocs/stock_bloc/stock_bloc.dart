@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../domain/entities/stock_mutation_entity.dart';
 import '../../../domain/usecases/stock_mutation_usecases.dart';
+import '../../../domain/usecases/sales_usecases.dart';
 import 'stock_event.dart';
 import 'stock_state.dart';
 
@@ -10,6 +11,9 @@ class StockBloc extends Bloc<StockEvent, StockState> {
   final GetTotalReturn getTotalReturn;
   final GetStockMutationsByEventSpg getStockMutationsByEventSpg;
   final GetStockMutationsByEvent getStockMutationsByEvent;
+  final UpdateStockMutationQty updateStockMutationQty;
+  final DeleteStockMutationRecord deleteStockMutationRecord;
+  final GetTotalSold getTotalSold;
 
   StockBloc({
     required this.createStockMutation,
@@ -17,6 +21,9 @@ class StockBloc extends Bloc<StockEvent, StockState> {
     required this.getTotalReturn,
     required this.getStockMutationsByEventSpg,
     required this.getStockMutationsByEvent,
+    required this.updateStockMutationQty,
+    required this.deleteStockMutationRecord,
+    required this.getTotalSold,
   }) : super(const StockState()) {
     on<CreateInitialDistribution>(_onCreateInitialDistribution);
     on<CreateTopup>(_onCreateTopup);
@@ -24,6 +31,8 @@ class StockBloc extends Bloc<StockEvent, StockState> {
     on<LoadStockByEventSpg>(_onLoadStockByEventSpg);
     on<LoadStockByEvent>(_onLoadStockByEvent);
     on<CreateDistributorStock>(_onCreateDistributorStock);
+    on<UpdateStockMutation>(_onUpdateStockMutation);
+    on<DeleteStockMutation>(_onDeleteStockMutation);
   }
 
   Future<void> _onCreateDistributorStock(
@@ -137,7 +146,6 @@ class StockBloc extends Bloc<StockEvent, StockState> {
         event.spgId,
       );
 
-      // Basic counters (can be refined with StockCalculator if needed)
       final initialQty = mutations
           .where((m) => m.type == MutationType.initial)
           .fold(0, (sum, m) => sum + m.qty);
@@ -156,6 +164,86 @@ class StockBloc extends Bloc<StockEvent, StockState> {
           totalReturn: returnQty,
         ),
       );
+    } catch (e) {
+      emit(state.copyWith(isLoading: false, errorMessage: e.toString()));
+    }
+  }
+
+  Future<void> _onUpdateStockMutation(
+    UpdateStockMutation event,
+    Emitter<StockState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(isLoading: true, errorMessage: null));
+
+      final mutation = state.mutations.firstWhere(
+        (m) => m.id == event.mutationId,
+        orElse: () => throw Exception('Mutation not found'),
+      );
+
+      if (mutation.type == MutationType.distributorToEvent) {
+        await updateStockMutationQty(event.mutationId, event.newQty);
+        add(LoadStockByEvent(eventId: event.eventId));
+        return;
+      }
+
+      final totalSold = await getTotalSold(event.eventId, event.spgId, event.productId);
+      final totalGiven = await getTotalGiven(event.eventId, event.spgId, event.productId);
+      final totalReturn = await getTotalReturn(event.eventId, event.spgId, event.productId);
+
+      final otherDistributions = totalGiven - mutation.qty;
+      final minAllowedQty = totalSold + totalReturn - otherDistributions;
+
+      if (event.newQty < minAllowedQty) {
+        emit(state.copyWith(
+          isLoading: false,
+          errorMessage: 'Qty tidak bisa lebih kecil dari yang sudah terjual ($minAllowedQty)',
+        ));
+        return;
+      }
+
+      await updateStockMutationQty(event.mutationId, event.newQty);
+      add(LoadStockByEventSpg(eventId: event.eventId, spgId: event.spgId));
+    } catch (e) {
+      emit(state.copyWith(isLoading: false, errorMessage: e.toString()));
+    }
+  }
+
+  Future<void> _onDeleteStockMutation(
+    DeleteStockMutation event,
+    Emitter<StockState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(isLoading: true, errorMessage: null));
+
+      final mutation = state.mutations.firstWhere(
+        (m) => m.id == event.mutationId,
+        orElse: () => throw Exception('Mutation not found'),
+      );
+
+      if (mutation.type == MutationType.distributorToEvent) {
+        await deleteStockMutationRecord(event.mutationId);
+        add(LoadStockByEvent(eventId: event.eventId));
+        return;
+      }
+
+      final totalSold = await getTotalSold(event.eventId, event.spgId, mutation.productId);
+      final totalGiven = await getTotalGiven(event.eventId, event.spgId, mutation.productId);
+      final totalReturn = await getTotalReturn(event.eventId, event.spgId, mutation.productId);
+
+      final otherDistributions = totalGiven - mutation.qty;
+      final remainingAfterDelete = otherDistributions - totalReturn;
+
+      if (remainingAfterDelete < totalSold) {
+        emit(state.copyWith(
+          isLoading: false,
+          errorMessage: 'Tidak bisa hapus, stok sudah ada yang terjual',
+        ));
+        return;
+      }
+
+      await deleteStockMutationRecord(event.mutationId);
+      add(LoadStockByEventSpg(eventId: event.eventId, spgId: event.spgId));
     } catch (e) {
       emit(state.copyWith(isLoading: false, errorMessage: e.toString()));
     }
