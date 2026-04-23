@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'dart:io';
 import '../../../core/constants/app_theme.dart';
-import '../../../core/utils/formatters.dart' as app_formatters;
 import '../../../domain/entities/event_entity.dart';
 import '../../blocs/event_bloc/event_bloc.dart';
 import '../../blocs/event_bloc/event_event.dart';
 import '../../blocs/event_bloc/event_state.dart';
-
-import '../event/event_setup_screen.dart';
 import '../../widgets/event_dashboard_view.dart';
+import '../../widgets/export_loading_dialog.dart';
+import '../../widgets/export_success_dialog.dart';
+import '../../widgets/permission_denied_dialog.dart';
 import '../../../core/utils/excel_export_service.dart';
 import '../../blocs/stock_bloc/stock_bloc.dart';
 import '../../blocs/stock_bloc/stock_event.dart';
@@ -93,10 +94,15 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
 
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const ExportLoadingDialog(),
+    );
+
     try {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Menyiapkan Laporan Excel...')),
-      );
+      final fileName =
+          '${event.name}_${DateTime.now().year}-${DateTime.now().month.toString().padLeft(2, '0')}-${DateTime.now().day.toString().padLeft(2, '0')}.xlsx';
 
       final filePath = await ExcelExportService.exportEvent(
         event: event,
@@ -110,12 +116,113 @@ class _HomeScreenState extends State<HomeScreen> {
         cashRecords: cashState.allCash,
       );
 
-      await ExcelExportService.shareExcel(filePath);
+      if (!mounted) return;
+      Navigator.of(context).pop();
+
+      if (Platform.isAndroid) {
+        final savedPath = await ExcelExportService.saveToDownloads(
+          filePath,
+          fileName,
+        );
+
+        if (!mounted) return;
+
+        if (savedPath != null) {
+          _showSuccessDialog(savedPath, true);
+        } else {
+          _showPermissionDialog(filePath);
+        }
+      } else {
+        final savedPath = await ExcelExportService.saveToDownloads(
+          filePath,
+          fileName,
+        );
+
+        if (!mounted) return;
+
+        if (savedPath != null) {
+          _showSuccessDialog(savedPath, true);
+        } else {
+          _showSuccessDialog(filePath, false);
+        }
+      }
     } catch (e) {
+      if (!mounted) return;
+      Navigator.of(context).pop();
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Gagal mengekspor: $e')));
     }
+  }
+
+  void _showSuccessDialog(String filePath, bool saveSuccess) {
+    showDialog(
+      context: context,
+      builder: (_) => ExportSuccessDialog(
+        filePath: filePath,
+        onSaveSuccess: saveSuccess,
+        onOpenFile: () async {
+          Navigator.of(context).pop();
+          final success = await ExcelExportService.openFile(filePath);
+          if (!success && mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('No Excel viewer installed. Try Share instead.'),
+              ),
+            );
+          }
+        },
+        onShare: () async {
+          Navigator.of(context).pop();
+          await ExcelExportService.shareExcel(filePath);
+        },
+      ),
+    );
+  }
+
+  void _showPermissionDialog(String filePath) {
+    showDialog(
+      context: context,
+      builder: (_) => PermissionDeniedDialog(
+        onRequestPermission: () async {
+          Navigator.of(context).pop();
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (_) => const ExportLoadingDialog(),
+          );
+
+          final fileName =
+              '${DateTime.now().year}-${DateTime.now().month.toString().padLeft(2, '0')}-${DateTime.now().day.toString().padLeft(2, '0')}.xlsx';
+
+          final savedPath = await ExcelExportService.saveToDownloads(
+            filePath,
+            fileName,
+          );
+
+          if (!mounted) return;
+          Navigator.of(context).pop();
+
+          if (savedPath != null) {
+            _showSuccessDialog(savedPath, true);
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Permission denied. Using Share instead.'),
+              ),
+            );
+            await ExcelExportService.shareExcel(filePath);
+          }
+        },
+        onShareOnly: () async {
+          Navigator.of(context).pop();
+          await ExcelExportService.shareExcel(filePath);
+        },
+        onCancel: () {
+          Navigator.of(context).pop();
+        },
+      ),
+    );
   }
 
   @override

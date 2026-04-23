@@ -4,6 +4,9 @@ import 'package:excel/excel.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:intl/intl.dart';
+import 'package:open_file_plus/open_file_plus.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:path/path.dart' as p;
 import '../../../domain/entities/event_entity.dart';
 import '../../../domain/entities/event_spg_entity.dart';
 import '../../../domain/entities/event_product_entity.dart';
@@ -74,6 +77,71 @@ class ExcelExportService {
   static Future<void> shareExcel(String filePath) async {
     final file = XFile(filePath);
     await Share.shareXFiles([file], text: 'Laporan Event Stockist');
+  }
+
+  /// Save file to Downloads/Stockist folder
+  static Future<String?> saveToDownloads(
+    String sourceFilePath,
+    String fileName,
+  ) async {
+    try {
+      if (Platform.isAndroid) {
+        final hasPermission = await _checkAndroidStoragePermission();
+        if (!hasPermission) {
+          return null;
+        }
+
+        final downloadsDir = Directory('/storage/emulated/0/Download/Stockist');
+        if (!downloadsDir.existsSync()) {
+          downloadsDir.createSync(recursive: true);
+        }
+
+        final destPath = p.join(downloadsDir.path, fileName);
+        final sourceFile = File(sourceFilePath);
+        await sourceFile.copy(destPath);
+
+        return destPath;
+      } else if (Platform.isIOS) {
+        final appDocDir = await getApplicationDocumentsDirectory();
+        final stockistDir = Directory(p.join(appDocDir.path, 'Stockist'));
+        if (!stockistDir.existsSync()) {
+          stockistDir.createSync(recursive: true);
+        }
+
+        final destPath = p.join(stockistDir.path, fileName);
+        final sourceFile = File(sourceFilePath);
+        await sourceFile.copy(destPath);
+
+        return destPath;
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Check Android storage permission (Android 9 and below)
+  static Future<bool> _checkAndroidStoragePermission() async {
+    if (Platform.isAndroid) {
+      final info = await Permission.storage.status;
+      if (info.isGranted) {
+        return true;
+      }
+
+      final result = await Permission.storage.request();
+      return result.isGranted;
+    }
+    return true;
+  }
+
+  /// Open file with default app
+  static Future<bool> openFile(String filePath) async {
+    try {
+      final result = await OpenFile.open(filePath);
+      return result.type == ResultType.done;
+    } catch (e) {
+      return false;
+    }
   }
 
   static void _createSummarySheet(

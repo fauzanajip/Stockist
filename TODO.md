@@ -198,12 +198,26 @@
 | 45  | Excel Export - Detail SPB merge for consecutive same SPB     | ✅ DONE    | Group detection & vertical cell merging     |
 | 46  | Excel Export - TOTAL row merge SPB + Name                    | ✅ DONE    | Shows "TOTAL" label in merged cell          |
 
+## Phase 2 - Save + Open + Share (Session 2026-04-24)
+
+| #   | Task                                                         | Status     | Notes                                       |
+| --- | ------------------------------------------------------------ | ---------- | ------------------------------------------- |
+| 47  | Add open_file_plus + permission_handler packages            | ✅ DONE    | pubspec.yaml updated                        |
+| 48  | Android storage permissions (WRITE/READ)                     | ✅ DONE    | AndroidManifest.xml with maxSdkVersion="28" |
+| 49  | Android FileProvider configuration                           | ✅ DONE    | file_paths.xml created                      |
+| 50  | saveToDownloads() method for Android/iOS                     | ✅ DONE    | Downloads/Stockist folder                   |
+| 51  | openFile() method with fallback                              | ✅ DONE    | Returns bool, fallback to share if fail     |
+| 52  | ExportLoadingDialog widget                                   | ✅ DONE    | Spinner + "Generating Excel..."             |
+| 53  | ExportSuccessDialog widget                                   | ✅ DONE    | Open/Share/Close buttons                    |
+| 54  | PermissionDeniedDialog widget                                | ✅ DONE    | Grant/Share Only/Cancel options             |
+| 55  | Home screen export flow integration                          | ✅ DONE    | Full dialog-based export flow               |
+
 ---
 
 ## Progress Summary
 
-- ✅ Completed: 46/46 (100%)
-- ⏳ Pending: 0/46 (0%)
+- ✅ Completed: 55/55 (100%)
+- ⏳ Pending: 0/55 (0%)
 
 ## PRD Reference
 

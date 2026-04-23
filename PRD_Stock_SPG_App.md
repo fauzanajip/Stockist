@@ -598,6 +598,38 @@ Summary:
 
 ---
 
+### 8.6 Save + Open + Share Feature (Phase 2 - Session 2026-04-24)
+
+**Export Flow**:
+1. User clicks "Export Excel" button
+2. Loading dialog shows: "Generating Excel..."
+3. File generated in app documents
+4. **Android**: Attempt save to Downloads/Stockist
+5. **iOS**: Save to Documents/Stockist (visible in Files app)
+6. Success dialog shows with options:
+   - **Open File**: Launch with Excel viewer app
+   - **Share**: Use Android/iOS share sheet
+   - **Close**: Dismiss dialog
+
+**Permission Handling (Android ≤9)**:
+- If storage permission denied → PermissionDeniedDialog
+- Options: Grant Permission / Share Only / Cancel
+- Unlimited retry on Grant Permission
+- Fallback to Share Only if permission still denied
+
+**File Locations**:
+| Platform | Save Location | User Access |
+|----------|---------------|-------------|
+| Android 10+ | Downloads/Stockist | File Manager → Downloads |
+| Android ≤9 | Downloads/Stockist (needs permission) | File Manager → Downloads |
+| iOS | Documents/Stockist | Files app → On My iPhone → Stockist |
+
+**Packages Used**:
+- `open_file_plus: ^3.0.0` - Open file with default app
+- `permission_handler: ^11.0.1` - Android storage permissions
+
+---
+
 ## 9. ⚙️ Technical Requirements
 
 ---

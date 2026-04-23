@@ -34,6 +34,8 @@ dependencies:
   excel: ^4.0.2
   uuid: ^4.3.3
   dartz: ^0.10.1
+  open_file_plus: ^3.0.0
+  permission_handler: ^11.0.1
   
   # Icons
   cupertino_icons: ^1.0.8
