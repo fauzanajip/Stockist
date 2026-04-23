@@ -53,6 +53,7 @@ class CashBloc extends Bloc<CashEvent, CashState> {
         emit(
           state.copyWith(
             isLoading: false,
+            hasRecord: true,
             cashReceived: cashRecord.cashReceived,
             qrisReceived: cashRecord.qrisReceived,
             actualCash: cashRecord.actualCash,
@@ -62,6 +63,7 @@ class CashBloc extends Bloc<CashEvent, CashState> {
         emit(
           state.copyWith(
             isLoading: false,
+            hasRecord: false,
             cashReceived: 0,
             qrisReceived: 0,
             actualCash: 0,

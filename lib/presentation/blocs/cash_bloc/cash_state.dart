@@ -7,6 +7,7 @@ class CashState extends Equatable {
   final double actualCash;
   final List<CashRecordEntity> allCash;
   final bool isLoading;
+  final bool hasRecord;
   final String? errorMessage;
 
   const CashState({
@@ -15,6 +16,7 @@ class CashState extends Equatable {
     this.actualCash = 0,
     this.allCash = const [],
     this.isLoading = false,
+    this.hasRecord = false,
     this.errorMessage,
   });
 
@@ -24,6 +26,7 @@ class CashState extends Equatable {
     double? actualCash,
     List<CashRecordEntity>? allCash,
     bool? isLoading,
+    bool? hasRecord,
     String? errorMessage,
   }) {
     return CashState(
@@ -32,6 +35,7 @@ class CashState extends Equatable {
       actualCash: actualCash ?? this.actualCash,
       allCash: allCash ?? this.allCash,
       isLoading: isLoading ?? this.isLoading,
+      hasRecord: hasRecord ?? this.hasRecord,
       errorMessage: errorMessage ?? this.errorMessage,
     );
   }
@@ -43,6 +47,7 @@ class CashState extends Equatable {
     actualCash,
     allCash,
     isLoading,
+    hasRecord,
     errorMessage,
   ];
 }

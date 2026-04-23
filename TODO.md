@@ -58,24 +58,6 @@
 | 32  | SPB assignment not saved on re-open                           | ✅ DONE    | Added UpdateEventSpg usecase & handler      |
 | 33  | SPG List shows SPB ID instead of name                        | ✅ DONE    | Pass spbs list & lookup name by ID          |
 
----
-
-## Progress Summary
-
-- ✅ Completed: 29/33 (88%)
-- ⏳ Pending: 4/33 (12%)
-
-## PRD Reference
-
-- PRD Section 6.1: Create Event flow ✅
-- PRD Section 6.2: Setup Data (Event Setup) ✅
-- PRD Section 6.3-6.8: Stock & Sales operations ✅ (All screens implemented with BLoC integration)
-- PRD Section 6.9: Edit & Delete Distribusi ✅ (Tasks #25-28 completed)
-- PRD Section 6.10: Backup ✅ (Service created, needs UI wiring)
-- PRD Section 7.1: Home Screen (Active Event Dashboard) ✅ (Consolidated & Auto-detect)
-- PRD Section 8: Export Excel ✅ (Directly in main Dashboard)
-- **Danger Zone**: Reset All Data feature implemented (with 2-step confirmation) ✅
-
 ## Completed Features (Last Update)
 
 1. StockCalculator - all business logic calculations
@@ -194,6 +176,67 @@
     - Bloc event: `DeleteStockMutation` added to StockBloc.
 
 28. **Stock Mutation Repository Update**: ✅ DONE
-    - Add `update()` method to `StockMutationRepository` interface.
-    - Implement `update()` in `StockMutationRepositoryImpl`.
-    - Update mutation record in SQLite: `UPDATE stock_mutations SET qty = ? WHERE id = ?`.
+     - Add `update()` method to `StockMutationRepository` interface.
+     - Implement `update()` in `StockMutationRepositoryImpl`.
+     - Update mutation record in SQLite: `UPDATE stock_mutations SET qty = ? WHERE id = ?`.
+
+## Bug Fixes & Enhancements (Session 2026-04-24)
+
+| #   | Task/Bug                                                      | Status     | Notes                                       |
+| --- | ------------------------------------------------------------ | ---------- | ------------------------------------------- |
+| 34  | Cash Input - Button disabled issue                           | ✅ DONE    | Added controller listeners for setState rebuild |
+| 35  | Cash Input - Smart validation (save 0 for update)            | ✅ DONE    | Added hasRecord field to CashState          |
+| 36  | Cash Input - Leading zeros allowed                           | ✅ DONE    | Added _ThousandsFormatter to strip zeros + format |
+| 37  | Cash Input - Thousand separator display                      | ✅ DONE    | Formatter adds dots (150.000) while typing  |
+| 38  | SPG List - Missing expected cash & QRIS breakdown            | ✅ DONE    | Added Expected, Cash Tunai, QRIS, Total, Surplus/Deficit |
+| 39  | SPG List - Hardcoded price 10000 in status chip              | ✅ DONE    | Fixed to use actual product price per event  |
+| 40  | Excel Export - Sheet1 still appearing                        | ✅ DONE    | Moved excel.delete('Sheet1') to end of exportEvent |
+| 41  | Excel Export - Summary sheet missing borders                 | ✅ DONE    | Added headerStyle & dataStyle with thin borders |
+| 42  | Excel Export - CashRecordEntity type mismatch (firstWhere)   | ✅ DONE    | Changed to firstWhereOrNull from collection package |
+| 43  | Excel Export - Detail SPG missing SPB column                 | ✅ DONE    | Added SPB column with vertical merge for same SPB |
+| 44  | Excel Export - Detail SPG sorting by SPB                     | ✅ DONE    | Sort alphabetically, unassigned (-) last    |
+| 45  | Excel Export - Detail SPB merge for consecutive same SPB     | ✅ DONE    | Group detection & vertical cell merging     |
+| 46  | Excel Export - TOTAL row merge SPB + Name                    | ✅ DONE    | Shows "TOTAL" label in merged cell          |
+
+---
+
+## Progress Summary
+
+- ✅ Completed: 46/46 (100%)
+- ⏳ Pending: 0/46 (0%)
+
+## PRD Reference
+
+- PRD Section 6.1: Create Event flow ✅
+- PRD Section 6.2: Setup Data (Event Setup) ✅
+- PRD Section 6.3-6.8: Stock & Sales operations ✅ (All screens implemented with BLoC integration)
+- PRD Section 6.9: Edit & Delete Distribusi ✅ (Tasks #25-28 completed)
+- PRD Section 6.10: Backup ✅ (Service created, needs UI wiring)
+- PRD Section 7.1: Home Screen (Active Event Dashboard) ✅ (Consolidated & Auto-detect)
+- PRD Section 8: Export Excel ✅ (Enhanced with SPB column, borders, sorting)
+- **Danger Zone**: Reset All Data feature implemented (with 2-step confirmation) ✅
+
+## Completed Features (Session 2026-04-24)
+
+29. **Cash Input Enhancements**:
+    - Smart validation: New record requires input > 0, update allows zero values.
+    - Thousand separator formatter: Shows 150.000 while typing with dots.
+    - Leading zero stripping: Prevents input like 0150000 via _ThousandsFormatter.
+    - Button text changes: "SIMPAN KAS" vs "UPDATE KAS" based on hasRecord state.
+    - Controller listeners: Added setState rebuild when user types.
+30. **SPG List - Cash Breakdown Display**:
+    - Shows Expected Cash (calculated from sales × product price).
+    - Cash Tunai and QRIS displayed separately with values.
+    - Total Actual Cash summary (cash + qris).
+    - Surplus/Deficit indicator with color (green/red) when not matching.
+    - Fixed hardcoded price 10000 in status chip - now uses actual event product price.
+31. **Excel Export Quality Improvements**:
+    - Sheet1 fix: Moved deletion to end of exportEvent() method.
+    - Summary sheet borders: headerStyle (bold, grey200 bg), nameStyle (left align), dataStyle (center).
+    - CashRecordEntity fix: Changed firstWhere to firstWhereOrNull to avoid type mismatch.
+    - Detail SPG sheet enhanced:
+      - Added SPB column (column 0) with vertical header merge.
+      - SPGs sorted by SPB alphabetically (unassigned "-" shown last).
+      - Vertical cell merge for consecutive SPGs with same SPB.
+      - TOTAL row merges SPB + Name columns, displays "TOTAL" label.
+      - All cells have thin borders with proper alignment (left for names, center for numbers).

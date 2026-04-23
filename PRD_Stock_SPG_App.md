@@ -541,13 +541,25 @@ Summary:
 
 **Sheet: Ringkasan Event**
 
-| SPG | Total Dikasih | Total Terjual | Sisa Sistem | Cash Tunai | QRIS | Expected Cash | Surplus |
-| --- | ------------- | ------------- | ----------- | ---------- | ---- | ------------- | ------- |
+| SPG | Total Dikasih | Total Terjual | Total Return | Sisa Sistem | Cash Tunai | QRIS | Expected Cash | Surplus |
+| --- | ------------- | ------------- | ------------ | ----------- | ---------- | ---- | ------------- | ------- |
 
-**Sheet: Detail per SPG (1 sheet per SPG)**
+- **Borders**: All cells have thin borders
+- **Header Style**: Bold, centered, grey background
+- **Alignment**: SPG column left-aligned, numbers center-aligned
 
-| Produk | AWAL | TAMBAH | RETURN | TERJUAL | SISA |
-| ------ | ---- | ------ | ------ | ------- | ---- |
+**Sheet: Detail SPG**
+
+| SPB | Name | PRODUCT A                      | PRODUCT B                      |
+|     |      | AWAL | TAMBAH | RETURN | TERJUAL | SISA | AWAL | TAMBAH | RETURN | TERJUAL | SISA |
+| --- | ---- | ---- | ------ | ------ | ------- | ---- | ---- | ------ | ------ | ------- | ---- |
+
+- **SPB Column**: Shows SPB assignment for each SPG
+- **Sorting**: SPGs grouped by SPB, sorted alphabetically (unassigned "-" last)
+- **Cell Merge**: SPB cells merged vertically for consecutive SPGs with same SPB
+- **TOTAL Row**: SPB + Name columns merged, shows "TOTAL" label
+- **Borders**: All cells have thin borders
+- **Header Style**: Bold, centered, grey background for headers
 
 ---
 
@@ -563,6 +575,26 @@ Summary:
 - File `.xlsx`
 - Per event
 - Nama file: `[NamaEvent]_[Tanggal].xlsx`
+- **Sheets**: Only "Ringkasan Event" and "Detail SPG" (Sheet1 removed)
+
+---
+
+### 8.4 Cash Input Enhancements (Session 2026-04-24)
+
+- **Smart Validation**: 
+  - New record: Button disabled if cash & qris both = 0
+  - Existing record: Button enabled (allows setting values to 0 for future update)
+- **Thousand Separator**: Numbers displayed with dots (e.g., 150.000) while typing
+- **Leading Zero Prevention**: Formatter strips leading zeros automatically
+
+---
+
+### 8.5 SPG List Cash Display
+
+- **Expected Cash**: Calculated from `qty_sold × product_price`
+- **Cash Breakdown**: Shows Cash Tunai and QRIS separately
+- **Total Actual**: Sum of cash + qris
+- **Surplus/Deficit**: Color indicator when actual ≠ expected
 
 ---
 

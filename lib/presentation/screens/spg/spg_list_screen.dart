@@ -131,7 +131,11 @@ class _SpgListScreenState extends State<SpgListScreen> {
     );
   }
 
-  Widget _buildSpgList(BuildContext context, List<EventSpgEntity> eventSpgs, List<SpbEntity> spbs) {
+  Widget _buildSpgList(
+    BuildContext context,
+    List<EventSpgEntity> eventSpgs,
+    List<SpbEntity> spbs,
+  ) {
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       itemCount: eventSpgs.length,
@@ -253,10 +257,13 @@ class SpgDashboardCard extends StatelessWidget {
                                       final spb = spbs.firstWhereOrNull(
                                         (s) => s.id == eventSpg.spbId,
                                       );
-                                      final spbName = spb?.name ?? eventSpg.spbId!;
+                                      final spbName =
+                                          spb?.name ?? eventSpg.spbId!;
                                       return Text(
                                         'SPB: $spbName',
-                                        style: Theme.of(context).textTheme.bodySmall
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
                                             ?.copyWith(
                                               color: AppColors.onSurfaceVariant,
                                             ),
@@ -289,45 +296,52 @@ class SpgDashboardCard extends StatelessWidget {
           builder: (context, salesState) {
             return BlocBuilder<CashBloc, CashState>(
               builder: (context, cashState) {
-                bool hasData = stockState.mutations.any(
-                  (m) => m.spgId == spgId,
-                );
-                bool isMatch = false;
-                bool isLoading =
-                    stockState.isLoading ||
-                    salesState.isLoading ||
-                    cashState.isLoading;
+                return BlocBuilder<EventProductBloc, EventProductState>(
+                  builder: (context, epState) {
+                    bool hasData = stockState.mutations.any(
+                      (m) => m.spgId == spgId,
+                    );
+                    bool isMatch = false;
+                    bool isLoading =
+                        stockState.isLoading ||
+                        salesState.isLoading ||
+                        cashState.isLoading;
 
-                if (hasData) {
-                  final spgSales = salesState.allSales.where(
-                    (s) => s.spgId == spgId,
-                  );
-                  final totalTerjual = spgSales.fold(
-                    0,
-                    (sum, s) => sum + s.qtySold,
-                  );
-                  final spgCash = cashState.allCash
-                      .where((c) => c.spgId == spgId)
-                      .firstOrNull;
-                  final cashTotal =
-                      (spgCash?.cashReceived ?? 0) +
-                      (spgCash?.qrisReceived ?? 0);
+                    if (hasData) {
+                      final spgSales = salesState.allSales.where(
+                        (s) => s.spgId == spgId,
+                      );
+                      final spgCash = cashState.allCash
+                          .where((c) => c.spgId == spgId)
+                          .firstOrNull;
+                      final cashTotal =
+                          (spgCash?.cashReceived ?? 0) +
+                          (spgCash?.qrisReceived ?? 0);
 
-                  if (totalTerjual > 0) {
-                    final expectedCash = totalTerjual * 10000;
-                    isMatch = (cashTotal - expectedCash) == 0;
-                  } else {
-                    isMatch = cashTotal == 0;
-                  }
-                }
+                      double expectedCash = 0;
+                      if (epState is AvailableProductsLoaded) {
+                        for (final sale in spgSales) {
+                          final ep = epState.assignedProducts.firstWhereOrNull(
+                            (p) => p.productId == sale.productId,
+                          );
+                          if (ep != null) {
+                            expectedCash += sale.qtySold * ep.price;
+                          }
+                        }
+                      }
 
-                if (isLoading) return _chip("Syncing", Colors.grey);
-                if (!hasData)
-                  return _chip("No Data", AppColors.onSurfaceVariant);
+                      isMatch = (cashTotal - expectedCash) == 0;
+                    }
 
-                return _chip(
-                  isMatch ? "Ready" : "Review",
-                  isMatch ? AppColors.success : AppColors.warning,
+                    if (isLoading) return _chip("Syncing", Colors.grey);
+                    if (!hasData)
+                      return _chip("No Data", AppColors.onSurfaceVariant);
+
+                    return _chip(
+                      isMatch ? "Ready" : "Review",
+                      isMatch ? AppColors.success : AppColors.warning,
+                    );
+                  },
                 );
               },
             );
@@ -409,9 +423,6 @@ class _SpgDashboardStats extends StatelessWidget {
                   totalTerjual: totalTerjual,
                 );
 
-                final totalCash =
-                    (spgCash?.cashReceived ?? 0) + (spgCash?.qrisReceived ?? 0);
-
                 return Theme(
                   data: Theme.of(
                     context,
@@ -446,44 +457,207 @@ class _SpgDashboardStats extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 12),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.surfaceContainerHigh,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.account_balance_wallet_outlined,
-                                size: 16,
-                                color: AppColors.secondary,
+                        BlocBuilder<EventProductBloc, EventProductState>(
+                          builder: (context, epState) {
+                            double expectedCash = 0;
+                            if (epState is AvailableProductsLoaded) {
+                              for (final sale in spgSales) {
+                                final ep = epState.assignedProducts
+                                    .firstWhereOrNull(
+                                      (p) => p.productId == sale.productId,
+                                    );
+                                if (ep != null) {
+                                  expectedCash += sale.qtySold * ep.price;
+                                }
+                              }
+                            }
+
+                            final cashTunai = spgCash?.cashReceived ?? 0;
+                            final qris = spgCash?.qrisReceived ?? 0;
+                            final totalActual = cashTunai + qris;
+                            final surplus = totalActual - expectedCash;
+
+                            return Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: AppColors.surfaceContainerHigh,
+                                borderRadius: BorderRadius.circular(8),
                               ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'TOTAL CASH',
-                                style: Theme.of(context).textTheme.labelSmall
-                                    ?.copyWith(
-                                      color: AppColors.onSurfaceVariant,
-                                      fontWeight: FontWeight.bold,
+                              child: Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.account_balance_wallet_outlined,
+                                        size: 16,
+                                        color: AppColors.secondary,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        'EXPECTED',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelSmall
+                                            ?.copyWith(
+                                              color: AppColors.onSurfaceVariant,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                      ),
+                                      const Spacer(),
+                                      Text(
+                                        app_formatters
+                                            .Formatters.formatCurrency(
+                                          expectedCash,
+                                        ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(
+                                              color: AppColors.onSurfaceVariant,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      const SizedBox(width: 24),
+                                      Text(
+                                        'Cash Tunai',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(
+                                              color: AppColors.onSurfaceVariant,
+                                            ),
+                                      ),
+                                      const Spacer(),
+                                      Text(
+                                        app_formatters
+                                            .Formatters.formatCurrency(
+                                          cashTunai,
+                                        ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      const SizedBox(width: 24),
+                                      Text(
+                                        'QRIS',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(
+                                              color: AppColors.onSurfaceVariant,
+                                            ),
+                                      ),
+                                      const Spacer(),
+                                      Text(
+                                        app_formatters
+                                            .Formatters.formatCurrency(qris),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                  const Divider(height: 16),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.payments_outlined,
+                                        size: 16,
+                                        color: AppColors.primary,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        'TOTAL ACTUAL',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelSmall
+                                            ?.copyWith(
+                                              color: AppColors.primary,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                      ),
+                                      const Spacer(),
+                                      Text(
+                                        app_formatters
+                                            .Formatters.formatCurrency(
+                                          totalActual,
+                                        ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleSmall
+                                            ?.copyWith(
+                                              color: AppColors.primary,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                  if (surplus != 0)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 8),
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            surplus > 0
+                                                ? Icons.arrow_upward
+                                                : Icons.arrow_downward,
+                                            size: 14,
+                                            color: surplus > 0
+                                                ? AppColors.success
+                                                : AppColors.error,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            surplus > 0 ? 'SURPLUS' : 'DEFICIT',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .labelSmall
+                                                ?.copyWith(
+                                                  color: surplus > 0
+                                                      ? AppColors.success
+                                                      : AppColors.error,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                          ),
+                                          const Spacer(),
+                                          Text(
+                                            app_formatters
+                                                .Formatters.formatCurrency(
+                                              surplus.abs(),
+                                            ),
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyMedium
+                                                ?.copyWith(
+                                                  color: surplus > 0
+                                                      ? AppColors.success
+                                                      : AppColors.error,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
+                                ],
                               ),
-                              const Spacer(),
-                              Text(
-                                app_formatters.Formatters.formatCurrency(
-                                  totalCash,
-                                ),
-                                style: Theme.of(context).textTheme.titleSmall
-                                    ?.copyWith(
-                                      color: AppColors.secondary,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                              ),
-                            ],
-                          ),
+                            );
+                          },
                         ),
                       ],
                     ),

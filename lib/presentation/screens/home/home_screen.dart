@@ -102,6 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
         event: event,
         eventSpgs: eventSpgState.assignedSpgs,
         spgs: spgState.spqs,
+        spbs: eventSpgState.spbs,
         eventProducts: eventProductState.assignedProducts,
         products: productState.products,
         stockMutations: stockState.mutations,

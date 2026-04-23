@@ -17,11 +17,51 @@ import '../../blocs/spg_bloc/spg_bloc.dart';
 import '../../blocs/spg_bloc/spg_event.dart';
 import '../../blocs/spg_bloc/spg_state.dart';
 
+class _ThousandsFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (newValue.text.isEmpty) return newValue;
+
+    final digitsOnly = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
+    if (digitsOnly.isEmpty) return const TextEditingValue(text: '');
+
+    final stripped = digitsOnly.replaceAll(RegExp(r'^0+(?!$)'), '');
+    if (stripped.isEmpty) return const TextEditingValue(text: '0');
+
+    final formatted = _formatWithThousands(stripped);
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
+
+  String _formatWithThousands(String digits) {
+    final buffer = StringBuffer();
+    final length = digits.length;
+
+    for (int i = 0; i < length; i++) {
+      if (i > 0 && (length - i) % 3 == 0) {
+        buffer.write('.');
+      }
+      buffer.write(digits[i]);
+    }
+
+    return buffer.toString();
+  }
+}
+
 class CashInputScreen extends StatefulWidget {
   final String eventId;
   final String spgId;
 
-  const CashInputScreen({super.key, required this.eventId, required this.spgId});
+  const CashInputScreen({
+    super.key,
+    required this.eventId,
+    required this.spgId,
+  });
 
   @override
   State<CashInputScreen> createState() => _CashInputScreenState();
@@ -37,6 +77,8 @@ class _CashInputScreenState extends State<CashInputScreen> {
   void initState() {
     super.initState();
     _loadData();
+    _cashController.addListener(() => setState(() {}));
+    _qrisController.addListener(() => setState(() {}));
   }
 
   @override
@@ -62,17 +104,38 @@ class _CashInputScreenState extends State<CashInputScreen> {
 
   void _initControllersFromState() {
     final cashState = context.read<CashBloc>().state;
-    if (_cashController.text.isEmpty) {
-      _cashController.text = cashState.cashReceived.toStringAsFixed(0);
+    if (_cashController.text.isEmpty && cashState.cashReceived > 0) {
+      _cashController.text = _formatThousands(cashState.cashReceived.toInt());
     }
-    if (_qrisController.text.isEmpty) {
-      _qrisController.text = cashState.qrisReceived.toStringAsFixed(0);
+    if (_qrisController.text.isEmpty && cashState.qrisReceived > 0) {
+      _qrisController.text = _formatThousands(cashState.qrisReceived.toInt());
     }
   }
 
+  String _formatThousands(int value) {
+    if (value == 0) return '';
+    final digits = value.toString();
+    final buffer = StringBuffer();
+    final length = digits.length;
+    for (int i = 0; i < length; i++) {
+      if (i > 0 && (length - i) % 3 == 0) {
+        buffer.write('.');
+      }
+      buffer.write(digits[i]);
+    }
+    return buffer.toString();
+  }
+
+  double _parseAmount(String text) {
+    final stripped = text
+        .replaceAll('.', '')
+        .replaceAll(RegExp(r'^0+(?!$)'), '');
+    return double.tryParse(stripped) ?? 0;
+  }
+
   void _submitCash() async {
-    final cash = double.tryParse(_cashController.text.replaceAll('.', '').replaceAll(',', '')) ?? 0;
-    final qris = double.tryParse(_qrisController.text.replaceAll('.', '').replaceAll(',', '')) ?? 0;
+    final cash = _parseAmount(_cashController.text);
+    final qris = _parseAmount(_qrisController.text);
 
     if (cash < 0 || qris < 0) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -112,9 +175,9 @@ class _CashInputScreenState extends State<CashInputScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal menyimpan kas: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Gagal menyimpan kas: $e')));
       }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
@@ -147,9 +210,7 @@ class _CashInputScreenState extends State<CashInputScreen> {
               return Column(
                 children: [
                   _buildHeader(context, spgName),
-                  Expanded(
-                    child: _buildForm(context),
-                  ),
+                  Expanded(child: _buildForm(context)),
                 ],
               );
             },
@@ -167,7 +228,8 @@ class _CashInputScreenState extends State<CashInputScreen> {
           builder: (context, productState) {
             double expectedCash = 0;
 
-            if (productState is AvailableProductsLoaded && salesState.salesByProduct.isNotEmpty) {
+            if (productState is AvailableProductsLoaded &&
+                salesState.salesByProduct.isNotEmpty) {
               for (final entry in salesState.salesByProduct.entries) {
                 final product = productState.assignedProducts.firstWhere(
                   (p) => p.productId == entry.key,
@@ -186,7 +248,11 @@ class _CashInputScreenState extends State<CashInputScreen> {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.account_balance_wallet_outlined, color: AppColors.primary, size: 24),
+                      Icon(
+                        Icons.account_balance_wallet_outlined,
+                        color: AppColors.primary,
+                        size: 24,
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         'INPUT KAS',
@@ -221,20 +287,26 @@ class _CashInputScreenState extends State<CashInputScreen> {
                           children: [
                             Text(
                               'Expected Cash',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.onSurfaceVariant,
-                              ),
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(color: AppColors.onSurfaceVariant),
                             ),
                             Text(
-                              app_formatters.Formatters.formatCurrency(expectedCash),
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                color: AppColors.secondary,
-                                fontWeight: FontWeight.bold,
+                              app_formatters.Formatters.formatCurrency(
+                                expectedCash,
                               ),
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(
+                                    color: AppColors.secondary,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                             ),
                           ],
                         ),
-                        Icon(Icons.calculate, color: AppColors.secondary, size: 28),
+                        Icon(
+                          Icons.calculate,
+                          color: AppColors.secondary,
+                          size: 28,
+                        ),
                       ],
                     ),
                   ),
@@ -265,9 +337,7 @@ class _CashInputScreenState extends State<CashInputScreen> {
           TextField(
             controller: _cashController,
             keyboardType: const TextInputType.numberWithOptions(decimal: false),
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-            ],
+            inputFormatters: [_ThousandsFormatter()],
             decoration: InputDecoration(
               hintText: '0',
               prefixText: 'Rp ',
@@ -278,9 +348,9 @@ class _CashInputScreenState extends State<CashInputScreen> {
                 borderSide: BorderSide.none,
               ),
             ),
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 24),
           Text(
@@ -295,9 +365,7 @@ class _CashInputScreenState extends State<CashInputScreen> {
           TextField(
             controller: _qrisController,
             keyboardType: const TextInputType.numberWithOptions(decimal: false),
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-            ],
+            inputFormatters: [_ThousandsFormatter()],
             decoration: InputDecoration(
               hintText: '0',
               prefixText: 'Rp ',
@@ -308,16 +376,16 @@ class _CashInputScreenState extends State<CashInputScreen> {
                 borderSide: BorderSide.none,
               ),
             ),
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Text(
             '(QRIS boleh 0 jika tidak ada pembayaran via QR)',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.onSurfaceVariant,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: AppColors.onSurfaceVariant),
           ),
           const SizedBox(height: 24),
           Text(
@@ -350,8 +418,8 @@ class _CashInputScreenState extends State<CashInputScreen> {
   }
 
   Widget _buildTotalSummary(BuildContext context) {
-    final cash = double.tryParse(_cashController.text.replaceAll('.', '').replaceAll(',', '')) ?? 0;
-    final qris = double.tryParse(_qrisController.text.replaceAll('.', '').replaceAll(',', '')) ?? 0;
+    final cash = _parseAmount(_cashController.text);
+    final qris = _parseAmount(_qrisController.text);
     final total = cash + qris;
 
     return Container(
@@ -366,15 +434,12 @@ class _CashInputScreenState extends State<CashInputScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Cash Tunai',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
+              Text('Cash Tunai', style: Theme.of(context).textTheme.bodyMedium),
               Text(
                 app_formatters.Formatters.formatCurrency(cash),
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -382,15 +447,12 @@ class _CashInputScreenState extends State<CashInputScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'QRIS',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
+              Text('QRIS', style: Theme.of(context).textTheme.bodyMedium),
               Text(
                 app_formatters.Formatters.formatCurrency(qris),
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -420,50 +482,54 @@ class _CashInputScreenState extends State<CashInputScreen> {
   }
 
   Widget _buildBottomAction() {
-    final cash = _cashController.text.isEmpty
-        ? 0
-        : double.tryParse(_cashController.text.replaceAll('.', '').replaceAll(',', '')) ?? 0;
-    final qris = _qrisController.text.isEmpty
-        ? 0
-        : double.tryParse(_qrisController.text.replaceAll('.', '').replaceAll(',', '')) ?? 0;
-    final hasInput = cash > 0 || qris > 0;
+    return BlocBuilder<CashBloc, CashState>(
+      builder: (context, cashState) {
+        final cash = _parseAmount(_cashController.text);
+        final qris = _parseAmount(_qrisController.text);
+        final hasInput = cash > 0 || qris > 0;
+        final isExistingRecord = cashState.hasRecord;
+        final canSave = isExistingRecord || hasInput;
 
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: ElevatedButton(
-          onPressed: (_isSubmitting || !hasInput) ? null : _submitCash,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-          child: _isSubmitting
-              ? const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
-                  ),
-                )
-              : const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.save),
-                    SizedBox(width: 8),
-                    Text(
-                      'SIMPAN KAS',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.2,
-                      ),
-                    ),
-                  ],
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: ElevatedButton(
+              onPressed: (_isSubmitting || !canSave) ? null : _submitCash,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
-        ),
-      ),
+              ),
+              child: _isSubmitting
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.save),
+                        const SizedBox(width: 8),
+                        Text(
+                          isExistingRecord ? 'UPDATE KAS' : 'SIMPAN KAS',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                      ],
+                    ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
