@@ -19,9 +19,9 @@ import 'presentation/blocs/spb_bloc/spb_bloc.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   await initDependencies();
-  
+
   runApp(const StockistApp());
 }
 
@@ -41,21 +41,11 @@ class StockistApp extends StatelessWidget {
         BlocProvider<SpgBloc>(
           create: (context) => sl<SpgBloc>()..add(LoadActiveSpqs()),
         ),
-        BlocProvider<SpbBloc>(
-          create: (context) => sl<SpbBloc>(),
-        ),
-        BlocProvider<StockBloc>(
-          create: (context) => sl<StockBloc>(),
-        ),
-        BlocProvider<SalesBloc>(
-          create: (context) => sl<SalesBloc>(),
-        ),
-        BlocProvider<CashBloc>(
-          create: (context) => sl<CashBloc>(),
-        ),
-        BlocProvider<EventSpgBloc>(
-          create: (context) => sl<EventSpgBloc>(),
-        ),
+        BlocProvider<SpbBloc>(create: (context) => sl<SpbBloc>()),
+        BlocProvider<StockBloc>(create: (context) => sl<StockBloc>()),
+        BlocProvider<SalesBloc>(create: (context) => sl<SalesBloc>()),
+        BlocProvider<CashBloc>(create: (context) => sl<CashBloc>()),
+        BlocProvider<EventSpgBloc>(create: (context) => sl<EventSpgBloc>()),
         BlocProvider<EventProductBloc>(
           create: (context) => sl<EventProductBloc>(),
         ),
@@ -70,10 +60,7 @@ class StockistApp extends StatelessWidget {
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
-        supportedLocales: const [
-          Locale('en', 'US'),
-          Locale('id', 'ID'),
-        ],
+        supportedLocales: const [Locale('en', 'US'), Locale('id', 'ID')],
       ),
     );
   }

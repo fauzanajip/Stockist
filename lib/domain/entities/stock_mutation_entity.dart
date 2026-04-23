@@ -46,5 +46,14 @@ class StockMutationEntity extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, eventId, spgId, productId, qty, type, timestamp, note];
+  List<Object?> get props => [
+    id,
+    eventId,
+    spgId,
+    productId,
+    qty,
+    type,
+    timestamp,
+    note,
+  ];
 }

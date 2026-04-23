@@ -38,5 +38,12 @@ class CashRecordEntity extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, eventId, spgId, cashReceived, qrisReceived, note];
+  List<Object?> get props => [
+    id,
+    eventId,
+    spgId,
+    cashReceived,
+    qrisReceived,
+    note,
+  ];
 }

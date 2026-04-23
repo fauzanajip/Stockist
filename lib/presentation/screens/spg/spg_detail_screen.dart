@@ -16,6 +16,12 @@ import '../../blocs/cash_bloc/cash_event.dart';
 import '../../blocs/cash_bloc/cash_state.dart';
 import '../../blocs/spg_bloc/spg_bloc.dart';
 import '../../blocs/spg_bloc/spg_state.dart';
+import '../../blocs/event_product_bloc/event_product_bloc.dart';
+import '../../blocs/event_product_bloc/event_product_event.dart';
+import '../../blocs/event_product_bloc/event_product_state.dart';
+import '../../blocs/product_bloc/product_bloc.dart';
+import '../../blocs/product_bloc/product_event.dart';
+import '../../blocs/product_bloc/product_state.dart';
 
 class SpgDetailScreen extends StatefulWidget {
   final String eventId;
@@ -42,6 +48,10 @@ class _SpgDetailScreenState extends State<SpgDetailScreen> {
     context.read<StockBloc>().add(LoadStockByEvent(eventId: widget.eventId));
     context.read<SalesBloc>().add(LoadAllSalesByEvent(eventId: widget.eventId));
     context.read<CashBloc>().add(LoadAllCashByEvent(eventId: widget.eventId));
+    context.read<EventProductBloc>().add(
+      LoadAvailableProducts(eventId: widget.eventId),
+    );
+    context.read<ProductBloc>().add(LoadAllProducts());
   }
 
   Color _getAvatarColor(String name) {
@@ -95,6 +105,8 @@ class _SpgDetailScreenState extends State<SpgDetailScreen> {
                 _buildHeader(context, spg.name),
                 const SizedBox(height: 24),
                 _buildSummaryDashboard(context),
+                const SizedBox(height: 24),
+                _buildProductBreakdown(context),
                 const SizedBox(height: 32),
                 Text(
                   'TRANSACTIONS',
@@ -350,6 +362,182 @@ class _SpgDetailScreenState extends State<SpgDetailScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildProductBreakdown(BuildContext context) {
+    return BlocBuilder<EventProductBloc, EventProductState>(
+      builder: (context, epState) {
+        return BlocBuilder<ProductBloc, ProductState>(
+          builder: (context, productState) {
+            return BlocBuilder<StockBloc, StockState>(
+              builder: (context, stockState) {
+                return BlocBuilder<SalesBloc, SalesState>(
+                  builder: (context, salesState) {
+                    if (epState is! AvailableProductsLoaded ||
+                        productState is! ProductsLoaded) {
+                      return const SizedBox.shrink();
+                    }
+
+                    final assignedProducts = epState.assignedProducts;
+                    if (assignedProducts.isEmpty) {
+                      return const SizedBox.shrink();
+                    }
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'PRODUCT BREAKDOWN',
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 1.2,
+                                color: AppColors.onSurfaceVariant,
+                              ),
+                        ),
+                        const SizedBox(height: 12),
+                        ...assignedProducts.map((ep) {
+                          final product = productState.products
+                              .firstWhereOrNull((p) => p.id == ep.productId);
+                          if (product == null) return const SizedBox.shrink();
+
+                          final mutations = stockState.mutations
+                              .where(
+                                (m) =>
+                                    m.spgId == widget.spgId &&
+                                    m.productId == ep.productId,
+                              )
+                              .toList();
+
+                          final given = mutations
+                              .where(
+                                (m) =>
+                                    m.type == MutationType.initial ||
+                                    m.type == MutationType.topup,
+                              )
+                              .fold(0, (sum, m) => sum + m.qty);
+
+                          final returned = mutations
+                              .where(
+                                (m) => m.type == MutationType.returnMutation,
+                              )
+                              .fold(0, (sum, m) => sum + m.qty);
+
+                          final sales = salesState.allSales
+                              .where(
+                                (s) =>
+                                    s.spgId == widget.spgId &&
+                                    s.productId == ep.productId,
+                              )
+                              .firstOrNull;
+
+                          final sold = sales?.qtySold ?? 0;
+                          final remaining = given - returned - sold;
+
+                          return _buildProductCard(
+                            context,
+                            product: product,
+                            given: given,
+                            returned: returned,
+                            sold: sold,
+                            remaining: remaining,
+                            price: ep.price,
+                          );
+                        }),
+                      ],
+                    );
+                  },
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildProductCard(
+    BuildContext context, {
+    required dynamic product,
+    required int given,
+    required int returned,
+    required int sold,
+    required int remaining,
+    required double price,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceContainer,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  product.name,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+              Text(
+                app_formatters.Formatters.formatCurrency(price),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.secondary,
+                  fontSize: 13,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              _buildMiniStat('Dikasih', given.toString(), AppColors.success),
+              const SizedBox(width: 16),
+              _buildMiniStat('Return', returned.toString(), AppColors.warning),
+              const SizedBox(width: 16),
+              _buildMiniStat('Terjual', sold.toString(), AppColors.secondary),
+              const SizedBox(width: 16),
+              _buildMiniStat('Sisa', remaining.toString(), AppColors.primary),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMiniStat(String label, String value, Color color) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w900,
+              color: AppColors.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w900,
+              color: color,
+            ),
+          ),
+        ],
+      ),
     );
   }
 

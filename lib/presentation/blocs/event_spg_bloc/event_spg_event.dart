@@ -60,10 +60,7 @@ class SyncEventSpgs extends EventSpgEvent {
   final String eventId;
   final List<EventSpgEntity> assignedSpgs;
 
-  const SyncEventSpgs({
-    required this.eventId,
-    required this.assignedSpgs,
-  });
+  const SyncEventSpgs({required this.eventId, required this.assignedSpgs});
 
   @override
   List<Object?> get props => [eventId, assignedSpgs];

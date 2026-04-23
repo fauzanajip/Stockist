@@ -4,11 +4,11 @@ import '../../../core/constants/app_constants.dart';
 
 class DatabaseHelper {
   DatabaseHelper._privateConstructor();
-  
+
   static final DatabaseHelper instance = DatabaseHelper._privateConstructor();
-  
+
   static Database? _database;
-  
+
   Future<Database> get database async {
     if (_database != null) return _database!;
     _database = await _initDatabase();
@@ -18,7 +18,7 @@ class DatabaseHelper {
   Future<Database> _initDatabase() async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, AppConstants.databaseName);
-    
+
     return await openDatabase(
       path,
       version: AppConstants.databaseVersion,
@@ -169,7 +169,9 @@ class DatabaseHelper {
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     // Handle migrations here
     if (oldVersion < 2) {
-      await db.execute('ALTER TABLE events ADD COLUMN is_active INTEGER NOT NULL DEFAULT 0');
+      await db.execute(
+        'ALTER TABLE events ADD COLUMN is_active INTEGER NOT NULL DEFAULT 0',
+      );
     }
   }
 
@@ -190,6 +192,7 @@ class DatabaseHelper {
   }
 
   // Helper methods
-  static String dateTimeToString(DateTime dateTime) => dateTime.toIso8601String();
+  static String dateTimeToString(DateTime dateTime) =>
+      dateTime.toIso8601String();
   static DateTime stringToDateTime(String string) => DateTime.parse(string);
 }

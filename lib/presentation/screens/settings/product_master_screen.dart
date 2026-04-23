@@ -36,12 +36,12 @@ class _ProductMasterScreenState extends State<ProductMasterScreen> {
   void _addProduct() {
     if (_formKey.currentState!.validate()) {
       context.read<ProductBloc>().add(
-            CreateNewProduct(
-              name: _nameController.text.trim(),
-              sku: _skuController.text.trim(),
-              price: double.tryParse(_priceController.text) ?? 0,
-            ),
-          );
+        CreateNewProduct(
+          name: _nameController.text.trim(),
+          sku: _skuController.text.trim(),
+          price: double.tryParse(_priceController.text) ?? 0,
+        ),
+      );
       _nameController.clear();
       _skuController.clear();
       _priceController.clear();
@@ -101,8 +101,11 @@ class _ProductMasterScreenState extends State<ProductMasterScreen> {
                               labelText: 'Harga',
                               prefixText: 'Rp ',
                             ),
-                            validator: (value) => Validators.validatePositiveNumber(
-                                value, 'Harga'),
+                            validator: (value) =>
+                                Validators.validatePositiveNumber(
+                                  value,
+                                  'Harga',
+                                ),
                           ),
                         ),
                       ],
@@ -114,7 +117,9 @@ class _ProductMasterScreenState extends State<ProductMasterScreen> {
                       label: const Text('TAMBAH PRODUK'),
                       style: ElevatedButton.styleFrom(
                         minimumSize: const Size(double.infinity, 54),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                       ),
                     ),
                   ],
@@ -133,13 +138,18 @@ class _ProductMasterScreenState extends State<ProductMasterScreen> {
                       return _buildEmptyState();
                     }
                     return ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                       itemCount: state.products.length,
                       itemBuilder: (context, index) {
                         final product = state.products[index];
                         return Card(
                           margin: const EdgeInsets.only(bottom: 12),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
                           child: ListTile(
                             leading: Container(
                               padding: const EdgeInsets.all(8),
@@ -147,12 +157,25 @@ class _ProductMasterScreenState extends State<ProductMasterScreen> {
                                 color: AppColors.primary.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(10),
                               ),
-                              child: const Icon(Icons.inventory_2, color: AppColors.primary),
+                              child: const Icon(
+                                Icons.inventory_2,
+                                color: AppColors.primary,
+                              ),
                             ),
-                            title: Text(product.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                            subtitle: Text('SKU: ${product.sku} | Rp ${product.price.toInt()}'),
+                            title: Text(
+                              product.name,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            subtitle: Text(
+                              'SKU: ${product.sku} | Rp ${product.price.toInt()}',
+                            ),
                             trailing: IconButton(
-                              icon: const Icon(Icons.delete_outline, color: AppColors.error),
+                              icon: const Icon(
+                                Icons.delete_outline,
+                                color: AppColors.error,
+                              ),
                               onPressed: () => _confirmDelete(product),
                             ),
                           ),
@@ -175,9 +198,16 @@ class _ProductMasterScreenState extends State<ProductMasterScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.inventory_2_outlined, size: 64, color: AppColors.onSurfaceVariant),
+          Icon(
+            Icons.inventory_2_outlined,
+            size: 64,
+            color: AppColors.onSurfaceVariant,
+          ),
           SizedBox(height: 16),
-          Text('Belum ada produk', style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(
+            'Belum ada produk',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
         ],
       ),
     );
@@ -190,13 +220,21 @@ class _ProductMasterScreenState extends State<ProductMasterScreen> {
         title: const Text('Hapus Produk?'),
         content: Text('Yakin ingin menghapus ${product.name}?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('BATAL')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('BATAL'),
+          ),
           TextButton(
             onPressed: () {
-              context.read<ProductBloc>().add(SoftDeleteProductEvent(id: product.id));
+              context.read<ProductBloc>().add(
+                SoftDeleteProductEvent(id: product.id),
+              );
               Navigator.pop(context);
             },
-            child: const Text('HAPUS', style: TextStyle(color: AppColors.error)),
+            child: const Text(
+              'HAPUS',
+              style: TextStyle(color: AppColors.error),
+            ),
           ),
         ],
       ),

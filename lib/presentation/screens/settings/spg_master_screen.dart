@@ -32,8 +32,8 @@ class _SpgMasterScreenState extends State<SpgMasterScreen> {
   void _addSpg() {
     if (_formKey.currentState!.validate()) {
       context.read<SpgBloc>().add(
-            CreateNewSpq(name: _nameController.text.trim()),
-          );
+        CreateNewSpq(name: _nameController.text.trim()),
+      );
       _nameController.clear();
     }
   }
@@ -75,7 +75,9 @@ class _SpgMasterScreenState extends State<SpgMasterScreen> {
                       label: const Text('TAMBAH SPG'),
                       style: ElevatedButton.styleFrom(
                         minimumSize: const Size(double.infinity, 54),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                       ),
                     ),
                   ],
@@ -94,21 +96,40 @@ class _SpgMasterScreenState extends State<SpgMasterScreen> {
                       return _buildEmptyState();
                     }
                     return ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                       itemCount: state.spqs.length,
                       itemBuilder: (context, index) {
                         final spg = state.spqs[index];
                         return Card(
                           margin: const EdgeInsets.only(bottom: 12),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
                           child: ListTile(
                             leading: CircleAvatar(
-                              backgroundColor: AppColors.primary.withOpacity(0.1),
-                              child: const Icon(Icons.person, color: AppColors.primary, size: 20),
+                              backgroundColor: AppColors.primary.withOpacity(
+                                0.1,
+                              ),
+                              child: const Icon(
+                                Icons.person,
+                                color: AppColors.primary,
+                                size: 20,
+                              ),
                             ),
-                            title: Text(spg.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                            title: Text(
+                              spg.name,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                             trailing: IconButton(
-                              icon: const Icon(Icons.delete_outline, color: AppColors.error),
+                              icon: const Icon(
+                                Icons.delete_outline,
+                                color: AppColors.error,
+                              ),
                               onPressed: () => _confirmDelete(spg),
                             ),
                           ),
@@ -131,7 +152,11 @@ class _SpgMasterScreenState extends State<SpgMasterScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.people_outline, size: 64, color: AppColors.onSurfaceVariant),
+          Icon(
+            Icons.people_outline,
+            size: 64,
+            color: AppColors.onSurfaceVariant,
+          ),
           SizedBox(height: 16),
           Text('Belum ada SPG', style: TextStyle(fontWeight: FontWeight.bold)),
         ],
@@ -146,13 +171,19 @@ class _SpgMasterScreenState extends State<SpgMasterScreen> {
         title: const Text('Hapus SPG?'),
         content: Text('Yakin ingin menghapus ${spg.name}?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('BATAL')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('BATAL'),
+          ),
           TextButton(
             onPressed: () {
               context.read<SpgBloc>().add(SoftDeleteSpqEvent(id: spg.id));
               Navigator.pop(context);
             },
-            child: const Text('HAPUS', style: TextStyle(color: AppColors.error)),
+            child: const Text(
+              'HAPUS',
+              style: TextStyle(color: AppColors.error),
+            ),
           ),
         ],
       ),

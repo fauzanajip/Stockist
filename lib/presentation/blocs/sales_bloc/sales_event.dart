@@ -28,14 +28,12 @@ class LoadSales extends SalesEvent {
   final String eventId;
   final String spgId;
 
-  const LoadSales({
-    required this.eventId,
-    required this.spgId,
-  });
+  const LoadSales({required this.eventId, required this.spgId});
 
   @override
   List<Object?> get props => [eventId, spgId];
 }
+
 class LoadAllSalesByEvent extends SalesEvent {
   final String eventId;
 

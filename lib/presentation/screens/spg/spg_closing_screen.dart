@@ -26,7 +26,11 @@ class SpgClosingScreen extends StatefulWidget {
   final String eventId;
   final String spgId;
 
-  const SpgClosingScreen({super.key, required this.eventId, required this.spgId});
+  const SpgClosingScreen({
+    super.key,
+    required this.eventId,
+    required this.spgId,
+  });
 
   @override
   State<SpgClosingScreen> createState() => _SpgClosingScreenState();
@@ -91,14 +95,20 @@ class _SpgClosingScreenState extends State<SpgClosingScreen> {
 
     for (final assignedProduct in productState.assignedProducts) {
       final productId = assignedProduct.productId;
-      
-      final mutations = stockState.mutations.where((m) => m.productId == productId).toList();
-      final totalGiven = mutations.where((m) => m.type != MutationType.returnMutation).fold(0, (sum, m) => sum + m.qty);
-      final totalReturned = mutations.where((m) => m.type == MutationType.returnMutation).fold(0, (sum, m) => sum + m.qty);
+
+      final mutations = stockState.mutations
+          .where((m) => m.productId == productId)
+          .toList();
+      final totalGiven = mutations
+          .where((m) => m.type != MutationType.returnMutation)
+          .fold(0, (sum, m) => sum + m.qty);
+      final totalReturned = mutations
+          .where((m) => m.type == MutationType.returnMutation)
+          .fold(0, (sum, m) => sum + m.qty);
       final totalSold = salesState.salesByProduct[productId] ?? 0;
       final sisaSystem = totalGiven - totalReturned - totalSold;
       final sisaRealValue = _sisaReal[productId] ?? sisaSystem;
-      
+
       expectedCash += totalSold * assignedProduct.price;
       totalSelisihFisik += StockCalculator.calculateSelisihFisik(
         sisaSystem: sisaSystem,
@@ -140,7 +150,9 @@ class _SpgClosingScreenState extends State<SpgClosingScreen> {
         builder: (context, spgState) {
           String spgName = widget.spgId;
           if (spgState is SpqsLoaded) {
-            final spg = spgState.spqs.firstWhereOrNull((s) => s.id == widget.spgId);
+            final spg = spgState.spqs.firstWhereOrNull(
+              (s) => s.id == widget.spgId,
+            );
             if (spg != null) spgName = spg.name;
           }
 
@@ -156,7 +168,9 @@ class _SpgClosingScreenState extends State<SpgClosingScreen> {
                               stockState.isLoading ||
                               salesState.isLoading ||
                               cashState.isLoading) {
-                            return const Center(child: CircularProgressIndicator());
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
                           }
 
                           if (productState is! AvailableProductsLoaded) {
@@ -224,16 +238,16 @@ class _SpgClosingScreenState extends State<SpgClosingScreen> {
           const SizedBox(height: 8),
           Text(
             'SPG: $spgName',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4),
           Text(
             'Input sisa real per produk untuk menentukan selisih.',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.onSurfaceVariant,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: AppColors.onSurfaceVariant),
           ),
         ],
       ),
@@ -303,7 +317,9 @@ class _SpgClosingScreenState extends State<SpgClosingScreen> {
                 _buildTableCell(
                   context,
                   selisihFisik.toString(),
-                  color: selisihFisik != 0 ? AppColors.error : AppColors.success,
+                  color: selisihFisik != 0
+                      ? AppColors.error
+                      : AppColors.success,
                   isBold: true,
                 ),
               ],
@@ -348,9 +364,10 @@ class _SpgClosingScreenState extends State<SpgClosingScreen> {
 
   Widget _buildTableCell(
     BuildContext context,
-    String text,
-    {bool isBold = false, Color? color}
-  ) {
+    String text, {
+    bool isBold = false,
+    Color? color,
+  }) {
     return Padding(
       padding: const EdgeInsets.all(8),
       child: Text(
@@ -370,9 +387,9 @@ class _SpgClosingScreenState extends State<SpgClosingScreen> {
       child: TextField(
         keyboardType: TextInputType.number,
         textAlign: TextAlign.center,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          fontWeight: FontWeight.bold,
-        ),
+        style: Theme.of(
+          context,
+        ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
         decoration: InputDecoration(
           isDense: true,
           contentPadding: const EdgeInsets.symmetric(vertical: 8),
@@ -426,7 +443,10 @@ class _SpgClosingScreenState extends State<SpgClosingScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Expected Cash', style: Theme.of(context).textTheme.bodyMedium),
+              Text(
+                'Expected Cash',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
               Text(
                 app_formatters.Formatters.formatCurrency(expectedCash),
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -440,12 +460,17 @@ class _SpgClosingScreenState extends State<SpgClosingScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Actual Cash (Tunai)', style: Theme.of(context).textTheme.bodyMedium),
               Text(
-                app_formatters.Formatters.formatCurrency(cashState.cashReceived),
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+                'Actual Cash (Tunai)',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              Text(
+                app_formatters.Formatters.formatCurrency(
+                  cashState.cashReceived,
                 ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -453,12 +478,17 @@ class _SpgClosingScreenState extends State<SpgClosingScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Actual Cash (QRIS)', style: Theme.of(context).textTheme.bodyMedium),
               Text(
-                app_formatters.Formatters.formatCurrency(cashState.qrisReceived),
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+                'Actual Cash (QRIS)',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              Text(
+                app_formatters.Formatters.formatCurrency(
+                  cashState.qrisReceived,
                 ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -466,9 +496,12 @@ class _SpgClosingScreenState extends State<SpgClosingScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Total Actual', style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              )),
+              Text(
+                'Total Actual',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+              ),
               Text(
                 app_formatters.Formatters.formatCurrency(actualCash),
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -500,8 +533,8 @@ class _SpgClosingScreenState extends State<SpgClosingScreen> {
                   surplus == 0
                       ? 'Rp 0'
                       : (surplus > 0
-                          ? '+ ${app_formatters.Formatters.formatCurrency(surplus)}'
-                          : '- ${app_formatters.Formatters.formatCurrency(surplus.abs())}'),
+                            ? '+ ${app_formatters.Formatters.formatCurrency(surplus)}'
+                            : '- ${app_formatters.Formatters.formatCurrency(surplus.abs())}'),
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w900,
                     color: surplus == 0
@@ -529,9 +562,15 @@ class _SpgClosingScreenState extends State<SpgClosingScreen> {
     if (productState is AvailableProductsLoaded) {
       for (final assignedProduct in productState.assignedProducts) {
         final productId = assignedProduct.productId;
-        final mutations = stockState.mutations.where((m) => m.productId == productId).toList();
-        final totalGiven = mutations.where((m) => m.type != MutationType.returnMutation).fold(0, (sum, m) => sum + m.qty);
-        final totalReturned = mutations.where((m) => m.type == MutationType.returnMutation).fold(0, (sum, m) => sum + m.qty);
+        final mutations = stockState.mutations
+            .where((m) => m.productId == productId)
+            .toList();
+        final totalGiven = mutations
+            .where((m) => m.type != MutationType.returnMutation)
+            .fold(0, (sum, m) => sum + m.qty);
+        final totalReturned = mutations
+            .where((m) => m.type == MutationType.returnMutation)
+            .fold(0, (sum, m) => sum + m.qty);
         final totalSold = salesState.salesByProduct[productId] ?? 0;
         final sisaSystem = totalGiven - totalReturned - totalSold;
         final sisaRealValue = _sisaReal[productId] ?? sisaSystem;
@@ -553,10 +592,7 @@ class _SpgClosingScreenState extends State<SpgClosingScreen> {
       color: color.withOpacity(0.1),
       child: Row(
         children: [
-          Text(
-            _status,
-            style: const TextStyle(fontSize: 24),
-          ),
+          Text(_status, style: const TextStyle(fontSize: 24)),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
@@ -616,9 +652,9 @@ class _SpgClosingScreenState extends State<SpgClosingScreen> {
                     Expanded(
                       child: Text(
                         'Closing belum bisa dilakukan. Pastikan semua produk sudah ada data sales dan cash sudah diinput.',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.error,
-                        ),
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.copyWith(color: AppColors.error),
                       ),
                     ),
                   ],
@@ -629,7 +665,9 @@ class _SpgClosingScreenState extends State<SpgClosingScreen> {
                   ? () {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: const Text('Closing berhasil! Data SPG sudah valid.'),
+                          content: const Text(
+                            'Closing berhasil! Data SPG sudah valid.',
+                          ),
                           backgroundColor: AppColors.success,
                         ),
                       );
@@ -637,10 +675,16 @@ class _SpgClosingScreenState extends State<SpgClosingScreen> {
                     }
                   : null,
               style: ElevatedButton.styleFrom(
-                backgroundColor: _canClose ? AppColors.success : AppColors.surfaceContainerHigh,
-                foregroundColor: _canClose ? Colors.white : AppColors.onSurfaceVariant,
+                backgroundColor: _canClose
+                    ? AppColors.success
+                    : AppColors.surfaceContainerHigh,
+                foregroundColor: _canClose
+                    ? Colors.white
+                    : AppColors.onSurfaceVariant,
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,

@@ -27,12 +27,7 @@ class CreateSpb {
   CreateSpb(this.repository);
 
   Future<SpbEntity> call(String name) async {
-    return await repository.create(
-      SpbEntity(
-        id: '',
-        name: name,
-      ),
-    );
+    return await repository.create(SpbEntity(id: '', name: name));
   }
 }
 

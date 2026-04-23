@@ -22,10 +22,7 @@ class CreateNewEvent extends EventEvent {
   final String name;
   final DateTime date;
 
-  const CreateNewEvent({
-    required this.name,
-    required this.date,
-  });
+  const CreateNewEvent({required this.name, required this.date});
 
   @override
   List<Object?> get props => [name, date];

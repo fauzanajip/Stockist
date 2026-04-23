@@ -20,7 +20,11 @@ class SalesInputScreen extends StatefulWidget {
   final String eventId;
   final String spgId;
 
-  const SalesInputScreen({super.key, required this.eventId, required this.spgId});
+  const SalesInputScreen({
+    super.key,
+    required this.eventId,
+    required this.spgId,
+  });
 
   @override
   State<SalesInputScreen> createState() => _SalesInputScreenState();
@@ -56,7 +60,9 @@ class _SalesInputScreenState extends State<SalesInputScreen> {
 
     if (productsToSubmit.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Masukkan minimal satu produk dengan jumlah > 0')),
+        const SnackBar(
+          content: Text('Masukkan minimal satu produk dengan jumlah > 0'),
+        ),
       );
       return;
     }
@@ -180,9 +186,9 @@ class _SalesInputScreenState extends State<SalesInputScreen> {
           const SizedBox(height: 4),
           Text(
             'Input jumlah produk yang terjual. Data akan replace nilai sebelumnya.',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.onSurfaceVariant,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: AppColors.onSurfaceVariant),
           ),
         ],
       ),
@@ -205,12 +211,18 @@ class _SalesInputScreenState extends State<SalesInputScreen> {
 
                 final mutations = stockState.mutations;
                 final totalGiven = mutations
-                    .where((m) => m.productId == product.id &&
-                           m.type != MutationType.returnMutation)
+                    .where(
+                      (m) =>
+                          m.productId == product.id &&
+                          m.type != MutationType.returnMutation,
+                    )
                     .fold(0, (sum, m) => sum + m.qty);
                 final totalReturned = mutations
-                    .where((m) => m.productId == product.id &&
-                           m.type == MutationType.returnMutation)
+                    .where(
+                      (m) =>
+                          m.productId == product.id &&
+                          m.type == MutationType.returnMutation,
+                    )
                     .fold(0, (sum, m) => sum + m.qty);
                 final stockInHand = totalGiven - totalReturned;
 
@@ -232,19 +244,25 @@ class _SalesInputScreenState extends State<SalesInputScreen> {
                                 children: [
                                   Text(
                                     product.name,
-                                    style: Theme.of(context).textTheme.titleMedium,
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.titleMedium,
                                   ),
                                   Text(
                                     'SKU: ${product.sku} | Harga: Rp ${assignedProduct.price}',
-                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: AppColors.onSurfaceVariant,
-                                    ),
+                                    style: Theme.of(context).textTheme.bodySmall
+                                        ?.copyWith(
+                                          color: AppColors.onSurfaceVariant,
+                                        ),
                                   ),
                                 ],
                               ),
                             ),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
                               decoration: BoxDecoration(
                                 color: AppColors.surfaceContainerHigh,
                                 borderRadius: BorderRadius.circular(8),
@@ -265,9 +283,8 @@ class _SalesInputScreenState extends State<SalesInputScreen> {
                           children: [
                             Text(
                               'Terjual: ',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(fontWeight: FontWeight.bold),
                             ),
                             Expanded(
                               child: _QuantityInput(
@@ -287,9 +304,8 @@ class _SalesInputScreenState extends State<SalesInputScreen> {
                             padding: const EdgeInsets.only(top: 8),
                             child: Text(
                               'Sebelumnya: $currentSold',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.onSurfaceVariant,
-                              ),
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(color: AppColors.onSurfaceVariant),
                             ),
                           ),
                       ],
@@ -352,7 +368,9 @@ class _SalesInputScreenState extends State<SalesInputScreen> {
             backgroundColor: AppColors.secondary,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
           child: _isSubmitting
               ? const SizedBox(
@@ -443,7 +461,11 @@ class _QuantityInputState extends State<_QuantityInput> {
       children: [
         IconButton(
           onPressed: () => _updateValue(widget.value - 1),
-          icon: const Icon(Icons.remove_circle, color: AppColors.error, size: 28),
+          icon: const Icon(
+            Icons.remove_circle,
+            color: AppColors.error,
+            size: 28,
+          ),
           padding: EdgeInsets.zero,
           constraints: const BoxConstraints(),
         ),
@@ -470,7 +492,11 @@ class _QuantityInputState extends State<_QuantityInput> {
         ),
         IconButton(
           onPressed: () => _updateValue(widget.value + 1),
-          icon: const Icon(Icons.add_circle, color: AppColors.success, size: 28),
+          icon: const Icon(
+            Icons.add_circle,
+            color: AppColors.success,
+            size: 28,
+          ),
           padding: EdgeInsets.zero,
           constraints: const BoxConstraints(),
         ),

@@ -34,7 +34,9 @@ class SpgRepositoryImpl implements SpgRepository {
       );
       return maps.map<SpgEntity>((map) => SpgModel.fromMap(map)).toList();
     } catch (e) {
-      throw AppDatabaseException(message: 'Gagal mengambil data active SPG: $e');
+      throw AppDatabaseException(
+        message: 'Gagal mengambil data active SPG: $e',
+      );
     }
   }
 
@@ -72,9 +74,9 @@ class SpgRepositoryImpl implements SpgRepository {
   Future<SpgEntity> update(SpgEntity spg) async {
     try {
       final db = await dbHelper.database;
-      final model = SpgModel.fromEntity(spg).copyWith(
-        updatedAt: DateTime.now(),
-      );
+      final model = SpgModel.fromEntity(
+        spg,
+      ).copyWith(updatedAt: DateTime.now());
       await db.update(
         'spgs',
         model.toMap(),
@@ -91,11 +93,7 @@ class SpgRepositoryImpl implements SpgRepository {
   Future<void> delete(String id) async {
     try {
       final db = await dbHelper.database;
-      await db.delete(
-        'spgs',
-        where: 'id = ?',
-        whereArgs: [id],
-      );
+      await db.delete('spgs', where: 'id = ?', whereArgs: [id]);
     } catch (e) {
       throw AppDatabaseException(message: 'Gagal hapus SPG: $e');
     }

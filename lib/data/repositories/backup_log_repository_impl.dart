@@ -22,7 +22,9 @@ class BackupLogRepositoryImpl implements BackupLogRepository {
       );
       return maps.map((map) => BackupLogModel.fromMap(map)).toList();
     } catch (e) {
-      throw AppDatabaseException(message: 'Gagal mengambil data backup logs: $e');
+      throw AppDatabaseException(
+        message: 'Gagal mengambil data backup logs: $e',
+      );
     }
   }
 
@@ -49,11 +51,7 @@ class BackupLogRepositoryImpl implements BackupLogRepository {
   Future<void> delete(String id) async {
     try {
       final db = await dbHelper.database;
-      await db.delete(
-        'backup_logs',
-        where: 'id = ?',
-        whereArgs: [id],
-      );
+      await db.delete('backup_logs', where: 'id = ?', whereArgs: [id]);
     } catch (e) {
       throw AppDatabaseException(message: 'Gagal hapus backup log: $e');
     }

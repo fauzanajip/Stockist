@@ -62,11 +62,7 @@ class SpbRepositoryImpl implements SpbRepository {
   Future<void> delete(String id) async {
     try {
       final db = await dbHelper.database;
-      await db.delete(
-        'spbs',
-        where: 'id = ?',
-        whereArgs: [id],
-      );
+      await db.delete('spbs', where: 'id = ?', whereArgs: [id]);
     } catch (e) {
       throw AppDatabaseException(message: 'Gagal hapus SPB: $e');
     }

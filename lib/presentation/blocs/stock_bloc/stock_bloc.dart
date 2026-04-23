@@ -69,7 +69,6 @@ class StockBloc extends Bloc<StockEvent, StockState> {
     }
   }
 
-
   Future<void> _onCreateInitialDistribution(
     CreateInitialDistribution event,
     Emitter<StockState> emit,
@@ -187,18 +186,33 @@ class StockBloc extends Bloc<StockEvent, StockState> {
         return;
       }
 
-      final totalSold = await getTotalSold(event.eventId, event.spgId, event.productId);
-      final totalGiven = await getTotalGiven(event.eventId, event.spgId, event.productId);
-      final totalReturn = await getTotalReturn(event.eventId, event.spgId, event.productId);
+      final totalSold = await getTotalSold(
+        event.eventId,
+        event.spgId,
+        event.productId,
+      );
+      final totalGiven = await getTotalGiven(
+        event.eventId,
+        event.spgId,
+        event.productId,
+      );
+      final totalReturn = await getTotalReturn(
+        event.eventId,
+        event.spgId,
+        event.productId,
+      );
 
       final otherDistributions = totalGiven - mutation.qty;
       final minAllowedQty = totalSold + totalReturn - otherDistributions;
 
       if (event.newQty < minAllowedQty) {
-        emit(state.copyWith(
-          isLoading: false,
-          errorMessage: 'Qty tidak bisa lebih kecil dari yang sudah terjual ($minAllowedQty)',
-        ));
+        emit(
+          state.copyWith(
+            isLoading: false,
+            errorMessage:
+                'Qty tidak bisa lebih kecil dari yang sudah terjual ($minAllowedQty)',
+          ),
+        );
         return;
       }
 
@@ -227,18 +241,32 @@ class StockBloc extends Bloc<StockEvent, StockState> {
         return;
       }
 
-      final totalSold = await getTotalSold(event.eventId, event.spgId, mutation.productId);
-      final totalGiven = await getTotalGiven(event.eventId, event.spgId, mutation.productId);
-      final totalReturn = await getTotalReturn(event.eventId, event.spgId, mutation.productId);
+      final totalSold = await getTotalSold(
+        event.eventId,
+        event.spgId,
+        mutation.productId,
+      );
+      final totalGiven = await getTotalGiven(
+        event.eventId,
+        event.spgId,
+        mutation.productId,
+      );
+      final totalReturn = await getTotalReturn(
+        event.eventId,
+        event.spgId,
+        mutation.productId,
+      );
 
       final otherDistributions = totalGiven - mutation.qty;
       final remainingAfterDelete = otherDistributions - totalReturn;
 
       if (remainingAfterDelete < totalSold) {
-        emit(state.copyWith(
-          isLoading: false,
-          errorMessage: 'Tidak bisa hapus, stok sudah ada yang terjual',
-        ));
+        emit(
+          state.copyWith(
+            isLoading: false,
+            errorMessage: 'Tidak bisa hapus, stok sudah ada yang terjual',
+          ),
+        );
         return;
       }
 

@@ -38,10 +38,7 @@ class SalesBloc extends Bloc<SalesEvent, SalesState> {
     }
   }
 
-  Future<void> _onLoadSales(
-    LoadSales event,
-    Emitter<SalesState> emit,
-  ) async {
+  Future<void> _onLoadSales(LoadSales event, Emitter<SalesState> emit) async {
     try {
       emit(state.copyWith(isLoading: true, errorMessage: null));
       final salesList = await getSalesByEventSpg(event.eventId, event.spgId);
@@ -68,4 +65,3 @@ class SalesBloc extends Bloc<SalesEvent, SalesState> {
     }
   }
 }
-

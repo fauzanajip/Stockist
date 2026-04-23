@@ -7,9 +7,7 @@ class BackupScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Backup & Restore'),
-      ),
+      appBar: AppBar(title: const Text('Backup & Restore')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -29,7 +27,10 @@ class BackupScreen extends StatelessWidget {
                             color: AppColors.primary.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Icon(Icons.backup, color: AppColors.primary),
+                          child: const Icon(
+                            Icons.backup,
+                            color: AppColors.primary,
+                          ),
                         ),
                         const SizedBox(width: 12),
                         Text(
@@ -72,7 +73,10 @@ class BackupScreen extends StatelessWidget {
                             color: AppColors.secondary.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Icon(Icons.restore, color: AppColors.secondary),
+                          child: const Icon(
+                            Icons.restore,
+                            color: AppColors.secondary,
+                          ),
                         ),
                         const SizedBox(width: 12),
                         Text(

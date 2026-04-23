@@ -64,6 +64,7 @@ class GetSalesByEventSpg {
     return await repository.getByEventAndSpg(eventId, spgId);
   }
 }
+
 class GetSalesByEvent {
   final SalesRepository repository;
 

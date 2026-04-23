@@ -17,7 +17,9 @@ class ProductRepositoryImpl implements ProductRepository {
         'products',
         orderBy: 'name ASC',
       );
-      return maps.map<ProductEntity>((map) => ProductModel.fromMap(map)).toList();
+      return maps
+          .map<ProductEntity>((map) => ProductModel.fromMap(map))
+          .toList();
     } catch (e) {
       throw AppDatabaseException(message: 'Gagal mengambil data products: $e');
     }
@@ -32,9 +34,13 @@ class ProductRepositoryImpl implements ProductRepository {
         where: 'deleted_at IS NULL',
         orderBy: 'name ASC',
       );
-      return maps.map<ProductEntity>((map) => ProductModel.fromMap(map)).toList();
+      return maps
+          .map<ProductEntity>((map) => ProductModel.fromMap(map))
+          .toList();
     } catch (e) {
-      throw AppDatabaseException(message: 'Gagal mengambil data active products: $e');
+      throw AppDatabaseException(
+        message: 'Gagal mengambil data active products: $e',
+      );
     }
   }
 
@@ -72,9 +78,9 @@ class ProductRepositoryImpl implements ProductRepository {
   Future<ProductEntity> update(ProductEntity product) async {
     try {
       final db = await dbHelper.database;
-      final model = ProductModel.fromEntity(product).copyWith(
-        updatedAt: DateTime.now(),
-      );
+      final model = ProductModel.fromEntity(
+        product,
+      ).copyWith(updatedAt: DateTime.now());
       await db.update(
         'products',
         model.toMap(),
@@ -91,11 +97,7 @@ class ProductRepositoryImpl implements ProductRepository {
   Future<void> delete(String id) async {
     try {
       final db = await dbHelper.database;
-      await db.delete(
-        'products',
-        where: 'id = ?',
-        whereArgs: [id],
-      );
+      await db.delete('products', where: 'id = ?', whereArgs: [id]);
     } catch (e) {
       throw AppDatabaseException(message: 'Gagal hapus product: $e');
     }

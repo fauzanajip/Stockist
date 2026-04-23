@@ -21,12 +21,17 @@ class CashRecordRepositoryImpl implements CashRecordRepository {
       );
       return maps.map((map) => CashRecordModel.fromMap(map)).toList();
     } catch (e) {
-      throw AppDatabaseException(message: 'Gagal mengambil data cash records: $e');
+      throw AppDatabaseException(
+        message: 'Gagal mengambil data cash records: $e',
+      );
     }
   }
 
   @override
-  Future<CashRecordEntity?> getByEventAndSpg(String eventId, String spgId) async {
+  Future<CashRecordEntity?> getByEventAndSpg(
+    String eventId,
+    String spgId,
+  ) async {
     try {
       final db = await dbHelper.database;
       final List<Map<String, dynamic>> maps = await db.query(
@@ -39,7 +44,9 @@ class CashRecordRepositoryImpl implements CashRecordRepository {
       }
       return null;
     } catch (e) {
-      throw AppDatabaseException(message: 'Gagal mengambil data cash record: $e');
+      throw AppDatabaseException(
+        message: 'Gagal mengambil data cash record: $e',
+      );
     }
   }
 
@@ -68,9 +75,9 @@ class CashRecordRepositoryImpl implements CashRecordRepository {
   Future<CashRecordEntity> update(CashRecordEntity cashRecord) async {
     try {
       final db = await dbHelper.database;
-      final model = CashRecordModel.fromEntity(cashRecord).copyWith(
-        updatedAt: DateTime.now(),
-      );
+      final model = CashRecordModel.fromEntity(
+        cashRecord,
+      ).copyWith(updatedAt: DateTime.now());
       await db.update(
         'cash_records',
         model.toMap(),
@@ -87,11 +94,7 @@ class CashRecordRepositoryImpl implements CashRecordRepository {
   Future<void> delete(String id) async {
     try {
       final db = await dbHelper.database;
-      await db.delete(
-        'cash_records',
-        where: 'id = ?',
-        whereArgs: [id],
-      );
+      await db.delete('cash_records', where: 'id = ?', whereArgs: [id]);
     } catch (e) {
       throw AppDatabaseException(message: 'Gagal hapus cash record: $e');
     }

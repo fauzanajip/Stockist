@@ -83,10 +83,10 @@ class EventBloc extends Bloc<EventEvent, EventState> {
       final newEvent = await createEvent(
         CreateEventParams(name: event.name, date: event.date),
       );
-      
+
       // Auto-activate the newly created event
       await setEventActive(newEvent.id);
-      
+
       emit(EventCreated(event: newEvent));
       add(LoadAllEvents());
     } catch (e) {

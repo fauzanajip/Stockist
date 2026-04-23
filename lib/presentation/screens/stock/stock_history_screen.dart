@@ -15,11 +15,7 @@ class StockHistoryScreen extends StatefulWidget {
   final String eventId;
   final String? spgId;
 
-  const StockHistoryScreen({
-    super.key,
-    required this.eventId,
-    this.spgId,
-  });
+  const StockHistoryScreen({super.key, required this.eventId, this.spgId});
 
   @override
   State<StockHistoryScreen> createState() => _StockHistoryScreenState();
@@ -70,7 +66,9 @@ class _StockHistoryScreenState extends State<StockHistoryScreen> {
     }
   }
 
-  List<StockMutationEntity> _filterMutations(List<StockMutationEntity> mutations) {
+  List<StockMutationEntity> _filterMutations(
+    List<StockMutationEntity> mutations,
+  ) {
     if (_selectedFilter == null) return mutations;
     return mutations.where((m) => m.type == _selectedFilter).toList();
   }
@@ -78,7 +76,7 @@ class _StockHistoryScreenState extends State<StockHistoryScreen> {
   void _showEditDialog(StockMutationEntity mutation) {
     final productBloc = context.read<ProductBloc>();
     final productState = productBloc.state;
-    
+
     String productName = mutation.productId;
     if (productState is ProductsLoaded) {
       final product = productState.products.firstWhereOrNull(
@@ -88,7 +86,7 @@ class _StockHistoryScreenState extends State<StockHistoryScreen> {
     }
 
     int newQty = mutation.qty;
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -105,7 +103,8 @@ class _StockHistoryScreenState extends State<StockHistoryScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   IconButton(
-                    onPressed: () => setState(() => newQty = newQty > 0 ? newQty - 1 : 0),
+                    onPressed: () =>
+                        setState(() => newQty = newQty > 0 ? newQty - 1 : 0),
                     icon: const Icon(Icons.remove_circle_outline),
                     color: AppColors.error,
                   ),
@@ -115,7 +114,10 @@ class _StockHistoryScreenState extends State<StockHistoryScreen> {
                     child: Text(
                       newQty.toString(),
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   IconButton(
@@ -206,7 +208,9 @@ class _StockHistoryScreenState extends State<StockHistoryScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(widget.spgId != null ? 'Riwayat SPG' : 'Riwayat Distribusi'),
+          title: Text(
+            widget.spgId != null ? 'Riwayat SPG' : 'Riwayat Distribusi',
+          ),
           actions: [
             IconButton(onPressed: _loadData, icon: const Icon(Icons.refresh)),
           ],
@@ -267,7 +271,11 @@ class _StockHistoryScreenState extends State<StockHistoryScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.history, size: 64, color: AppColors.onSurfaceVariant),
+                const Icon(
+                  Icons.history,
+                  size: 64,
+                  color: AppColors.onSurfaceVariant,
+                ),
                 const SizedBox(height: 16),
                 const Text('Tidak ada data distribusi'),
               ],
@@ -310,9 +318,7 @@ class _StockHistoryScreenState extends State<StockHistoryScreen> {
 
     String spgName = mutation.spgId;
     if (spgState is SpqsLoaded && mutation.spgId != 'WAREHOUSE') {
-      final spg = spgState.spqs.firstWhereOrNull(
-        (s) => s.id == mutation.spgId,
-      );
+      final spg = spgState.spqs.firstWhereOrNull((s) => s.id == mutation.spgId);
       if (spg != null) spgName = spg.name;
     } else if (mutation.spgId == 'WAREHOUSE') {
       spgName = 'Warehouse';
@@ -365,7 +371,10 @@ class _StockHistoryScreenState extends State<StockHistoryScreen> {
                     Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: typeColor.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(8),

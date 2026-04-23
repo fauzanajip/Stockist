@@ -29,8 +29,8 @@ class SpgModel extends SpgEntity {
     return SpgModel(
       id: map['id'] as String,
       name: map['name'] as String,
-      deletedAt: map['deleted_at'] != null 
-          ? DatabaseHelper.stringToDateTime(map['deleted_at'] as String) 
+      deletedAt: map['deleted_at'] != null
+          ? DatabaseHelper.stringToDateTime(map['deleted_at'] as String)
           : null,
       createdAt: DatabaseHelper.stringToDateTime(map['created_at'] as String),
       updatedAt: DatabaseHelper.stringToDateTime(map['updated_at'] as String),
@@ -41,7 +41,9 @@ class SpgModel extends SpgEntity {
     return {
       'id': id,
       'name': name,
-      'deleted_at': deletedAt != null ? DatabaseHelper.dateTimeToString(deletedAt!) : null,
+      'deleted_at': deletedAt != null
+          ? DatabaseHelper.dateTimeToString(deletedAt!)
+          : null,
       'created_at': DatabaseHelper.dateTimeToString(createdAt),
       'updated_at': DatabaseHelper.dateTimeToString(updatedAt),
     };

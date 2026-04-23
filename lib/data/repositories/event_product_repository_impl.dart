@@ -19,9 +19,13 @@ class EventProductRepositoryImpl implements EventProductRepository {
         where: 'event_id = ?',
         whereArgs: [eventId],
       );
-      return maps.map<EventProductEntity>((map) => EventProductModel.fromMap(map)).toList();
+      return maps
+          .map<EventProductEntity>((map) => EventProductModel.fromMap(map))
+          .toList();
     } catch (e) {
-      throw AppDatabaseException(message: 'Gagal mengambil data Event Product: $e');
+      throw AppDatabaseException(
+        message: 'Gagal mengambil data Event Product: $e',
+      );
     }
   }
 
@@ -39,7 +43,9 @@ class EventProductRepositoryImpl implements EventProductRepository {
       }
       return null;
     } catch (e) {
-      throw AppDatabaseException(message: 'Gagal mengambil data Event Product: $e');
+      throw AppDatabaseException(
+        message: 'Gagal mengambil data Event Product: $e',
+      );
     }
   }
 
@@ -89,7 +95,9 @@ class EventProductRepositoryImpl implements EventProductRepository {
         whereArgs: [id],
       );
     } catch (e) {
-      throw AppDatabaseException(message: 'Gagal update harga Event Product: $e');
+      throw AppDatabaseException(
+        message: 'Gagal update harga Event Product: $e',
+      );
     }
   }
 
@@ -97,11 +105,7 @@ class EventProductRepositoryImpl implements EventProductRepository {
   Future<void> delete(String id) async {
     try {
       final db = await dbHelper.database;
-      await db.delete(
-        'event_products',
-        where: 'id = ?',
-        whereArgs: [id],
-      );
+      await db.delete('event_products', where: 'id = ?', whereArgs: [id]);
     } catch (e) {
       throw AppDatabaseException(message: 'Gagal hapus Event Product: $e');
     }

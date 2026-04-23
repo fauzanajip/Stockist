@@ -26,7 +26,10 @@ class SalesRepositoryImpl implements SalesRepository {
   }
 
   @override
-  Future<List<SalesEntity>> getByEventAndSpg(String eventId, String spgId) async {
+  Future<List<SalesEntity>> getByEventAndSpg(
+    String eventId,
+    String spgId,
+  ) async {
     try {
       final db = await dbHelper.database;
       final List<Map<String, dynamic>> maps = await db.query(
@@ -41,7 +44,11 @@ class SalesRepositoryImpl implements SalesRepository {
   }
 
   @override
-  Future<SalesEntity?> getByEventSpgProduct(String eventId, String spgId, String productId) async {
+  Future<SalesEntity?> getByEventSpgProduct(
+    String eventId,
+    String spgId,
+    String productId,
+  ) async {
     try {
       final db = await dbHelper.database;
       final List<Map<String, dynamic>> maps = await db.query(
@@ -83,9 +90,9 @@ class SalesRepositoryImpl implements SalesRepository {
   Future<SalesEntity> update(SalesEntity sales) async {
     try {
       final db = await dbHelper.database;
-      final model = SalesModel.fromEntity(sales).copyWith(
-        updatedAt: DateTime.now(),
-      );
+      final model = SalesModel.fromEntity(
+        sales,
+      ).copyWith(updatedAt: DateTime.now());
       await db.update(
         'sales',
         model.toMap(),
@@ -99,15 +106,22 @@ class SalesRepositoryImpl implements SalesRepository {
   }
 
   @override
-  Future<int> getTotalSold(String eventId, String spgId, String productId) async {
+  Future<int> getTotalSold(
+    String eventId,
+    String spgId,
+    String productId,
+  ) async {
     try {
       final db = await dbHelper.database;
-      final result = await db.rawQuery('''
+      final result = await db.rawQuery(
+        '''
         SELECT qty_sold
         FROM sales
         WHERE event_id = ? AND spg_id = ? AND product_id = ?
-      ''', [eventId, spgId, productId]);
-      
+      ''',
+        [eventId, spgId, productId],
+      );
+
       if (result.isNotEmpty && result.first['qty_sold'] != null) {
         return result.first['qty_sold'] as int;
       }

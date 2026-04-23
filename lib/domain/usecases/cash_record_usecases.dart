@@ -63,6 +63,7 @@ class GetCashRecordByEventSpg {
     return await repository.getByEventAndSpg(eventId, spgId);
   }
 }
+
 class GetCashRecordsByEvent {
   final CashRecordRepository repository;
 

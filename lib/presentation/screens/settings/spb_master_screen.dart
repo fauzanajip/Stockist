@@ -32,8 +32,8 @@ class _SpbMasterScreenState extends State<SpbMasterScreen> {
   void _addSpb() {
     if (_formKey.currentState!.validate()) {
       context.read<SpbBloc>().add(
-            CreateSpbEvent(name: _nameController.text.trim()),
-          );
+        CreateSpbEvent(name: _nameController.text.trim()),
+      );
       _nameController.clear();
     }
   }
@@ -77,7 +77,9 @@ class _SpbMasterScreenState extends State<SpbMasterScreen> {
                       label: const Text('TAMBAH SPB'),
                       style: ElevatedButton.styleFrom(
                         minimumSize: const Size(double.infinity, 54),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                       ),
                     ),
                   ],
@@ -96,21 +98,40 @@ class _SpbMasterScreenState extends State<SpbMasterScreen> {
                       return _buildEmptyState();
                     }
                     return ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                       itemCount: state.spbs.length,
                       itemBuilder: (context, index) {
                         final spb = state.spbs[index];
                         return Card(
                           margin: const EdgeInsets.only(bottom: 12),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
                           child: ListTile(
                             leading: CircleAvatar(
-                              backgroundColor: AppColors.primary.withOpacity(0.1),
-                              child: const Icon(Icons.person_pin, color: AppColors.primary, size: 20),
+                              backgroundColor: AppColors.primary.withOpacity(
+                                0.1,
+                              ),
+                              child: const Icon(
+                                Icons.person_pin,
+                                color: AppColors.primary,
+                                size: 20,
+                              ),
                             ),
-                            title: Text(spb.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                            title: Text(
+                              spb.name,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                             trailing: IconButton(
-                              icon: const Icon(Icons.delete_outline, color: AppColors.error),
+                              icon: const Icon(
+                                Icons.delete_outline,
+                                color: AppColors.error,
+                              ),
                               onPressed: () => _confirmDelete(spb),
                             ),
                           ),
@@ -133,7 +154,11 @@ class _SpbMasterScreenState extends State<SpbMasterScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.person_pin_outlined, size: 64, color: AppColors.onSurfaceVariant),
+          Icon(
+            Icons.person_pin_outlined,
+            size: 64,
+            color: AppColors.onSurfaceVariant,
+          ),
           SizedBox(height: 16),
           Text('Belum ada SPB', style: TextStyle(fontWeight: FontWeight.bold)),
         ],
@@ -148,13 +173,19 @@ class _SpbMasterScreenState extends State<SpbMasterScreen> {
         title: const Text('Hapus SPB?'),
         content: Text('Yakin ingin menghapus ${spb.name}?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('BATAL')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('BATAL'),
+          ),
           TextButton(
             onPressed: () {
               context.read<SpbBloc>().add(DeleteSpbEvent(spbId: spb.id));
               Navigator.pop(context);
             },
-            child: const Text('HAPUS', style: TextStyle(color: AppColors.error)),
+            child: const Text(
+              'HAPUS',
+              style: TextStyle(color: AppColors.error),
+            ),
           ),
         ],
       ),

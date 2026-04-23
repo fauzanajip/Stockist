@@ -109,8 +109,9 @@ class EventProductBloc extends Bloc<EventProductEvent, EventProductState> {
       final currentInDb = await getProductsByEvent(event.eventId);
 
       // 2. Identify products to remove
-      final draftProductIds =
-          event.assignedProducts.map((p) => p.productId).toSet();
+      final draftProductIds = event.assignedProducts
+          .map((p) => p.productId)
+          .toSet();
       final toRemove = currentInDb.where(
         (p) => !draftProductIds.contains(p.productId),
       );

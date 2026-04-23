@@ -21,10 +21,7 @@ class SpgBloc extends Bloc<SpgEvent, SpgState> {
     on<SoftDeleteSpqEvent>(_onSoftDeleteSpq);
   }
 
-  Future<void> _onLoadAllSpqs(
-    LoadAllSpqs event,
-    Emitter<SpgState> emit,
-  ) async {
+  Future<void> _onLoadAllSpqs(LoadAllSpqs event, Emitter<SpgState> emit) async {
     try {
       emit(SpgLoading());
       final spgs = await getAllSpgs();

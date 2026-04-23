@@ -66,9 +66,9 @@ class EventRepositoryImpl implements EventRepository {
   Future<EventEntity> update(EventEntity event) async {
     try {
       final db = await dbHelper.database;
-      final model = EventModel.fromEntity(event).copyWith(
-        updatedAt: DateTime.now(),
-      );
+      final model = EventModel.fromEntity(
+        event,
+      ).copyWith(updatedAt: DateTime.now());
       await db.update(
         'events',
         model.toMap(),
@@ -85,11 +85,7 @@ class EventRepositoryImpl implements EventRepository {
   Future<void> delete(String id) async {
     try {
       final db = await dbHelper.database;
-      await db.delete(
-        'events',
-        where: 'id = ?',
-        whereArgs: [id],
-      );
+      await db.delete('events', where: 'id = ?', whereArgs: [id]);
     } catch (e) {
       throw AppDatabaseException(message: 'Gagal hapus event');
     }

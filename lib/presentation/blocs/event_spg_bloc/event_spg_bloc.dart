@@ -96,7 +96,7 @@ class EventSpgBloc extends Bloc<EventSpgEvent, EventSpgState> {
     Emitter<EventSpgState> emit,
   ) async {
     try {
-      // Small update doesn't need to emit loading to avoid flicker in some UIs, 
+      // Small update doesn't need to emit loading to avoid flicker in some UIs,
       // but here we might just want to persist it.
       // In the new Drafting model, this might not even be called until Sync.
     } catch (e) {
@@ -116,9 +116,7 @@ class EventSpgBloc extends Bloc<EventSpgEvent, EventSpgState> {
 
       // 2. Identify SPGs to remove
       final draftSpgIds = event.assignedSpgs.map((s) => s.spgId).toSet();
-      final toRemove = currentInDb.where(
-        (s) => !draftSpgIds.contains(s.spgId),
-      );
+      final toRemove = currentInDb.where((s) => !draftSpgIds.contains(s.spgId));
 
       for (final s in toRemove) {
         await removeSpgFromEvent(s.id);

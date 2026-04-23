@@ -23,9 +23,7 @@ class _EventFocusScreenState extends State<EventFocusScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Fokus Event'),
-      ),
+      appBar: AppBar(title: const Text('Fokus Event')),
       body: BlocBuilder<EventBloc, EventState>(
         builder: (context, state) {
           if (state is EventLoading) {
@@ -56,9 +54,9 @@ class _EventFocusScreenState extends State<EventFocusScreen> {
                   ),
                   child: InkWell(
                     onTap: () {
-                      context
-                          .read<EventBloc>()
-                          .add(SetEventActive(id: event.id));
+                      context.read<EventBloc>().add(
+                        SetEventActive(id: event.id),
+                      );
                     },
                     borderRadius: BorderRadius.circular(20),
                     child: Padding(
@@ -75,7 +73,9 @@ class _EventFocusScreenState extends State<EventFocusScreen> {
                             ),
                             child: Icon(
                               isActive ? Icons.star : Icons.star_border,
-                              color: isActive ? Colors.white : AppColors.onSurfaceVariant,
+                              color: isActive
+                                  ? Colors.white
+                                  : AppColors.onSurfaceVariant,
                             ),
                           ),
                           const SizedBox(width: 16),
@@ -91,7 +91,9 @@ class _EventFocusScreenState extends State<EventFocusScreen> {
                                   ),
                                 ),
                                 Text(
-                                  app_formatters.Formatters.formatDate(event.date),
+                                  app_formatters.Formatters.formatDate(
+                                    event.date,
+                                  ),
                                   style: const TextStyle(
                                     fontSize: 12,
                                     color: AppColors.onSurfaceVariant,
@@ -101,7 +103,10 @@ class _EventFocusScreenState extends State<EventFocusScreen> {
                             ),
                           ),
                           if (isActive)
-                            const Icon(Icons.check_circle, color: AppColors.primary),
+                            const Icon(
+                              Icons.check_circle,
+                              color: AppColors.primary,
+                            ),
                         ],
                       ),
                     ),

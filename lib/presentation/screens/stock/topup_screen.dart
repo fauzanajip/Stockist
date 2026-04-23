@@ -86,9 +86,9 @@ class _TopupScreenState extends State<TopupScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal menyimpan topup: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Gagal menyimpan topup: $e')));
       }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
@@ -173,9 +173,9 @@ class _TopupScreenState extends State<TopupScreen> {
           const SizedBox(height: 4),
           Text(
             'Pilih produk dan masukkan jumlah stok tambahan.',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.onSurfaceVariant,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: AppColors.onSurfaceVariant),
           ),
         ],
       ),
@@ -209,7 +209,9 @@ class _TopupScreenState extends State<TopupScreen> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
                 side: BorderSide(
-                  color: isSelected ? AppColors.success : AppColors.onSurfaceVariant,
+                  color: isSelected
+                      ? AppColors.success
+                      : AppColors.onSurfaceVariant,
                   width: isSelected ? 2 : 1,
                 ),
               ),
@@ -224,12 +226,12 @@ class _TopupScreenState extends State<TopupScreen> {
                   padding: const EdgeInsets.all(16),
                   child: Row(
                     children: [
-Icon(
-                          isSelected
-                              ? Icons.check_circle
-                              : Icons.circle_outlined,
-                          color: isSelected ? AppColors.success : AppColors.onSurfaceVariant,
-                        ),
+                      Icon(
+                        isSelected ? Icons.check_circle : Icons.circle_outlined,
+                        color: isSelected
+                            ? AppColors.success
+                            : AppColors.onSurfaceVariant,
+                      ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
@@ -241,9 +243,8 @@ Icon(
                             ),
                             Text(
                               'SKU: ${product.sku}',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.onSurfaceVariant,
-                              ),
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(color: AppColors.onSurfaceVariant),
                             ),
                           ],
                         ),
@@ -344,14 +345,17 @@ Icon(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: ElevatedButton(
-          onPressed: (_isSubmitting || _selectedProductId == null || _quantity <= 0)
+          onPressed:
+              (_isSubmitting || _selectedProductId == null || _quantity <= 0)
               ? null
               : _submitTopup,
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.success,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
           child: _isSubmitting
               ? const SizedBox(
@@ -433,7 +437,11 @@ class _QuantityInputState extends State<_QuantityInput> {
         children: [
           IconButton(
             onPressed: () => _updateValue(widget.value - 1),
-            icon: const Icon(Icons.remove_circle, color: AppColors.error, size: 32),
+            icon: const Icon(
+              Icons.remove_circle,
+              color: AppColors.error,
+              size: 32,
+            ),
           ),
           const SizedBox(width: 16),
           SizedBox(
@@ -460,7 +468,11 @@ class _QuantityInputState extends State<_QuantityInput> {
           const SizedBox(width: 16),
           IconButton(
             onPressed: () => _updateValue(widget.value + 1),
-            icon: const Icon(Icons.add_circle, color: AppColors.success, size: 32),
+            icon: const Icon(
+              Icons.add_circle,
+              color: AppColors.success,
+              size: 32,
+            ),
           ),
         ],
       ),

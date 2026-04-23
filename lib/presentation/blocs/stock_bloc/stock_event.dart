@@ -66,14 +66,12 @@ class LoadStockByEventSpg extends StockEvent {
   final String eventId;
   final String spgId;
 
-  const LoadStockByEventSpg({
-    required this.eventId,
-    required this.spgId,
-  });
+  const LoadStockByEventSpg({required this.eventId, required this.spgId});
 
   @override
   List<Object?> get props => [eventId, spgId];
 }
+
 class LoadStockByEvent extends StockEvent {
   final String eventId;
 

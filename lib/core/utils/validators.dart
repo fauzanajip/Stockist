@@ -21,7 +21,7 @@ class Validators {
   static String? validatePositiveNumber(String? value, String fieldName) {
     final error = validateNumber(value, fieldName);
     if (error != null) return error;
-    
+
     if (double.parse(value!) <= 0) {
       return '$fieldName harus lebih dari 0';
     }
@@ -31,17 +31,21 @@ class Validators {
   static String? validateNonNegativeNumber(String? value, String fieldName) {
     final error = validateNumber(value, fieldName);
     if (error != null) return error;
-    
+
     if (double.parse(value!) < 0) {
       return '$fieldName tidak boleh negatif';
     }
     return null;
   }
 
-  static String? validateMinLength(String? value, int minLength, String fieldName) {
+  static String? validateMinLength(
+    String? value,
+    int minLength,
+    String fieldName,
+  ) {
     final error = validateRequired(value, fieldName);
     if (error != null) return error;
-    
+
     if (value!.length < minLength) {
       return '$fieldName minimal $minLength karakter';
     }

@@ -6,10 +6,7 @@ class CreateEventParams extends Equatable {
   final String name;
   final DateTime date;
 
-  const CreateEventParams({
-    required this.name,
-    required this.date,
-  });
+  const CreateEventParams({required this.name, required this.date});
 
   @override
   List<Object?> get props => [name, date];

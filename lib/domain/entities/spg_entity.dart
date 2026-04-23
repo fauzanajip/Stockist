@@ -5,19 +5,11 @@ class SpgEntity extends Equatable {
   final String name;
   final DateTime? deletedAt;
 
-  const SpgEntity({
-    required this.id,
-    required this.name,
-    this.deletedAt,
-  });
+  const SpgEntity({required this.id, required this.name, this.deletedAt});
 
   bool get isDeleted => deletedAt != null;
 
-  SpgEntity copyWith({
-    String? id,
-    String? name,
-    DateTime? deletedAt,
-  }) {
+  SpgEntity copyWith({String? id, String? name, DateTime? deletedAt}) {
     return SpgEntity(
       id: id ?? this.id,
       name: name ?? this.name,

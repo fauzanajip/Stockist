@@ -40,5 +40,13 @@ class SalesEntity extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, eventId, spgId, productId, qtySold, updatedAt, previousQty];
+  List<Object?> get props => [
+    id,
+    eventId,
+    spgId,
+    productId,
+    qtySold,
+    updatedAt,
+    previousQty,
+  ];
 }

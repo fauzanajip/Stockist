@@ -37,12 +37,7 @@ class CreateSpg {
   CreateSpg(this.repository);
 
   Future<SpgEntity> call(String name) async {
-    return await repository.create(
-      SpgEntity(
-        id: '',
-        name: name,
-      ),
-    );
+    return await repository.create(SpgEntity(id: '', name: name));
   }
 }
 

@@ -14,7 +14,7 @@ class BackupService {
   static Future<void> exportBackup() async {
     try {
       final db = await DatabaseHelper.instance.database;
-      
+
       // Export all tables
       final backupData = {
         'export_date': DateTime.now().toIso8601String(),
@@ -32,21 +32,19 @@ class BackupService {
       };
 
       final jsonString = JsonEncoder.withIndent('  ').convert(backupData);
-      
+
       // Save to file
       final directory = await getApplicationDocumentsDirectory();
-      final fileName = 'stockist_backup_${DateTime.now().millisecondsSinceEpoch}.json';
+      final fileName =
+          'stockist_backup_${DateTime.now().millisecondsSinceEpoch}.json';
       final filePath = '${directory.path}/$fileName';
-      
+
       final file = File(filePath);
       await file.writeAsString(jsonString);
 
       // Share via Android Share Sheet
       final xFile = XFile(filePath);
-      await Share.shareXFiles(
-        [xFile],
-        text: 'Backup Data Stockist App',
-      );
+      await Share.shareXFiles([xFile], text: 'Backup Data Stockist App');
 
       // Log backup
       await db.insert('backup_logs', {
@@ -66,33 +64,54 @@ class BackupService {
   static Future<void> exportEventBackup(String eventId) async {
     try {
       final db = await DatabaseHelper.instance.database;
-      
+
       final backupData = {
         'export_date': DateTime.now().toIso8601String(),
         'app_version': '1.0.0',
         'event_id': eventId,
-        'events': await db.query('events', where: 'id = ?', whereArgs: [eventId]),
-        'event_spgs': await db.query('event_spgs', where: 'event_id = ?', whereArgs: [eventId]),
-        'event_products': await db.query('event_products', where: 'event_id = ?', whereArgs: [eventId]),
-        'stock_mutations': await db.query('stock_mutations', where: 'event_id = ?', whereArgs: [eventId]),
-        'sales': await db.query('sales', where: 'event_id = ?', whereArgs: [eventId]),
-        'cash_records': await db.query('cash_records', where: 'event_id = ?', whereArgs: [eventId]),
+        'events': await db.query(
+          'events',
+          where: 'id = ?',
+          whereArgs: [eventId],
+        ),
+        'event_spgs': await db.query(
+          'event_spgs',
+          where: 'event_id = ?',
+          whereArgs: [eventId],
+        ),
+        'event_products': await db.query(
+          'event_products',
+          where: 'event_id = ?',
+          whereArgs: [eventId],
+        ),
+        'stock_mutations': await db.query(
+          'stock_mutations',
+          where: 'event_id = ?',
+          whereArgs: [eventId],
+        ),
+        'sales': await db.query(
+          'sales',
+          where: 'event_id = ?',
+          whereArgs: [eventId],
+        ),
+        'cash_records': await db.query(
+          'cash_records',
+          where: 'event_id = ?',
+          whereArgs: [eventId],
+        ),
       };
 
       final jsonString = JsonEncoder.withIndent('  ').convert(backupData);
-      
+
       final directory = await getApplicationDocumentsDirectory();
       final fileName = 'stockist_event_$eventId.json';
       final filePath = '${directory.path}/$fileName';
-      
+
       final file = File(filePath);
       await file.writeAsString(jsonString);
 
       final xFile = XFile(filePath);
-      await Share.shareXFiles(
-        [xFile],
-        text: 'Backup Data Event Stockist',
-      );
+      await Share.shareXFiles([xFile], text: 'Backup Data Event Stockist');
 
       await db.insert('backup_logs', {
         'id': const Uuid().v4(),
@@ -115,7 +134,7 @@ class BackupService {
       final backupData = jsonDecode(jsonString) as Map<String, dynamic>;
 
       final db = await DatabaseHelper.instance.database;
-      
+
       await db.transaction((txn) async {
         // Import events
         if (backupData['events'] != null) {
@@ -127,7 +146,9 @@ class BackupService {
 
         // Import products (only if global backup)
         if (backupData['products'] != null) {
-          final products = List<Map<String, dynamic>>.from(backupData['products']);
+          final products = List<Map<String, dynamic>>.from(
+            backupData['products'],
+          );
           for (final product in products) {
             await txn.insert('products', product);
           }
@@ -164,14 +185,14 @@ class BackupService {
     final result = await db.rawQuery(
       'SELECT MAX(timestamp) as last_backup FROM backup_logs',
     );
-    
+
     if (result.isEmpty || result.first['last_backup'] == null) {
       return true; // No backup yet
     }
 
     final lastBackup = DateTime.parse(result.first['last_backup'] as String);
     final hoursSinceBackup = DateTime.now().difference(lastBackup).inHours;
-    
+
     return hoursSinceBackup >= 4;
   }
 }

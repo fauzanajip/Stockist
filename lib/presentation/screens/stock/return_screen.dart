@@ -70,7 +70,9 @@ class _ReturnScreenState extends State<ReturnScreen> {
     if (_quantity > _maxReturnQty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Jumlah retur melebihi stok yang tersedia (max: $_maxReturnQty)'),
+          content: Text(
+            'Jumlah retur melebihi stok yang tersedia (max: $_maxReturnQty)',
+          ),
           backgroundColor: AppColors.error,
         ),
       );
@@ -195,9 +197,9 @@ class _ReturnScreenState extends State<ReturnScreen> {
           const SizedBox(height: 4),
           Text(
             'Pilih produk dan masukkan jumlah stok yang dikembalikan.',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.onSurfaceVariant,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: AppColors.onSurfaceVariant),
           ),
           const SizedBox(height: 8),
           Container(
@@ -253,12 +255,18 @@ class _ReturnScreenState extends State<ReturnScreen> {
 
                 final mutations = stockState.mutations;
                 final totalGiven = mutations
-                    .where((m) => m.productId == product.id &&
-                           m.type != MutationType.returnMutation)
+                    .where(
+                      (m) =>
+                          m.productId == product.id &&
+                          m.type != MutationType.returnMutation,
+                    )
                     .fold(0, (sum, m) => sum + m.qty);
                 final totalReturned = mutations
-                    .where((m) => m.productId == product.id &&
-                           m.type == MutationType.returnMutation)
+                    .where(
+                      (m) =>
+                          m.productId == product.id &&
+                          m.type == MutationType.returnMutation,
+                    )
                     .fold(0, (sum, m) => sum + m.qty);
                 final availableToReturn = totalGiven - totalReturned;
 
@@ -268,7 +276,9 @@ class _ReturnScreenState extends State<ReturnScreen> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                     side: BorderSide(
-                      color: isSelected ? AppColors.warning : AppColors.onSurfaceVariant,
+                      color: isSelected
+                          ? AppColors.warning
+                          : AppColors.onSurfaceVariant,
                       width: isSelected ? 2 : 1,
                     ),
                   ),
@@ -294,8 +304,8 @@ class _ReturnScreenState extends State<ReturnScreen> {
                             color: isSelected
                                 ? AppColors.warning
                                 : (availableToReturn > 0
-                                    ? AppColors.onSurfaceVariant
-                                    : AppColors.onSurfaceVariant),
+                                      ? AppColors.onSurfaceVariant
+                                      : AppColors.onSurfaceVariant),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
@@ -304,27 +314,30 @@ class _ReturnScreenState extends State<ReturnScreen> {
                               children: [
                                 Text(
                                   product.name,
-                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    color: availableToReturn > 0
-                                        ? null
-                                        : AppColors.onSurfaceVariant,
-                                  ),
+                                  style: Theme.of(context).textTheme.titleMedium
+                                      ?.copyWith(
+                                        color: availableToReturn > 0
+                                            ? null
+                                            : AppColors.onSurfaceVariant,
+                                      ),
                                 ),
                                 Text(
                                   'SKU: ${product.sku}',
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: AppColors.onSurfaceVariant,
-                                  ),
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(
+                                        color: AppColors.onSurfaceVariant,
+                                      ),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   'Tersedia untuk retur: $availableToReturn',
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: availableToReturn > 0
-                                        ? AppColors.warning
-                                        : AppColors.error,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(
+                                        color: availableToReturn > 0
+                                            ? AppColors.warning
+                                            : AppColors.error,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                 ),
                               ],
                             ),
@@ -455,14 +468,17 @@ class _ReturnScreenState extends State<ReturnScreen> {
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: ElevatedButton(
-          onPressed: (_isSubmitting || _selectedProductId == null || _quantity <= 0)
+          onPressed:
+              (_isSubmitting || _selectedProductId == null || _quantity <= 0)
               ? null
               : _submitReturn,
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.warning,
             foregroundColor: AppColors.onSurface,
             padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
           child: _isSubmitting
               ? const SizedBox(
@@ -553,7 +569,11 @@ class _QuantityInputState extends State<_QuantityInput> {
         children: [
           IconButton(
             onPressed: () => _updateValue(widget.value - 1),
-            icon: const Icon(Icons.remove_circle, color: AppColors.error, size: 32),
+            icon: const Icon(
+              Icons.remove_circle,
+              color: AppColors.error,
+              size: 32,
+            ),
           ),
           const SizedBox(width: 16),
           SizedBox(
@@ -580,7 +600,11 @@ class _QuantityInputState extends State<_QuantityInput> {
           const SizedBox(width: 16),
           IconButton(
             onPressed: () => _updateValue(widget.value + 1),
-            icon: const Icon(Icons.add_circle, color: AppColors.warning, size: 32),
+            icon: const Icon(
+              Icons.add_circle,
+              color: AppColors.warning,
+              size: 32,
+            ),
           ),
         ],
       ),

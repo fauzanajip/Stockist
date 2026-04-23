@@ -20,14 +20,21 @@ class StockMutationRepositoryImpl implements StockMutationRepository {
         whereArgs: [eventId],
         orderBy: 'timestamp DESC',
       );
-      return maps.map<StockMutationEntity>((map) => StockMutationModel.fromMap(map)).toList();
+      return maps
+          .map<StockMutationEntity>((map) => StockMutationModel.fromMap(map))
+          .toList();
     } catch (e) {
-      throw AppDatabaseException(message: 'Gagal mengambil data stock mutations: $e');
+      throw AppDatabaseException(
+        message: 'Gagal mengambil data stock mutations: $e',
+      );
     }
   }
 
   @override
-  Future<List<StockMutationEntity>> getByEventAndSpg(String eventId, String spgId) async {
+  Future<List<StockMutationEntity>> getByEventAndSpg(
+    String eventId,
+    String spgId,
+  ) async {
     try {
       final db = await dbHelper.database;
       final List<Map<String, dynamic>> maps = await db.query(
@@ -36,14 +43,22 @@ class StockMutationRepositoryImpl implements StockMutationRepository {
         whereArgs: [eventId, spgId],
         orderBy: 'timestamp DESC',
       );
-      return maps.map<StockMutationEntity>((map) => StockMutationModel.fromMap(map)).toList();
+      return maps
+          .map<StockMutationEntity>((map) => StockMutationModel.fromMap(map))
+          .toList();
     } catch (e) {
-      throw AppDatabaseException(message: 'Gagal mengambil data stock mutations: $e');
+      throw AppDatabaseException(
+        message: 'Gagal mengambil data stock mutations: $e',
+      );
     }
   }
 
   @override
-  Future<List<StockMutationEntity>> getByEventSpgProduct(String eventId, String spgId, String productId) async {
+  Future<List<StockMutationEntity>> getByEventSpgProduct(
+    String eventId,
+    String spgId,
+    String productId,
+  ) async {
     try {
       final db = await dbHelper.database;
       final List<Map<String, dynamic>> maps = await db.query(
@@ -52,9 +67,13 @@ class StockMutationRepositoryImpl implements StockMutationRepository {
         whereArgs: [eventId, spgId, productId],
         orderBy: 'timestamp DESC',
       );
-      return maps.map<StockMutationEntity>((map) => StockMutationModel.fromMap(map)).toList();
+      return maps
+          .map<StockMutationEntity>((map) => StockMutationModel.fromMap(map))
+          .toList();
     } catch (e) {
-      throw AppDatabaseException(message: 'Gagal mengambil data stock mutations: $e');
+      throw AppDatabaseException(
+        message: 'Gagal mengambil data stock mutations: $e',
+      );
     }
   }
 
@@ -84,11 +103,7 @@ class StockMutationRepositoryImpl implements StockMutationRepository {
   Future<void> delete(String id) async {
     try {
       final db = await dbHelper.database;
-      await db.delete(
-        'stock_mutations',
-        where: 'id = ?',
-        whereArgs: [id],
-      );
+      await db.delete('stock_mutations', where: 'id = ?', whereArgs: [id]);
     } catch (e) {
       throw AppDatabaseException(message: 'Gagal hapus stock mutation: $e');
     }
@@ -119,16 +134,23 @@ class StockMutationRepositoryImpl implements StockMutationRepository {
   }
 
   @override
-  Future<int> getTotalGiven(String eventId, String spgId, String productId) async {
+  Future<int> getTotalGiven(
+    String eventId,
+    String spgId,
+    String productId,
+  ) async {
     try {
       final db = await dbHelper.database;
-      final result = await db.rawQuery('''
+      final result = await db.rawQuery(
+        '''
         SELECT SUM(qty) as total
         FROM stock_mutations
         WHERE event_id = ? AND spg_id = ? AND product_id = ?
         AND (type = 'initial' OR type = 'topup')
-      ''', [eventId, spgId, productId]);
-      
+      ''',
+        [eventId, spgId, productId],
+      );
+
       if (result.isNotEmpty && result.first['total'] != null) {
         return result.first['total'] as int;
       }
@@ -139,16 +161,23 @@ class StockMutationRepositoryImpl implements StockMutationRepository {
   }
 
   @override
-  Future<int> getTotalReturn(String eventId, String spgId, String productId) async {
+  Future<int> getTotalReturn(
+    String eventId,
+    String spgId,
+    String productId,
+  ) async {
     try {
       final db = await dbHelper.database;
-      final result = await db.rawQuery('''
+      final result = await db.rawQuery(
+        '''
         SELECT SUM(qty) as total
         FROM stock_mutations
         WHERE event_id = ? AND spg_id = ? AND product_id = ?
         AND type = 'returnMutation'
-      ''', [eventId, spgId, productId]);
-      
+      ''',
+        [eventId, spgId, productId],
+      );
+
       if (result.isNotEmpty && result.first['total'] != null) {
         return result.first['total'] as int;
       }

@@ -18,10 +18,7 @@ class SpbBloc extends Bloc<SpbEvent, SpbState> {
     on<DeleteSpbEvent>(_onDeleteSpb);
   }
 
-  Future<void> _onLoadAllSpbs(
-    LoadAllSpbs event,
-    Emitter<SpbState> emit,
-  ) async {
+  Future<void> _onLoadAllSpbs(LoadAllSpbs event, Emitter<SpbState> emit) async {
     try {
       emit(SpbLoading());
       final spbs = await getAllSpbs();
