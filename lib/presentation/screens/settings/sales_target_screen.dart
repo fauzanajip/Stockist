@@ -71,7 +71,7 @@ class _SalesTargetScreenState extends State<SalesTargetScreen> {
       isScrollControlled: true,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
+        borderRadius: BorderRadius.zero,
       ),
       builder: (bottomSheetContext) {
         return StatefulBuilder(
@@ -89,25 +89,25 @@ class _SalesTargetScreenState extends State<SalesTargetScreen> {
                   children: [
                     // Header
                     Container(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(20),
                       decoration: const BoxDecoration(
-                        color: AppColors.surfaceContainer,
-                        borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
+                        color: AppColors.surfaceContainerLowest,
+                        border: Border(bottom: BorderSide(color: AppColors.surfaceContainerHigh)),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.batch_prediction_rounded, color: AppColors.secondary),
+                          const Icon(Icons.batch_prediction_rounded, color: AppColors.secondary, size: 20),
                           const SizedBox(width: 12),
                           Text(
-                            'BATCH CONFIGURATION',
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
+                            'BATCH_CONFIGURATION_PROTOCOL',
+                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.w900,
                                   letterSpacing: 1,
                                 ),
                           ),
                           const Spacer(),
                           IconButton(
-                            icon: const Icon(Icons.close_rounded),
+                            icon: const Icon(Icons.close_fullscreen_outlined, size: 20),
                             onPressed: () => Navigator.pop(bottomSheetContext),
                           ),
                         ],
@@ -115,7 +115,7 @@ class _SalesTargetScreenState extends State<SalesTargetScreen> {
                     ),
                     Flexible(
                       child: SingleChildScrollView(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(20),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -123,11 +123,11 @@ class _SalesTargetScreenState extends State<SalesTargetScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  'SELECT SPG UNITS',
+                                  'FLEET_UNIT_SELECTION',
                                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                         color: AppColors.onSurfaceVariant,
-                                        fontWeight: FontWeight.bold,
-                                        letterSpacing: 1.5,
+                                        fontWeight: FontWeight.w900,
+                                        letterSpacing: 2,
                                       ),
                                 ),
                                 TextButton(
@@ -147,8 +147,8 @@ class _SalesTargetScreenState extends State<SalesTargetScreen> {
                                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                   ),
                                   child: Text(
-                                    selectedSpgIds.length == eventSpgState.assignedSpgs.length ? 'DESELECT ALL' : 'SELECT ALL',
-                                    style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.secondary),
+                                    selectedSpgIds.length == eventSpgState.assignedSpgs.length ? 'DESELECT_ALL' : 'SELECT_ALL',
+                                    style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: AppColors.secondary, letterSpacing: 1),
                                   ),
                                 ),
                               ],
@@ -157,7 +157,7 @@ class _SalesTargetScreenState extends State<SalesTargetScreen> {
                             Container(
                               decoration: BoxDecoration(
                                 color: AppColors.surfaceContainerLowest,
-                                borderRadius: BorderRadius.circular(4),
+                                border: Border.all(color: AppColors.surfaceContainerHigh),
                               ),
                               child: Column(
                                 children: [
@@ -170,11 +170,13 @@ class _SalesTargetScreenState extends State<SalesTargetScreen> {
                                       title: Text(
                                         (spg?.name ?? es.spgId).toUpperCase(),
                                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                              fontWeight: FontWeight.bold,
+                                              fontWeight: FontWeight.w900,
+                                              letterSpacing: 0.5,
                                             ),
                                       ),
                                       value: isSelected,
                                       activeColor: AppColors.secondary,
+                                      checkboxShape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
                                       onChanged: (val) {
                                         setSheetState(() {
                                           if (val == true) {
@@ -192,13 +194,13 @@ class _SalesTargetScreenState extends State<SalesTargetScreen> {
                                 ],
                               ),
                             ),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 32),
                             Text(
-                              'SET PRODUCT TARGETS (UNITS)',
+                              'QUOTA_ALLOCATION_MATRIX (UNITS)',
                               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                     color: AppColors.onSurfaceVariant,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 1.5,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 2,
                                   ),
                             ),
                             const SizedBox(height: 12),
@@ -209,11 +211,10 @@ class _SalesTargetScreenState extends State<SalesTargetScreen> {
                               return Padding(
                                 padding: const EdgeInsets.only(bottom: 8),
                                 child: Container(
-                                  padding: const EdgeInsets.all(12),
+                                  padding: const EdgeInsets.all(16),
                                   decoration: BoxDecoration(
                                     color: AppColors.surfaceContainerLowest,
-                                    borderRadius: BorderRadius.circular(4),
-                                    border: Border.all(color: AppColors.surfaceContainerHigh, width: 1),
+                                    border: Border.all(color: AppColors.surfaceContainerHigh),
                                   ),
                                   child: Row(
                                     children: [
@@ -222,7 +223,8 @@ class _SalesTargetScreenState extends State<SalesTargetScreen> {
                                         child: Text(
                                           (product?.name ?? ep.productId).toUpperCase(),
                                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                                fontWeight: FontWeight.bold,
+                                                fontWeight: FontWeight.w900,
+                                                letterSpacing: 0.5,
                                               ),
                                         ),
                                       ),
@@ -233,18 +235,15 @@ class _SalesTargetScreenState extends State<SalesTargetScreen> {
                                           initialValue: targetInputs[ep.productId]?.toString() ?? '0',
                                           keyboardType: TextInputType.number,
                                           textAlign: TextAlign.center,
-                                          style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.secondary),
+                                          style: const TextStyle(fontWeight: FontWeight.w900, color: AppColors.secondary, fontSize: 16),
                                           decoration: const InputDecoration(
                                             isDense: true,
                                             contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 12),
                                             filled: true,
                                             fillColor: AppColors.surface,
-                                            enabledBorder: UnderlineInputBorder(
-                                              borderSide: BorderSide(color: AppColors.surfaceContainerHigh),
-                                            ),
-                                            focusedBorder: UnderlineInputBorder(
-                                              borderSide: BorderSide(color: AppColors.secondary, width: 2),
-                                            ),
+                                            border: OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: AppColors.surfaceContainerHigh)),
+                                            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: AppColors.surfaceContainerHigh)),
+                                            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: AppColors.secondary, width: 2)),
                                           ),
                                           onChanged: (val) {
                                             targetInputs[ep.productId] = int.tryParse(val) ?? 0;
@@ -262,23 +261,21 @@ class _SalesTargetScreenState extends State<SalesTargetScreen> {
                     ),
                     // Action Footer
                     Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: AppColors.surfaceContainer,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            blurRadius: 10,
-                            offset: const Offset(0, -2),
-                          ),
-                        ],
+                      padding: const EdgeInsets.all(20),
+                      decoration: const BoxDecoration(
+                        color: AppColors.surfaceContainerLowest,
+                        border: Border(top: BorderSide(color: AppColors.surfaceContainerHigh)),
                       ),
                       child: Row(
                         children: [
                           Expanded(
                             child: OutlinedButton(
                               onPressed: () => Navigator.pop(bottomSheetContext),
-                              child: const Text('CANCEL'),
+                              style: OutlinedButton.styleFrom(
+                                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                              ),
+                              child: const Text('ABORT_OVERRIDE', style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1)),
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -291,7 +288,14 @@ class _SalesTargetScreenState extends State<SalesTargetScreen> {
                                       _applyBulkTargets(selectedSpgIds, targetInputs);
                                       Navigator.pop(bottomSheetContext);
                                     },
-                              child: Text('APPLY TO ${selectedSpgIds.length} UNITS'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                foregroundColor: Colors.white,
+                                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                elevation: 0,
+                              ),
+                              child: Text('COMMIT_TO_${selectedSpgIds.length}_UNITS', style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1)),
                             ),
                           ),
                         ],
@@ -354,12 +358,35 @@ class _SalesTargetScreenState extends State<SalesTargetScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.surface,
       appBar: AppBar(
-        title: const Text('TARGET PENJUALAN'), // Uppercase for tactical feel
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'CONTROL_QUOTA',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 2,
+                  ),
+            ),
+            const Text(
+              'MISSION_OBJECTIVE_TARGETS',
+              style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14, letterSpacing: -0.5),
+            ),
+          ],
+        ),
         centerTitle: false,
+        backgroundColor: AppColors.surfaceContainerLowest,
+        elevation: 0,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(color: AppColors.surfaceContainerHigh, height: 1),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh_rounded, size: 20),
+            icon: const Icon(Icons.sync_rounded, size: 20),
             onPressed: _loadData,
           ),
           const SizedBox(width: 8),
@@ -370,13 +397,16 @@ class _SalesTargetScreenState extends State<SalesTargetScreen> {
           if (state is SpgTargetsBulkSaved) {
             setState(() => _isSaving = false);
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Target berhasil disimpan')),
+              const SnackBar(
+                content: Text('TARGET_DATA_ARCHIVED: SUCCESS'),
+                backgroundColor: AppColors.success,
+              ),
             );
           }
           if (state is SpgTargetError) {
             setState(() => _isSaving = false);
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Error: ${state.message}')),
+              SnackBar(content: Text('TELEMETRY_ERROR: ${state.message.toUpperCase()}')),
             );
           }
           if (state is SpgTargetsLoaded) {
@@ -393,7 +423,7 @@ class _SalesTargetScreenState extends State<SalesTargetScreen> {
                       if (spgState is EventSpgLoading ||
                           productState is EventProductLoading ||
                           targetState is SpgTargetLoading) {
-                        return const Center(child: CircularProgressIndicator());
+                        return const Center(child: CircularProgressIndicator(strokeWidth: 2));
                       }
 
                       if (spgState is! AvailableSpgsLoaded ||
@@ -408,7 +438,7 @@ class _SalesTargetScreenState extends State<SalesTargetScreen> {
                             SliverFillRemaining(child: _buildEmptyState())
                           else
                             SliverPadding(
-                              padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
+                              padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
                               sliver: SliverList(
                                 delegate: SliverChildBuilderDelegate(
                                   (context, index) {
@@ -445,54 +475,53 @@ class _SalesTargetScreenState extends State<SalesTargetScreen> {
 
   Widget _buildToolbar(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'FIELD OPERATIONS COMMAND',
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: AppColors.onSurfaceVariant,
-                  letterSpacing: 1.5,
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-          const SizedBox(height: 12),
           Row(
             children: [
-              Expanded(
-                child: Container(
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceContainer,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: _showBulkSetDialog,
-                      borderRadius: BorderRadius.circular(4),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.edit_note_rounded, color: AppColors.secondary, size: 20),
-                            const SizedBox(width: 12),
-                            Text(
-                              'BATCH CONFIGURATION',
-                              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.onSurface,
-                                  ),
-                            ),
-                          ],
-                        ),
-                      ),
+              const Icon(Icons.terminal_outlined, size: 14, color: AppColors.onSurfaceVariant),
+              const SizedBox(width: 8),
+              Text(
+                'FIELD_OPERATIONS_COMMAND',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: AppColors.onSurfaceVariant,
+                      letterSpacing: 2,
+                      fontWeight: FontWeight.w900,
                     ),
-                  ),
-                ),
               ),
             ],
+          ),
+          const SizedBox(height: 16),
+          InkWell(
+            onTap: _showBulkSetDialog,
+            child: Container(
+              height: 52,
+              decoration: BoxDecoration(
+                color: AppColors.surfaceContainerLowest,
+                border: Border.all(color: AppColors.surfaceContainerHigh),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    const Icon(Icons.settings_input_component_outlined, color: AppColors.secondary, size: 20),
+                    const SizedBox(width: 16),
+                    Text(
+                      'EXECUTE_BATCH_CONFIGURATION',
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            fontWeight: FontWeight.w900,
+                            color: AppColors.onSurface,
+                            letterSpacing: 1,
+                          ),
+                    ),
+                    const Spacer(),
+                    const Icon(Icons.chevron_right_rounded, color: AppColors.onSurfaceVariant),
+                  ],
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -504,18 +533,18 @@ class _SalesTargetScreenState extends State<SalesTargetScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
+          const Icon(
             Icons.track_changes_outlined,
-            size: 64,
+            size: 48,
             color: AppColors.onSurfaceVariant,
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Belum ada SPG atau Produk',
-            style: TextStyle(fontWeight: FontWeight.bold),
+          Text(
+            'NO_ACTIVE_UNITS_DETECTED'.toUpperCase(),
+            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12, letterSpacing: 1),
           ),
           const SizedBox(height: 8),
-          const Text('Setup Event terlebih dahulu'),
+          const Text('MISSION SETUP DATA REQUIRED', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.onSurfaceVariant)),
         ],
       ),
     );
@@ -536,71 +565,73 @@ class _SalesTargetScreenState extends State<SalesTargetScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: AppColors.surfaceContainerHigh, width: 1),
+        color: AppColors.surfaceContainerLowest,
+        border: Border.all(color: AppColors.surfaceContainerHigh),
       ),
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
-          tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
           collapsedIconColor: AppColors.onSurfaceVariant,
           iconColor: AppColors.secondary,
           leading: Container(
             width: 40,
             height: 40,
-            decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(4),
+            decoration: const BoxDecoration(
+              color: AppColors.surface,
+              border: Border.fromBorderSide(BorderSide(color: AppColors.surfaceContainerHigh)),
             ),
-            child: const Icon(Icons.person_outline_rounded, color: AppColors.primary, size: 20),
+            child: const Icon(Icons.shield_outlined, color: AppColors.primary, size: 18),
           ),
           title: Text(
             spgName.toUpperCase(),
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.5,
-                ),
+            style: const TextStyle(
+              fontWeight: FontWeight.w900,
+              fontSize: 14,
+              letterSpacing: 0.5,
+            ),
           ),
           subtitle: Text(
-            spbName != null ? 'SUPERVISOR: $spbName' : 'NO SUPERVISOR ASSIGNED',
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: AppColors.onSurfaceVariant,
-                  fontSize: 10,
-                ),
+            spbName != null ? 'COMMANDER: ${spbName.toUpperCase()}' : 'NO COMMANDER ASSIGNED',
+            style: const TextStyle(
+              color: AppColors.onSurfaceVariant,
+              fontSize: 9,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.5,
+            ),
           ),
           children: [
-            const SizedBox(height: 8),
             Container(
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
               decoration: const BoxDecoration(
-                color: AppColors.surfaceContainerLowest,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(2),
-                  topRight: Radius.circular(2),
-                ),
+                color: AppColors.surface,
+                border: Border(bottom: BorderSide(color: AppColors.surfaceContainerHigh)),
               ),
               child: Row(
                 children: [
-                  Expanded(
+                  const Expanded(
                     flex: 3,
                     child: Text(
-                      'PRODUCT ASSET',
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      'ASSET_DESC',
+                      style: TextStyle(
+                            fontSize: 8,
                             color: AppColors.onSurfaceVariant,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1,
                           ),
                     ),
                   ),
                   SizedBox(
                     width: 70,
                     child: Text(
-                      'TARGET',
+                      'QUOTA',
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
                             color: AppColors.onSurfaceVariant,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 8,
+                            letterSpacing: 1,
                           ),
                     ),
                   ),
@@ -611,7 +642,9 @@ class _SalesTargetScreenState extends State<SalesTargetScreen> {
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
                             color: AppColors.onSurfaceVariant,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 8,
+                            letterSpacing: 1,
                           ),
                     ),
                   ),
@@ -638,7 +671,7 @@ class _SalesTargetScreenState extends State<SalesTargetScreen> {
                 sold,
               );
             }),
-            const SizedBox(height: 12),
+            const SizedBox(height: 20),
             _buildSpgSummary(context, es.spgId, productState, salesState),
           ],
         ),
@@ -662,22 +695,20 @@ class _SalesTargetScreenState extends State<SalesTargetScreen> {
             : AppColors.success;
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceContainer.withOpacity(0.3),
-        border: Border(
-          bottom: BorderSide(color: AppColors.surfaceContainerHigh.withOpacity(0.2), width: 1),
-        ),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: AppColors.surfaceContainerHigh)),
       ),
       child: Row(
         children: [
           Expanded(
             flex: 3,
             child: Text(
-              productName,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              productName.toUpperCase(),
+              style: const TextStyle(
                     color: AppColors.onSurface,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 12,
                   ),
             ),
           ),
@@ -690,29 +721,24 @@ class _SalesTargetScreenState extends State<SalesTargetScreen> {
                 ),
               keyboardType: TextInputType.number,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              style: const TextStyle(
                     color: AppColors.secondary,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 14,
                   ),
               decoration: const InputDecoration(
                 isDense: true,
                 filled: true,
-                fillColor: AppColors.surfaceContainerLowest,
-                contentPadding: EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-                border: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.secondary, width: 1.5),
-                ),
+                fillColor: AppColors.surface,
+                contentPadding: EdgeInsets.symmetric(horizontal: 4, vertical: 10),
+                border: OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: AppColors.surfaceContainerHigh)),
+                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: AppColors.surfaceContainerHigh)),
+                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: AppColors.secondary, width: 2)),
               ),
               onChanged: (val) {
                 final newValue = int.tryParse(val) ?? 0;
                 _targets[spgId] ??= {};
                 _targets[spgId]![productId] = newValue;
-                // No setState here to avoid re-rendering while typing
-                // but we need it for the percentage calculation.
-                // Usually for numeric inputs in list, a debounce or local state is better.
-                // For now, let's keep it simple as the user might want immediate feedback.
                 setState(() {});
               },
             ),
@@ -724,16 +750,19 @@ class _SalesTargetScreenState extends State<SalesTargetScreen> {
                 Text(
                   sold.toString(),
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                  style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13),
                 ),
                 if (currentTarget > 0)
                   Container(
                     height: 2,
-                    margin: const EdgeInsets.only(top: 2),
-                    width: 24 * (percentage / 100),
-                    color: color,
+                    margin: const EdgeInsets.only(top: 4),
+                    width: 24,
+                    color: AppColors.surfaceContainerHigh,
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      width: 24 * (percentage / 100),
+                      color: color,
+                    ),
                   ),
               ],
             ),
@@ -767,12 +796,10 @@ class _SalesTargetScreenState extends State<SalesTargetScreen> {
             : AppColors.success;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: AppColors.primary.withOpacity(0.05),
-        border: const Border(
-          left: BorderSide(color: AppColors.primary, width: 3),
-        ),
+      padding: const EdgeInsets.all(16),
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        border: Border(left: BorderSide(color: AppColors.primary, width: 4)),
       ),
       child: Row(
         children: [
@@ -780,21 +807,22 @@ class _SalesTargetScreenState extends State<SalesTargetScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'COMPLETION TELEMETRY',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                const Text(
+                  'COMPLETION_TELEMETRY',
+                  style: TextStyle(
                         color: AppColors.onSurfaceVariant,
-                        fontSize: 9,
-                        letterSpacing: 1,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 8,
+                        letterSpacing: 2,
+                        fontWeight: FontWeight.w900,
                       ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Text(
-                  'AGGREGATE TARGET: $totalTarget units | ACTUAL: $totalSold',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontSize: 11,
+                  'AGGREGATE_TARGET: $totalTarget units | ACTUAL: $totalSold'.toUpperCase(),
+                  style: const TextStyle(
+                        fontSize: 10,
                         color: AppColors.onSurface,
+                        fontWeight: FontWeight.bold,
                       ),
                 ),
               ],
@@ -806,17 +834,18 @@ class _SalesTargetScreenState extends State<SalesTargetScreen> {
             children: [
               Text(
                 totalTarget > 0 ? '${percentage.toInt()}%' : '--',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w900,
                       color: totalTarget > 0 ? color : AppColors.onSurfaceVariant,
                       letterSpacing: -1,
                     ),
               ),
-              Text(
-                'QUOTA PHASE',
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              const Text(
+                'QUOTA_STATUS',
+                style: TextStyle(
                       color: AppColors.onSurfaceVariant,
                       fontSize: 8,
+                      fontWeight: FontWeight.w900,
                     ),
               ),
             ],
@@ -828,39 +857,33 @@ class _SalesTargetScreenState extends State<SalesTargetScreen> {
 
   Widget _buildBottomAction() {
     return Container(
-      padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + MediaQuery.of(context).padding.bottom),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.5),
-            blurRadius: 20,
-            offset: const Offset(0, -5),
-          ),
-        ],
+      padding: EdgeInsets.fromLTRB(20, 20, 20, 20 + MediaQuery.of(context).padding.bottom),
+      decoration: const BoxDecoration(
+        color: AppColors.surfaceContainerLowest,
+        border: Border(top: BorderSide(color: AppColors.surfaceContainerHigh)),
       ),
       child: ElevatedButton(
         onPressed: _isSaving ? null : _saveTargets,
         style: ElevatedButton.styleFrom(
-          minimumSize: const Size(double.infinity, 54),
+          minimumSize: const Size(double.infinity, 60),
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(4),
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.zero,
           ),
           elevation: 0,
         ),
         child: _isSaving
             ? const SizedBox(
-                height: 20,
-                width: 20,
+                height: 24,
+                width: 24,
                 child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
               )
             : const Text(
-                'COMMIT TARGET DATA',
+                'COMMIT_TARGET_DATA_PROTOCOL',
                 style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.5,
                 ),
               ),
       ),

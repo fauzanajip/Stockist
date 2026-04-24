@@ -630,7 +630,22 @@ Summary:
 
 ---
 
-## 9. ⚙️ Technical Requirements
+## 9. 🎨 Design System: Industrial Precision (Command Center) 
+
+### 9.1 Visual Identity
+Aplikasi menggunakan estetika **Industrial Precision** yang dirancang untuk memberikan kesan instrumen taktis yang serius, akurat, dan fokus pada misi.
+
+- **Geometry**: Strict `borderRadius: 0` (Zero Radius). Tidak ada sudut melingkar pada card, tombol, atau container untuk menjaga kesan kaku dan presisi.
+- **Typography**: Menggunakan font Inter/Roboto dengan gaya **All-Caps** dan **Weight w900** untuk semua label operasional, header, dan status.
+- **Color Palette**: Dark mode dengan kontras tinggi menggunakan Tactical Navy (Primary), Action Orange (Secondary), dan Warning Yellow untuk status kritis.
+
+### 9.2 Interaction Patterns
+- **Edit Workflow**: Semua proses pengeditan data master dan riwayat mutasi harus menggunakan **ModalBottomSheet** (bukan dialog standar) untuk menjaga fokus pada layar utama.
+- **Tactical Lexicon**: Penggunaan terminologi militer/taktis untuk status dan aksi (Contoh: `MISSION STATUS`, `RECOVERY PROTOCOL`, `FLEET TELEMETRY`).
+
+---
+
+## 10. ⚙️ Technical Requirements
 
 ---
 
@@ -747,6 +762,7 @@ Summary:
 
 | Versi | Perubahan                                                                                                                                                                                                                                                 |
 | ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v2.8  | **Industrial Precision UI Overhaul**: Migrated entire app to "Command Center" aesthetic (Zero radius, w900 all-caps typography); Standardized BottomSheets for master data editing; Fixed `SpgListScreen` syntax & duplication errors. |
 | v2.7  | Add **Edit & Delete Stock Distribution** feature with validation (PRD 6.9); Stock History Screen reusable from Home Dashboard & SPG Detail; Validation logic to prevent negative stock; Update TODO.md tasks #25-28.                                       |
 | v2.6  | Implementasi lengkap **Sales Input**, **Cash Input**, dan **Closing Screen** dengan full BLoC integration; Validasi closing per PRD 6.8 (selisih fisik & surplus); Status indicator ✅/⚠️; Progress 83% completion.                                       |
 | v2.5  | Implementasi **Topup Screen** & **Return Screen** dengan full BLoC integration; Validasi max return berdasarkan stock in hand; UI warning styling untuk retur (PRD 6.7); Progress menuju 96% completion.                                                  |

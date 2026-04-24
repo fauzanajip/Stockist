@@ -122,7 +122,33 @@ class _ReturnScreenState extends State<ReturnScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Retur Stok')),
+      backgroundColor: AppColors.surface,
+      appBar: AppBar(
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'LOGISTICS_LINK: RECLAMATION',
+              style: const TextStyle(
+                color: AppColors.warning,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 2,
+                fontSize: 9,
+              ),
+            ),
+            const Text(
+              'ASSET RECLAMATION',
+              style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: -0.5),
+            ),
+          ],
+        ),
+        backgroundColor: AppColors.surfaceContainerLowest,
+        elevation: 0,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(color: AppColors.surfaceContainerHigh, height: 1),
+        ),
+      ),
       body: BlocBuilder<SpgBloc, SpgState>(
         builder: (context, spgState) {
           String spgName = widget.spgId;
@@ -137,11 +163,12 @@ class _ReturnScreenState extends State<ReturnScreen> {
           return Column(
             children: [
               _buildHeader(context, spgName),
+              Container(height: 1, color: AppColors.surfaceContainerHigh),
               Expanded(
                 child: BlocBuilder<EventProductBloc, EventProductState>(
                   builder: (context, state) {
                     if (state is EventProductLoading) {
-                      return const Center(child: CircularProgressIndicator());
+                      return const Center(child: CircularProgressIndicator(strokeWidth: 2));
                     }
                     if (state is EventProductError) {
                       return _buildErrorState(state.message);
@@ -152,7 +179,7 @@ class _ReturnScreenState extends State<ReturnScreen> {
                       }
                       return _buildProductList(state);
                     }
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(child: CircularProgressIndicator(strokeWidth: 2));
                   },
                 ),
               ),
@@ -167,58 +194,59 @@ class _ReturnScreenState extends State<ReturnScreen> {
   Widget _buildHeader(BuildContext context, String spgName) {
     return Container(
       width: double.infinity,
-      color: AppColors.warning.withOpacity(0.1),
-      padding: const EdgeInsets.all(16),
+      color: AppColors.surfaceContainerLowest,
+      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(Icons.refresh, color: AppColors.warning, size: 24),
-              const SizedBox(width: 8),
-              Text(
-                'RETUR STOK',
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: AppColors.warning,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 1.2,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
           Text(
-            'SPG: $spgName',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: AppColors.secondary,
+            'SOURCE_UNIT_IDENTIFICATION'.toUpperCase(),
+            style: const TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.w900,
+              color: AppColors.onSurfaceVariant,
+              letterSpacing: 1.5,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            spgName.toUpperCase(),
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w900,
+              color: AppColors.primary,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'INVENTORY RECLAMATION PROTOCOL. REMOVE ASSETS FROM FIELD UNIT INVENTORY AND RETURN TO SYSTEM POOL.'.toUpperCase(),
+            style: const TextStyle(
+              fontSize: 9,
+              color: AppColors.onSurfaceVariant,
+              height: 1.5,
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            'Pilih produk dan masukkan jumlah stok yang dikembalikan.',
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: AppColors.onSurfaceVariant),
-          ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.error.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppColors.error.withOpacity(0.3)),
+              color: AppColors.error.withOpacity(0.05),
+              border: Border.all(color: AppColors.error.withOpacity(0.2)),
             ),
             child: Row(
               children: [
-                Icon(Icons.warning_amber, color: AppColors.error, size: 16),
-                const SizedBox(width: 8),
+                const Icon(Icons.warning_amber_rounded, color: AppColors.error, size: 16),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Retur akan mengurangi stok SPG. Pastikan jumlah sesuai!',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    'WARNING: RECLAMATION WILL DECREASE UNIT INVENTORY LEVELS. DATA INTEGRITY IS MANDATORY.'.toUpperCase(),
+                    style: const TextStyle(
                       color: AppColors.error,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 8,
+                      letterSpacing: 0.5,
                     ),
                   ),
                 ),
@@ -234,15 +262,16 @@ class _ReturnScreenState extends State<ReturnScreen> {
     return BlocBuilder<StockBloc, StockState>(
       builder: (context, stockState) {
         return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'PILIH PRODUK',
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                'ASSET_RECLAMATION_POOL'.toUpperCase(),
+                style: const TextStyle(
                   fontWeight: FontWeight.w900,
-                  letterSpacing: 1.2,
+                  letterSpacing: 1.5,
+                  fontSize: 9,
                   color: AppColors.onSurfaceVariant,
                 ),
               ),
@@ -270,16 +299,13 @@ class _ReturnScreenState extends State<ReturnScreen> {
                     .fold(0, (sum, m) => sum + m.qty);
                 final availableToReturn = totalGiven - totalReturned;
 
-                return Card(
+                return Container(
                   margin: const EdgeInsets.only(bottom: 8),
-                  color: isSelected ? AppColors.warning.withOpacity(0.1) : null,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    side: BorderSide(
-                      color: isSelected
-                          ? AppColors.warning
-                          : AppColors.onSurfaceVariant,
-                      width: isSelected ? 2 : 1,
+                  decoration: BoxDecoration(
+                    color: isSelected ? AppColors.warning.withOpacity(0.05) : AppColors.surfaceContainerLowest,
+                    border: Border.all(
+                      color: isSelected ? AppColors.warning : AppColors.surfaceContainerHigh,
+                      width: isSelected ? 1.5 : 1,
                     ),
                   ),
                   child: InkWell(
@@ -292,97 +318,69 @@ class _ReturnScreenState extends State<ReturnScreen> {
                             });
                           }
                         : null,
-                    borderRadius: BorderRadius.circular(12),
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Row(
                         children: [
                           Icon(
-                            isSelected
-                                ? Icons.check_circle
-                                : Icons.circle_outlined,
-                            color: isSelected
-                                ? AppColors.warning
-                                : (availableToReturn > 0
-                                      ? AppColors.onSurfaceVariant
-                                      : AppColors.onSurfaceVariant),
+                            isSelected ? Icons.check_circle_outlined : Icons.circle_outlined,
+                            color: isSelected ? AppColors.warning : AppColors.onSurfaceVariant,
+                            size: 20,
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: 16),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  product.name,
-                                  style: Theme.of(context).textTheme.titleMedium
-                                      ?.copyWith(
-                                        color: availableToReturn > 0
-                                            ? null
-                                            : AppColors.onSurfaceVariant,
-                                      ),
-                                ),
-                                Text(
-                                  'SKU: ${product.sku}',
-                                  style: Theme.of(context).textTheme.bodySmall
-                                      ?.copyWith(
-                                        color: AppColors.onSurfaceVariant,
-                                      ),
+                                  product.name.toUpperCase(),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 13,
+                                    color: availableToReturn > 0 ? null : AppColors.onSurfaceVariant.withOpacity(0.5),
+                                  ),
                                 ),
                                 const SizedBox(height: 4),
-                                Text(
-                                  'Tersedia untuk retur: $availableToReturn',
-                                  style: Theme.of(context).textTheme.bodySmall
-                                      ?.copyWith(
-                                        color: availableToReturn > 0
-                                            ? AppColors.warning
-                                            : AppColors.error,
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'SKU_ID: ${product.sku}'.toUpperCase(),
+                                      style: const TextStyle(
+                                        fontSize: 9,
                                         fontWeight: FontWeight.bold,
+                                        color: AppColors.onSurfaceVariant,
+                                        letterSpacing: 1,
                                       ),
+                                    ),
+                                    Text(
+                                      'RECLAIMABLE: $availableToReturn'.toUpperCase(),
+                                      style: TextStyle(
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.w900,
+                                        color: availableToReturn > 0 ? AppColors.warning : AppColors.error,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
                           ),
-                          if (availableToReturn <= 0)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.error.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                'N/A',
-                                style: TextStyle(
-                                  color: AppColors.error,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
                         ],
                       ),
                     ),
                   ),
                 );
               }),
-              const SizedBox(height: 24),
               if (_selectedProductId != null) ...[
+                const SizedBox(height: 32),
                 Text(
-                  'JUMLAH RETUR',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  'RECLAMATION_QUANTITY'.toUpperCase(),
+                  style: const TextStyle(
                     fontWeight: FontWeight.w900,
-                    letterSpacing: 1.2,
+                    letterSpacing: 1.5,
+                    fontSize: 9,
                     color: AppColors.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Maksimal: $_maxReturnQty',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.warning,
-                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -395,27 +393,29 @@ class _ReturnScreenState extends State<ReturnScreen> {
                     });
                   },
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 32),
                 Text(
-                  'CATATAN RETUR (Opsional)',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  'RECLAMATION_LOGS (OPTIONAL)'.toUpperCase(),
+                  style: const TextStyle(
                     fontWeight: FontWeight.w900,
-                    letterSpacing: 1.2,
+                    letterSpacing: 1.5,
+                    fontSize: 9,
                     color: AppColors.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: _noteController,
-                  maxLines: 2,
+                  maxLines: 3,
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                   decoration: InputDecoration(
-                    hintText: 'Contoh: Retur karena produk basi/rusak...',
+                    hintText: 'INPUT REASONING...',
+                    hintStyle: TextStyle(color: AppColors.onSurfaceVariant.withOpacity(0.5), fontSize: 13),
                     filled: true,
-                    fillColor: AppColors.surfaceContainer,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
+                    fillColor: AppColors.surfaceContainerLowest,
+                    border: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: AppColors.surfaceContainerHigh)),
+                    enabledBorder: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: AppColors.surfaceContainerHigh)),
+                    focusedBorder: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: AppColors.warning)),
                   ),
                 ),
               ],
@@ -431,17 +431,17 @@ class _ReturnScreenState extends State<ReturnScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
-            Icons.inventory_2_outlined,
-            size: 64,
-            color: AppColors.onSurfaceVariant,
+          const Icon(Icons.inventory_2_outlined, size: 48, color: AppColors.onSurfaceVariant),
+          const SizedBox(height: 16),
+          Text(
+            'NO ASSETS ASSIGNED TO MISSION'.toUpperCase(),
+            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12, letterSpacing: 1),
           ),
           const SizedBox(height: 16),
-          const Text('Belum ada produk yang di-assign ke event ini'),
-          const SizedBox(height: 8),
-          ElevatedButton(
+          OutlinedButton(
             onPressed: () => context.pop(),
-            child: const Text('Ke Event Setup'),
+            style: OutlinedButton.styleFrom(shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero)),
+            child: const Text('ABORT PROTOCOL'),
           ),
         ],
       ),
@@ -453,55 +453,47 @@ class _ReturnScreenState extends State<ReturnScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline, size: 64, color: AppColors.error),
+          const Icon(Icons.error_outline, size: 48, color: AppColors.error),
           const SizedBox(height: 16),
-          Text('Error: $message'),
+          Text('SYSTEM_FAILURE: ${message.toUpperCase()}', style: const TextStyle(fontWeight: FontWeight.w900)),
           const SizedBox(height: 16),
-          ElevatedButton(onPressed: _loadData, child: const Text('Retry')),
+          ElevatedButton(
+            onPressed: _loadData,
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error, shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero)),
+            child: const Text('RETRY SYNC'),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildBottomAction() {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.surfaceContainerLowest,
+        border: Border(top: BorderSide(color: AppColors.surfaceContainerHigh)),
+      ),
+      padding: EdgeInsets.fromLTRB(20, 16, 20, 16 + MediaQuery.of(context).padding.bottom),
+      child: SizedBox(
+        width: double.infinity,
+        height: 54,
         child: ElevatedButton(
-          onPressed:
-              (_isSubmitting || _selectedProductId == null || _quantity <= 0)
-              ? null
-              : _submitReturn,
+          onPressed: (_isSubmitting || _selectedProductId == null || _quantity <= 0) ? null : _submitReturn,
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.warning,
             foregroundColor: AppColors.onSurface,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+            elevation: 0,
           ),
           child: _isSubmitting
               ? const SizedBox(
                   height: 20,
                   width: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: AppColors.onSurface,
-                  ),
+                  child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.onSurface),
                 )
-              : const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.refresh),
-                    SizedBox(width: 8),
-                    Text(
-                      'SIMPAN RETUR',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.2,
-                      ),
-                    ),
-                  ],
+              : const Text(
+                  'EXECUTE RECLAMATION PROTOCOL',
+                  style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.5),
                 ),
         ),
       ),
@@ -558,38 +550,34 @@ class _QuantityInputState extends State<_QuantityInput> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.warning.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.warning.withOpacity(0.3)),
+        border: Border.all(color: AppColors.surfaceContainerHigh),
+        color: AppColors.surfaceContainerLowest,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           IconButton(
             onPressed: () => _updateValue(widget.value - 1),
-            icon: const Icon(
-              Icons.remove_circle,
-              color: AppColors.error,
-              size: 32,
-            ),
+            icon: const Icon(Icons.remove, size: 20),
+            constraints: const BoxConstraints(minWidth: 54, minHeight: 54),
+            color: AppColors.error,
           ),
-          const SizedBox(width: 16),
-          SizedBox(
-            width: 80,
+          Container(
+            width: 100,
+            height: 54,
+            decoration: const BoxDecoration(
+              border: Border.symmetric(vertical: BorderSide(color: AppColors.surfaceContainerHigh)),
+            ),
             child: TextField(
               controller: _controller,
               keyboardType: TextInputType.number,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: AppColors.warning,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 20, color: AppColors.warning),
               decoration: const InputDecoration(
                 isDense: true,
-                contentPadding: EdgeInsets.symmetric(vertical: 8),
                 border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(vertical: 14),
               ),
               onChanged: (val) {
                 final newValue = int.tryParse(val) ?? 0;
@@ -597,14 +585,11 @@ class _QuantityInputState extends State<_QuantityInput> {
               },
             ),
           ),
-          const SizedBox(width: 16),
           IconButton(
             onPressed: () => _updateValue(widget.value + 1),
-            icon: const Icon(
-              Icons.add_circle,
-              color: AppColors.warning,
-              size: 32,
-            ),
+            icon: const Icon(Icons.add, size: 20),
+            constraints: const BoxConstraints(minWidth: 54, minHeight: 54),
+            color: AppColors.warning,
           ),
         ],
       ),

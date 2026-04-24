@@ -42,47 +42,77 @@ class _SpgMasterScreenState extends State<SpgMasterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Master SPG')),
+      backgroundColor: AppColors.surface,
+      appBar: AppBar(
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'PERSONNEL LOGS',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 2,
+                  ),
+            ),
+            Text(
+              'FIELD PERSONNEL DATABASE',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.5,
+                  ),
+            ),
+          ],
+        ),
+        backgroundColor: AppColors.surfaceContainerLowest,
+        elevation: 0,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(color: AppColors.surfaceContainerHigh, height: 1),
+        ),
+      ),
       body: BlocListener<SpgBloc, SpgState>(
         listener: (context, state) {
           if (state is SpqCreated) {
             context.read<SpgBloc>().add(LoadActiveSpqs());
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('SPG berhasil ditambahkan')),
+              const SnackBar(content: Text('PERSONNEL REGISTERED: SUCCESS')),
             );
           }
           if (state is SpgUpdated) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('SPG berhasil diperbarui')),
+              const SnackBar(content: Text('PERSONNEL UPDATED: SUCCESS')),
             );
           }
         },
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
+            Container(
+              padding: const EdgeInsets.all(20),
+              color: AppColors.surfaceContainerLowest,
               child: Form(
                 key: _formKey,
                 child: Column(
                   children: [
                     TextFormField(
                       controller: _nameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Nama SPG',
-                        prefixIcon: Icon(Icons.person_outline),
-                      ),
-                      validator: (value) =>
-                          Validators.validateRequired(value, 'Nama SPG'),
+                      style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14),
+                      decoration: _buildInputDecoration('PERSONNEL NAME', Icons.person_add_alt_1_outlined),
+                      validator: (value) => Validators.validateRequired(value, 'PERSONNEL NAME'),
                     ),
                     const SizedBox(height: 16),
-                    ElevatedButton.icon(
-                      onPressed: _addSpg,
-                      icon: const Icon(Icons.add),
-                      label: const Text('TAMBAH SPG'),
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: const Size(double.infinity, 54),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: ElevatedButton.icon(
+                        onPressed: _addSpg,
+                        icon: const Icon(Icons.shield_outlined, size: 18),
+                        label: const Text('ENLIST NEW PERSONNEL', style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                          elevation: 0,
                         ),
                       ),
                     ),
@@ -90,72 +120,66 @@ class _SpgMasterScreenState extends State<SpgMasterScreen> {
                 ),
               ),
             ),
-            const Divider(),
+            Container(height: 1, color: AppColors.surfaceContainerHigh),
             Expanded(
               child: BlocBuilder<SpgBloc, SpgState>(
                 builder: (context, state) {
                   if (state is SpgLoading) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(child: CircularProgressIndicator(strokeWidth: 2));
                   }
                   if (state is SpqsLoaded) {
                     if (state.spqs.isEmpty) {
                       return _buildEmptyState();
                     }
                     return ListView.builder(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
                       itemCount: state.spqs.length,
                       itemBuilder: (context, index) {
                         final spg = state.spqs[index];
-                        return Card(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: AppColors.surfaceContainerLowest,
+                            border: Border.all(color: AppColors.surfaceContainerHigh),
                           ),
-                          child: ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor: AppColors.primary.withOpacity(
-                                0.1,
-                              ),
-                              child: const Icon(
-                                Icons.person,
-                                color: AppColors.primary,
-                                size: 20,
-                              ),
-                            ),
-                            title: Text(
-                              spg.name,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.edit_outlined,
-                                    color: AppColors.primary,
+                          child: Row(
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    spg.name.toUpperCase(),
+                                    style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14),
                                   ),
-                                  onPressed: () => _showEditDialog(spg),
-                                ),
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.delete_outline,
-                                    color: AppColors.error,
+                                  const SizedBox(height: 4),
+                                  const Text(
+                                    'STATUS: ACTIVE_DUTY',
+                                    style: TextStyle(
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.onSurfaceVariant,
+                                      letterSpacing: 1,
+                                    ),
                                   ),
-                                  onPressed: () => _confirmDelete(spg),
-                                ),
-                              ],
-                            ),
+                                ],
+                              ),
+                              const Spacer(),
+                              IconButton(
+                                icon: const Icon(Icons.edit_document, color: AppColors.primary, size: 20),
+                                onPressed: () => _showEditBottomSheet(spg),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.person_remove_outlined, color: AppColors.error, size: 20),
+                                onPressed: () => _confirmDelete(spg),
+                              ),
+                            ],
                           ),
                         );
                       },
                     );
                   }
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(child: CircularProgressIndicator(strokeWidth: 2));
                 },
               ),
             ),
@@ -165,18 +189,31 @@ class _SpgMasterScreenState extends State<SpgMasterScreen> {
     );
   }
 
+  InputDecoration _buildInputDecoration(String label, IconData icon) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1.5),
+      prefixIcon: Icon(icon, size: 16),
+      filled: true,
+      fillColor: AppColors.surface,
+      border: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide.none),
+      enabledBorder: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide.none),
+      focusedBorder: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: AppColors.primary)),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    );
+  }
+
   Widget _buildEmptyState() {
-    return const Center(
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.people_outline,
-            size: 64,
-            color: AppColors.onSurfaceVariant,
+          const Icon(Icons.no_accounts_outlined, size: 48, color: AppColors.onSurfaceVariant),
+          const SizedBox(height: 16),
+          Text(
+            'NO PERSONNEL RECORDS FOUND'.toUpperCase(),
+            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12, letterSpacing: 1),
           ),
-          SizedBox(height: 16),
-          Text('Belum ada SPG', style: TextStyle(fontWeight: FontWeight.bold)),
         ],
       ),
     );
@@ -186,66 +223,100 @@ class _SpgMasterScreenState extends State<SpgMasterScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Hapus SPG?'),
-        content: Text('Yakin ingin menghapus ${spg.name}?'),
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+        title: Text('TERMINATE PERSONNEL?'.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.w900)),
+        content: Text('REMOVE ${spg.name.toUpperCase()} FROM ACTIVE SERVICE DATABASE?', style: const TextStyle(fontSize: 12)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('BATAL'),
+            child: const Text('ABORT', style: TextStyle(color: AppColors.onSurfaceVariant)),
           ),
-          TextButton(
+          ElevatedButton(
             onPressed: () {
               context.read<SpgBloc>().add(SoftDeleteSpqEvent(id: spg.id));
               Navigator.pop(context);
             },
-            child: const Text(
-              'HAPUS',
-              style: TextStyle(color: AppColors.error),
-            ),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error, foregroundColor: Colors.white, shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero)),
+            child: const Text('TERMINATE RECORDS'),
           ),
         ],
       ),
     );
   }
 
-  void _showEditDialog(SpgEntity spg) {
+  void _showEditBottomSheet(SpgEntity spg) {
     final nameController = TextEditingController(text: spg.name);
     final editFormKey = GlobalKey<FormState>();
 
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Edit SPG'),
-        content: Form(
-          key: editFormKey,
-          child: TextFormField(
-            controller: nameController,
-            decoration: const InputDecoration(
-              labelText: 'Nama SPG',
-              prefixIcon: Icon(Icons.person_outline),
+      isScrollControlled: true,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setSheetState) => Padding(
+          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            child: Form(
+              key: editFormKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.edit_document, color: AppColors.primary),
+                      const SizedBox(width: 12),
+                      Text(
+                        'REVISE PERSONNEL PROTOCOL',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1,
+                            ),
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                  const Divider(height: 32),
+                  TextFormField(
+                    controller: nameController,
+                    style: const TextStyle(fontWeight: FontWeight.w900),
+                    decoration: _buildInputDecoration('PERSONNEL NAME', Icons.person_outline),
+                    validator: (value) => Validators.validateRequired(value, 'PERSONNEL NAME'),
+                  ),
+                  const SizedBox(height: 32),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        if (editFormKey.currentState!.validate()) {
+                          final updatedSpg = spg.copyWith(
+                            name: nameController.text.trim(),
+                          );
+                          context.read<SpgBloc>().add(UpdateSpgEvent(spg: updatedSpg));
+                          Navigator.pop(context);
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                        elevation: 0,
+                      ),
+                      child: const Text('COMMIT CHANGES', style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1)),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            validator: (value) =>
-                Validators.validateRequired(value, 'Nama SPG'),
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('BATAL'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (editFormKey.currentState!.validate()) {
-                final updatedSpg = spg.copyWith(
-                  name: nameController.text.trim(),
-                );
-                context.read<SpgBloc>().add(UpdateSpgEvent(spg: updatedSpg));
-                Navigator.pop(context);
-              }
-            },
-            child: const Text('SIMPAN'),
-          ),
-        ],
       ),
     );
   }

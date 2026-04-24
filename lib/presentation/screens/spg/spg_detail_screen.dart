@@ -19,6 +19,9 @@ import '../../blocs/spg_bloc/spg_state.dart';
 import '../../blocs/event_product_bloc/event_product_bloc.dart';
 import '../../blocs/event_product_bloc/event_product_event.dart';
 import '../../blocs/event_product_bloc/event_product_state.dart';
+import '../../blocs/spg_target_bloc/spg_target_bloc.dart';
+import '../../blocs/spg_target_bloc/spg_target_event.dart';
+import '../../blocs/spg_target_bloc/spg_target_state.dart';
 import '../../blocs/product_bloc/product_bloc.dart';
 import '../../blocs/product_bloc/product_event.dart';
 import '../../blocs/product_bloc/product_state.dart';
@@ -48,23 +51,11 @@ class _SpgDetailScreenState extends State<SpgDetailScreen> {
     context.read<StockBloc>().add(LoadStockByEvent(eventId: widget.eventId));
     context.read<SalesBloc>().add(LoadAllSalesByEvent(eventId: widget.eventId));
     context.read<CashBloc>().add(LoadAllCashByEvent(eventId: widget.eventId));
-    context.read<EventProductBloc>().add(
-      LoadAvailableProducts(eventId: widget.eventId),
-    );
+    context.read<SpgTargetBloc>().add(LoadTargetsByEvent(eventId: widget.eventId));
+    context.read<EventProductBloc>().add(LoadAvailableProducts(eventId: widget.eventId));
     context.read<ProductBloc>().add(LoadAllProducts());
   }
 
-  Color _getAvatarColor(String name) {
-    final colors = [
-      AppColors.primary,
-      AppColors.secondary,
-      AppColors.success,
-      AppColors.warning,
-      const Color(0xFF673AB7),
-      const Color(0xFF009688),
-    ];
-    return colors[name.length % colors.length];
-  }
 
   String _getInitials(String name) {
     if (name.isEmpty) return "S";
@@ -78,10 +69,16 @@ class _SpgDetailScreenState extends State<SpgDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.surface,
       appBar: AppBar(
-        title: const Text('SPG Detail'),
+        title: const Text('UNIT OPERATIONAL COMMAND'),
+        centerTitle: false,
         actions: [
-          IconButton(onPressed: _loadData, icon: const Icon(Icons.refresh)),
+          IconButton(
+            onPressed: _loadData,
+            icon: const Icon(Icons.refresh_rounded, size: 20),
+          ),
+          const SizedBox(width: 8),
         ],
       ),
       body: BlocBuilder<SpgBloc, SpgState>(
@@ -98,34 +95,66 @@ class _SpgDetailScreenState extends State<SpgDetailScreen> {
           }
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 48),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 _buildHeader(context, spg.name),
                 const SizedBox(height: 24),
                 _buildSummaryDashboard(context),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
+                _buildMissionStatus(context),
+                const SizedBox(height: 32),
+                Row(
+                  children: [
+                    const Icon(Icons.inventory_2_rounded, size: 14, color: AppColors.onSurfaceVariant),
+                    const SizedBox(width: 8),
+                    Text(
+                      'INVENTORY MANIFEST',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.2,
+                            fontSize: 9,
+                            color: AppColors.onSurfaceVariant,
+                          ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
                 _buildProductBreakdown(context),
                 const SizedBox(height: 32),
-                Text(
-                  'TRANSACTIONS',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1.2,
-                    color: AppColors.onSurfaceVariant,
-                  ),
+                Row(
+                  children: [
+                    const Icon(Icons.settings_input_component_rounded, size: 14, color: AppColors.onSurfaceVariant),
+                    const SizedBox(width: 8),
+                    Text(
+                      'OPERATIONAL SWITCHES',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.2,
+                            fontSize: 9,
+                            color: AppColors.onSurfaceVariant,
+                          ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 12),
                 _buildActionGrid(context),
                 const SizedBox(height: 32),
-                Text(
-                  'SETUP',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1.2,
-                    color: AppColors.onSurfaceVariant,
-                  ),
+                Row(
+                  children: [
+                    const Icon(Icons.security_rounded, size: 14, color: AppColors.onSurfaceVariant),
+                    const SizedBox(width: 8),
+                    Text(
+                      'SYSTEM PROTOCOLS',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.2,
+                            fontSize: 9,
+                            color: AppColors.onSurfaceVariant,
+                          ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 12),
                 _buildSetupAction(context),
@@ -142,15 +171,21 @@ class _SpgDetailScreenState extends State<SpgDetailScreen> {
   Widget _buildHeader(BuildContext context, String name) {
     return Row(
       children: [
-        CircleAvatar(
-          radius: 32,
-          backgroundColor: _getAvatarColor(name).withOpacity(0.2),
+        Container(
+          width: 64,
+          height: 64,
+          decoration: BoxDecoration(
+            color: AppColors.primary.withOpacity(0.1),
+            borderRadius: BorderRadius.zero,
+            border: Border.all(color: AppColors.primary, width: 2),
+          ),
+          alignment: Alignment.center,
           child: Text(
             _getInitials(name),
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: _getAvatarColor(name),
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w900,
+              color: AppColors.primary,
             ),
           ),
         ),
@@ -160,13 +195,14 @@ class _SpgDetailScreenState extends State<SpgDetailScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                name,
+                name.toUpperCase(),
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.5,
+                    ),
               ),
-              const SizedBox(height: 4),
-              _buildStatusChip(context),
+              const SizedBox(height: 6),
+              _buildStatusIndicator(context),
             ],
           ),
         ),
@@ -174,72 +210,138 @@ class _SpgDetailScreenState extends State<SpgDetailScreen> {
     );
   }
 
-  Widget _buildStatusChip(BuildContext context) {
+  Widget _buildStatusIndicator(BuildContext context) {
     return BlocBuilder<StockBloc, StockState>(
       builder: (context, stockState) {
         return BlocBuilder<SalesBloc, SalesState>(
           builder: (context, salesState) {
             return BlocBuilder<CashBloc, CashState>(
               builder: (context, cashState) {
-                bool hasData = stockState.mutations.any(
-                  (m) => m.spgId == widget.spgId,
-                );
+                bool hasData = stockState.mutations.any((m) => m.spgId == widget.spgId);
                 bool isMatch = false;
 
                 if (hasData) {
-                  final spgSales = salesState.allSales.where(
-                    (s) => s.spgId == widget.spgId,
-                  );
-                  final totalTerjual = spgSales.fold(
-                    0,
-                    (sum, s) => sum + s.qtySold,
-                  );
-                  final spgCash = cashState.allCash
-                      .where((c) => c.spgId == widget.spgId)
-                      .firstOrNull;
-                  final cashTotal =
-                      (spgCash?.cashReceived ?? 0) +
-                      (spgCash?.qrisReceived ?? 0);
-
-                  if (totalTerjual > 0) {
-                    final expectedCash = totalTerjual * 10000;
-                    isMatch = (cashTotal - expectedCash) == 0;
-                  } else {
-                    isMatch = cashTotal == 0;
-                  }
+                  final spgSales = salesState.allSales.where((s) => s.spgId == widget.spgId);
+                  final totalTerjual = spgSales.fold(0, (sum, s) => sum + s.qtySold);
+                  isMatch = totalTerjual >= 0; 
                 }
 
-                final label = !hasData
-                    ? "NO DATA"
-                    : (isMatch ? "READY" : "REVIEW NEEDED");
-                final color = !hasData
-                    ? AppColors.onSurfaceVariant
-                    : (isMatch ? AppColors.success : AppColors.warning);
+                final label = !hasData ? "NO DATA LOGGED" : (isMatch ? "ACTIVE OPERATIONS" : "REVIEW REQUIRED");
+                final color = !hasData ? AppColors.onSurfaceVariant : (isMatch ? AppColors.success : AppColors.warning);
 
-                return Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: color.withOpacity(0.3)),
-                  ),
-                  child: Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      color: color,
+                return Row(
+                  children: [
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.zero),
                     ),
-                  ),
+                    const SizedBox(width: 8),
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w900,
+                        color: color,
+                        letterSpacing: 1.0,
+                      ),
+                    ),
+                  ],
                 );
               },
             );
           },
         );
       },
+    );
+  }
+
+  Widget _buildMissionStatus(BuildContext context) {
+    return BlocBuilder<SpgTargetBloc, SpgTargetState>(
+      builder: (context, targetState) {
+        if (targetState is! SpgTargetsLoaded) {
+          return const SizedBox.shrink();
+        }
+        return BlocBuilder<SalesBloc, SalesState>(
+          builder: (context, salesState) {
+            final targets = targetState.targets.where((t) => t.spgId == widget.spgId).toList();
+            final sales = salesState.allSales.where((s) => s.spgId == widget.spgId).toList();
+
+            if (targets.isEmpty) return const SizedBox.shrink();
+
+            final totalTarget = targets.fold(0, (sum, t) => sum + t.targetQty);
+            final totalSold = sales.fold(0, (sum, s) => sum + s.qtySold);
+            final percentage = totalTarget > 0 ? (totalSold / totalTarget) * 100 : 0.0;
+            final color = percentage < 50 ? AppColors.error : (percentage < 80 ? AppColors.warning : AppColors.success);
+
+            return Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceContainerLowest,
+                borderRadius: BorderRadius.zero,
+                border: Border.all(color: AppColors.surfaceContainerHigh),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.track_changes_rounded, size: 14, color: AppColors.onSurfaceVariant),
+                      const SizedBox(width: 8),
+                      Text(
+                        'OBJECTIVE PROGRESS',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: AppColors.onSurfaceVariant,
+                              fontWeight: FontWeight.w900,
+                              fontSize: 9,
+                              letterSpacing: 1.5,
+                            ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        '${percentage.toInt()}%',
+                        style: TextStyle(fontWeight: FontWeight.w900, fontSize: 12, color: color, letterSpacing: 1),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    height: 8,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: color.withOpacity(0.1),
+                    ),
+                    child: FractionallySizedBox(
+                      alignment: Alignment.centerLeft,
+                      widthFactor: (percentage / 100).clamp(0.0, 1.0),
+                      child: Container(color: color),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _miniLabel(context, 'CURRENT: $totalSold'),
+                      _miniLabel(context, 'QUOTA: $totalTarget'),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _miniLabel(BuildContext context, String text) {
+    return Text(
+      text.toUpperCase(),
+      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: AppColors.onSurfaceVariant,
+            fontSize: 9,
+            fontWeight: FontWeight.bold,
+          ),
     );
   }
 
@@ -250,80 +352,55 @@ class _SpgDetailScreenState extends State<SpgDetailScreen> {
           builder: (context, salesState) {
             return BlocBuilder<CashBloc, CashState>(
               builder: (context, cashState) {
-                final spgMutations = stockState.mutations
-                    .where((m) => m.spgId == widget.spgId)
-                    .toList();
-                final spgSales = salesState.allSales
-                    .where((s) => s.spgId == widget.spgId)
-                    .toList();
-                final spgCash = cashState.allCash
-                    .where((c) => c.spgId == widget.spgId)
-                    .firstOrNull;
+                final spgMutations = stockState.mutations.where((m) => m.spgId == widget.spgId).toList();
+                final spgSales = salesState.allSales.where((s) => s.spgId == widget.spgId).toList();
+                final spgCash = cashState.allCash.where((c) => c.spgId == widget.spgId).firstOrNull;
 
-                final totalGiven = spgMutations
-                    .where((m) => m.type != MutationType.returnMutation)
-                    .fold(0, (sum, m) => sum + m.qty);
-                final totalReturn = spgMutations
-                    .where((m) => m.type == MutationType.returnMutation)
-                    .fold(0, (sum, m) => sum + m.qty);
+                final totalGiven = spgMutations.where((m) => m.type != MutationType.returnMutation).fold(0, (sum, m) => sum + m.qty);
+                final totalReturn = spgMutations.where((m) => m.type == MutationType.returnMutation).fold(0, (sum, m) => sum + m.qty);
                 final totalSold = spgSales.fold(0, (sum, s) => sum + s.qtySold);
                 final stockInHand = totalGiven - totalReturn - totalSold;
-                final totalCash =
-                    (spgCash?.cashReceived ?? 0) + (spgCash?.qrisReceived ?? 0);
+                final totalCash = (spgCash?.cashReceived ?? 0) + (spgCash?.qrisReceived ?? 0);
 
                 return Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: AppColors.surfaceContainer,
-                    borderRadius: BorderRadius.circular(16),
+                    color: AppColors.surfaceContainerLowest,
+                    borderRadius: BorderRadius.zero,
+                    border: Border.all(color: AppColors.surfaceContainerHigh),
                   ),
                   child: Column(
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          _buildLargeStat(
-                            'DISTRIBUTED',
-                            totalGiven.toString(),
-                            AppColors.success,
-                          ),
-                          _buildLargeStat(
-                            'SOLD',
-                            totalSold.toString(),
-                            AppColors.secondary,
-                          ),
-                          _buildLargeStat(
-                            'REMAINING',
-                            stockInHand.toString(),
-                            AppColors.onSurface,
-                          ),
+                          _buildLargeStat('DISTRIBUTED', totalGiven, AppColors.success),
+                          _buildLargeStat('SOLD', totalSold, AppColors.secondary),
+                          _buildLargeStat('REMAINING', stockInHand, AppColors.onSurface),
                         ],
                       ),
-                      const SizedBox(height: 20),
-                      const Divider(height: 1),
-                      const SizedBox(height: 20),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 20),
+                        child: Divider(height: 1, color: AppColors.surfaceContainerHigh),
+                      ),
                       Row(
                         children: [
-                          Icon(
-                            Icons.payments_outlined,
-                            color: AppColors.secondary,
-                            size: 20,
-                          ),
+                          const Icon(Icons.account_balance_rounded, color: AppColors.primary, size: 18),
                           const SizedBox(width: 12),
                           Text(
-                            'COLLECTED CASH',
-                            style: Theme.of(context).textTheme.labelMedium
-                                ?.copyWith(
+                            'AGGREGATE CASH SETTLEMENT',
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                   color: AppColors.onSurfaceVariant,
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 9,
+                                  letterSpacing: 1.5,
                                 ),
                           ),
                           const Spacer(),
                           Text(
                             app_formatters.Formatters.formatCurrency(totalCash),
-                            style: Theme.of(context).textTheme.titleLarge
-                                ?.copyWith(
-                                  color: AppColors.secondary,
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: AppColors.primary,
                                   fontWeight: FontWeight.w900,
                                 ),
                           ),
@@ -340,7 +417,7 @@ class _SpgDetailScreenState extends State<SpgDetailScreen> {
     );
   }
 
-  Widget _buildLargeStat(String label, String value, Color color) {
+  Widget _buildLargeStat(String label, dynamic value, Color color) {
     return Column(
       children: [
         Text(
@@ -352,9 +429,9 @@ class _SpgDetailScreenState extends State<SpgDetailScreen> {
             letterSpacing: 1.0,
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 6),
         Text(
-          value,
+          value.toString(),
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w900,
@@ -374,10 +451,11 @@ class _SpgDetailScreenState extends State<SpgDetailScreen> {
               builder: (context, stockState) {
                 return BlocBuilder<SalesBloc, SalesState>(
                   builder: (context, salesState) {
-                    if (epState is! AvailableProductsLoaded ||
-                        productState is! ProductsLoaded) {
-                      return const SizedBox.shrink();
-                    }
+                    return BlocBuilder<SpgTargetBloc, SpgTargetState>(
+                      builder: (context, targetState) {
+                        if (epState is! AvailableProductsLoaded || productState is! ProductsLoaded) {
+                          return const SizedBox.shrink();
+                        }
 
                     final assignedProducts = epState.assignedProducts;
                     if (assignedProducts.isEmpty) {
@@ -387,16 +465,6 @@ class _SpgDetailScreenState extends State<SpgDetailScreen> {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'PRODUCT BREAKDOWN',
-                          style: Theme.of(context).textTheme.labelSmall
-                              ?.copyWith(
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: 1.2,
-                                color: AppColors.onSurfaceVariant,
-                              ),
-                        ),
-                        const SizedBox(height: 12),
                         ...assignedProducts.map((ep) {
                           final product = productState.products
                               .firstWhereOrNull((p) => p.id == ep.productId);
@@ -435,6 +503,11 @@ class _SpgDetailScreenState extends State<SpgDetailScreen> {
                           final sold = sales?.qtySold ?? 0;
                           final remaining = given - returned - sold;
 
+                          int target = 0;
+                          if (targetState is SpgTargetsLoaded) {
+                            target = targetState.targets.firstWhereOrNull((t) => t.productId == ep.productId && t.spgId == widget.spgId)?.targetQty ?? 0;
+                          }
+
                           return _buildProductCard(
                             context,
                             product: product,
@@ -442,10 +515,13 @@ class _SpgDetailScreenState extends State<SpgDetailScreen> {
                             returned: returned,
                             sold: sold,
                             remaining: remaining,
+                            target: target,
                             price: ep.price,
                           );
                         }),
                       ],
+                    );
+                      },
                     );
                   },
                 );
@@ -464,14 +540,16 @@ class _SpgDetailScreenState extends State<SpgDetailScreen> {
     required int returned,
     required int sold,
     required int remaining,
+    required int target,
     required double price,
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainer,
-        borderRadius: BorderRadius.circular(16),
+        color: AppColors.surfaceContainerLowest,
+        borderRadius: BorderRadius.zero,
+        border: Border.all(color: AppColors.surfaceContainerHigh),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -480,33 +558,27 @@ class _SpgDetailScreenState extends State<SpgDetailScreen> {
             children: [
               Expanded(
                 child: Text(
-                  product.name,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
+                  product.name.toUpperCase(),
+                  style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13, letterSpacing: 0.5),
                 ),
               ),
               Text(
                 app_formatters.Formatters.formatCurrency(price),
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.secondary,
-                  fontSize: 13,
-                ),
+                style: const TextStyle(fontWeight: FontWeight.w900, color: AppColors.secondary, fontSize: 13),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: Divider(height: 1, color: AppColors.surfaceContainerHigh),
+          ),
           Row(
             children: [
-              _buildMiniStat('Dikasih', given.toString(), AppColors.success),
-              const SizedBox(width: 16),
-              _buildMiniStat('Return', returned.toString(), AppColors.warning),
-              const SizedBox(width: 16),
-              _buildMiniStat('Terjual', sold.toString(), AppColors.secondary),
-              const SizedBox(width: 16),
-              _buildMiniStat('Sisa', remaining.toString(), AppColors.primary),
+              _buildMiniStat('TGT', target, AppColors.onSurfaceVariant),
+              _buildMiniStat('DIST', given, AppColors.success),
+              _buildMiniStat('RET', returned, AppColors.warning),
+              _buildMiniStat('SOLD', sold, AppColors.secondary),
+              _buildMiniStat('STOCK', remaining, AppColors.onSurface),
             ],
           ),
         ],
@@ -514,27 +586,19 @@ class _SpgDetailScreenState extends State<SpgDetailScreen> {
     );
   }
 
-  Widget _buildMiniStat(String label, String value, Color color) {
+  Widget _buildMiniStat(String label, dynamic value, Color color) {
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w900,
-              color: AppColors.onSurfaceVariant,
-            ),
+            style: const TextStyle(fontSize: 8, fontWeight: FontWeight.w900, color: AppColors.onSurfaceVariant, letterSpacing: 1.0),
           ),
           const SizedBox(height: 4),
           Text(
-            value,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w900,
-              color: color,
-            ),
+            value.toString(),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: color),
           ),
         ],
       ),
@@ -553,28 +617,28 @@ class _SpgDetailScreenState extends State<SpgDetailScreen> {
         _buildGridButton(
           context,
           icon: Icons.add_circle_outline,
-          label: 'Tambah Stok',
+          label: 'RESUPPLY_SYNC',
           color: AppColors.success,
           route: 'topup',
         ),
         _buildGridButton(
           context,
           icon: Icons.refresh,
-          label: 'Retur Stok',
+          label: 'RECOVERY_LINK',
           color: AppColors.warning,
           route: 'return',
         ),
         _buildGridButton(
           context,
           icon: Icons.bar_chart,
-          label: 'Update Sales',
+          label: 'REVENUE_CAPTURE',
           color: AppColors.secondary,
           route: 'sales_input',
         ),
         _buildGridButton(
           context,
           icon: Icons.account_balance_wallet_outlined,
-          label: 'Input Cash',
+          label: 'CREDIT_SETTLEMENT',
           color: AppColors.primary,
           route: 'cash_input',
         ),
@@ -588,8 +652,8 @@ class _SpgDetailScreenState extends State<SpgDetailScreen> {
         _buildListButton(
           context,
           icon: Icons.app_registration,
-          label: 'Distribusi Awal',
-          subtitle: 'Set stok awal untuk event ini',
+          label: 'INITIAL_ALLOCATION',
+          subtitle: 'EXECUTE PRIMARY ASSET DISTRIBUTION',
           color: AppColors.primary,
           route: 'initial_distribution',
         ),
@@ -597,8 +661,8 @@ class _SpgDetailScreenState extends State<SpgDetailScreen> {
         _buildListButton(
           context,
           icon: Icons.history_outlined,
-          label: 'Riwayat Distribusi',
-          subtitle: 'Audit & edit mutation records',
+          label: 'LOGISTICS_HISTORY',
+          subtitle: 'AUDIT & VERIFY MUTATION RECORDS',
           color: AppColors.secondary,
           route: 'stock_history_spg',
         ),
@@ -613,31 +677,38 @@ class _SpgDetailScreenState extends State<SpgDetailScreen> {
     required Color color,
     required String route,
   }) {
-    return Material(
-      color: AppColors.surfaceContainer,
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        onTap: () => context.pushNamed(
-          route,
-          pathParameters: {'eventId': widget.eventId, 'spgId': widget.spgId},
-        ),
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, color: color, size: 28),
-              const SizedBox(height: 8),
-              Text(
-                label,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surfaceContainerLowest,
+        borderRadius: BorderRadius.zero,
+        border: Border.all(color: AppColors.surfaceContainerHigh),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => context.pushNamed(
+            route,
+            pathParameters: {'eventId': widget.eventId, 'spgId': widget.spgId},
+          ),
+          borderRadius: BorderRadius.zero,
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, color: color, size: 24),
+                const SizedBox(height: 8),
+                Text(
+                  label.toUpperCase(),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 9,
+                    letterSpacing: 1.0,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -652,52 +723,64 @@ class _SpgDetailScreenState extends State<SpgDetailScreen> {
     required Color color,
     required String route,
   }) {
-    return Material(
-      color: AppColors.surfaceContainer,
-      borderRadius: BorderRadius.circular(16),
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surfaceContainerLowest,
+        borderRadius: BorderRadius.zero,
+        border: Border.all(color: AppColors.surfaceContainerHigh),
+      ),
       child: ListTile(
         onTap: () => context.pushNamed(
           route,
           pathParameters: {'eventId': widget.eventId, 'spgId': widget.spgId},
         ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        leading: CircleAvatar(
-          backgroundColor: color.withOpacity(0.1),
-          child: Icon(icon, color: color, size: 20),
+        dense: true,
+        leading: Icon(icon, color: color, size: 18),
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+        title: Text(
+          label.toUpperCase(),
+          style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 11, letterSpacing: 0.5),
         ),
-        title: Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
-        trailing: const Icon(Icons.chevron_right, size: 20),
+        subtitle: Text(
+          subtitle.toUpperCase(),
+          style: TextStyle(fontSize: 8, color: AppColors.onSurfaceVariant, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+        ),
+        trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 12),
       ),
     );
   }
 
   Widget _buildClosingButton(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () => context.pushNamed(
-        'spg_closing',
-        pathParameters: {'eventId': widget.eventId, 'spgId': widget.spgId},
-      ),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.surfaceContainerHigh,
-        foregroundColor: AppColors.onSurface,
-        padding: const EdgeInsets.symmetric(vertical: 20),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      ),
-      child: const Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.lock_outline),
-          SizedBox(width: 12),
-          Text(
-            'CLOSING SESSION',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.2,
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: () => context.pushNamed(
+          'spg_closing',
+          pathParameters: {'eventId': widget.eventId, 'spgId': widget.spgId},
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.surfaceContainerHigh,
+          foregroundColor: AppColors.primary,
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          elevation: 0,
+          side: const BorderSide(color: AppColors.primary, width: 1),
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+        ),
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.lock_reset_rounded, size: 18),
+            SizedBox(width: 12),
+            Text(
+              'EXECUTE CLOSING PROTOCOL',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.5,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

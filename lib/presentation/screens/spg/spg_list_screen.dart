@@ -71,21 +71,16 @@ class _SpgListScreenState extends State<SpgListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.surface,
       appBar: AppBar(
-        title: const Text('SPG List'),
+        title: const Text('FLEET TELEMETRY'),
+        centerTitle: false,
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildSortChip('Name', _SpgSortMode.name),
-                const SizedBox(width: 4),
-                _buildSortChip('SPB', _SpgSortMode.spb),
-              ],
-            ),
+          IconButton(
+            icon: const Icon(Icons.refresh_rounded, size: 20),
+            onPressed: _loadData,
           ),
-          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadData),
+          const SizedBox(width: 8),
         ],
       ),
       body: BlocBuilder<EventSpgBloc, EventSpgState>(
@@ -99,29 +94,96 @@ class _SpgListScreenState extends State<SpgListScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Icon(
-                    Icons.error_outline,
-                    size: 64,
+                    Icons.warning_amber_rounded,
+                    size: 48,
                     color: AppColors.error,
                   ),
                   const SizedBox(height: 16),
-                  Text('Error: ${state.message}'),
+                  Text('SYSTEM ERROR: ${state.message.toUpperCase()}'),
                   const SizedBox(height: 16),
-                  ElevatedButton(
+                  OutlinedButton(
                     onPressed: _loadData,
-                    child: const Text('Retry'),
+                    child: const Text('RETRY SYNC'),
                   ),
                 ],
               ),
             );
           }
           if (state is AvailableSpgsLoaded) {
-            if (state.assignedSpgs.isEmpty) {
-              return _buildEmptyState(context);
-            }
-            return _buildSpgList(context, state.assignedSpgs, state.spbs);
+            return BlocBuilder<SpgBloc, SpgState>(
+              builder: (context, spgState) {
+                final sortedSpgs = _sortEventSpgs(
+                  state.assignedSpgs,
+                  state.spbs,
+                  spgState,
+                );
+
+                if (sortedSpgs.isEmpty) {
+                  return _buildEmptyState(context);
+                }
+
+                return CustomScrollView(
+                  slivers: [
+                    SliverToBoxAdapter(child: _buildOperationalToolbar()),
+                    SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          return SpgDashboardCard(
+                            eventId: widget.eventId,
+                            eventSpg: sortedSpgs[index],
+                            spbs: state.spbs,
+                          );
+                        }, childCount: sortedSpgs.length),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            );
           }
           return const Center(child: CircularProgressIndicator());
         },
+      ),
+    );
+  }
+
+  Widget _buildOperationalToolbar() {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.sort_rounded,
+                size: 14,
+                color: AppColors.onSurfaceVariant,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'SORT PRIORITY',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: AppColors.onSurfaceVariant,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 9,
+                  letterSpacing: 1.0,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              _buildSortChip('UNIT NAME', _SpgSortMode.name),
+              const SizedBox(width: 8),
+              _buildSortChip('SPB COORDINATOR', _SpgSortMode.spb),
+            ],
+          ),
+          const SizedBox(height: 8),
+          const Divider(height: 1, color: AppColors.surfaceContainerHigh),
+        ],
       ),
     );
   }
@@ -133,20 +195,22 @@ class _SpgListScreenState extends State<SpgListScreen> {
         children: [
           const Icon(
             Icons.people_outline,
-            size: 64,
+            size: 48,
             color: AppColors.onSurfaceVariant,
           ),
           const SizedBox(height: 16),
           Text(
-            'Belum ada SPG di event ini',
-            style: Theme.of(context).textTheme.headlineSmall,
+            'NO MISSION UNITS DETECTED'.toUpperCase(),
+            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13),
           ),
           const SizedBox(height: 8),
           Text(
-            'Setup SPG di Event Setup terlebih dahulu',
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(color: AppColors.onSurfaceVariant),
+            'EXECUTE UNIT REGISTRATION IN MISSION SETUP'.toUpperCase(),
+            style: const TextStyle(
+              fontSize: 9,
+              color: AppColors.onSurfaceVariant,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ],
       ),
@@ -155,29 +219,30 @@ class _SpgListScreenState extends State<SpgListScreen> {
 
   Widget _buildSortChip(String label, _SpgSortMode mode) {
     final isSelected = _sortMode == mode;
-    return FilterChip(
-      label: Text(
-        label,
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          color: isSelected ? AppColors.primary : AppColors.onSurfaceVariant,
+    return InkWell(
+      onTap: () => setState(() => _sortMode = mode),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.primary
+              : AppColors.surfaceContainerLowest,
+          border: Border.all(
+            color: isSelected
+                ? AppColors.primary
+                : AppColors.surfaceContainerHigh,
+          ),
+        ),
+        child: Text(
+          label.toUpperCase(),
+          style: TextStyle(
+            fontSize: 9,
+            fontWeight: FontWeight.w900,
+            color: isSelected ? Colors.white : AppColors.onSurfaceVariant,
+            letterSpacing: 1.0,
+          ),
         ),
       ),
-      selected: isSelected,
-      onSelected: (_) => setState(() => _sortMode = mode),
-      backgroundColor: isSelected ? AppColors.primary.withOpacity(0.1) : null,
-      selectedColor: AppColors.primary.withOpacity(0.2),
-      checkmarkColor: AppColors.primary,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: isSelected ? AppColors.primary : Colors.transparent,
-          width: 1,
-        ),
-      ),
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      visualDensity: VisualDensity.compact,
     );
   }
 
@@ -212,30 +277,6 @@ class _SpgListScreenState extends State<SpgListScreen> {
 
     return sorted;
   }
-
-  Widget _buildSpgList(
-    BuildContext context,
-    List<EventSpgEntity> eventSpgs,
-    List<SpbEntity> spbs,
-  ) {
-    return BlocBuilder<SpgBloc, SpgState>(
-      builder: (context, spgState) {
-        final sortedSpgs = _sortEventSpgs(eventSpgs, spbs, spgState);
-
-        return ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          itemCount: sortedSpgs.length,
-          itemBuilder: (context, index) {
-            return SpgDashboardCard(
-              eventId: widget.eventId,
-              eventSpg: sortedSpgs[index],
-              spbs: spbs,
-            );
-          },
-        );
-      },
-    );
-  }
 }
 
 class SpgDashboardCard extends StatelessWidget {
@@ -249,18 +290,6 @@ class SpgDashboardCard extends StatelessWidget {
     required this.eventSpg,
     required this.spbs,
   });
-
-  Color _getAvatarColor(String name) {
-    final colors = [
-      AppColors.primary,
-      AppColors.secondary,
-      AppColors.success,
-      AppColors.warning,
-      const Color(0xFF673AB7),
-      const Color(0xFF009688),
-    ];
-    return colors[name.length % colors.length];
-  }
 
   String _getInitials(String name) {
     if (name.isEmpty) return "S";
@@ -276,29 +305,29 @@ class SpgDashboardCard extends StatelessWidget {
     return BlocBuilder<SpgBloc, SpgState>(
       builder: (context, spgState) {
         if (spgState is! SpqsLoaded) {
-          return const Card(child: ListTile(title: Text('Loading SPG...')));
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          );
         }
 
         final spg = spgState.spqs.firstWhere((s) => s.id == eventSpg.spgId);
 
-        return Card(
-          margin: const EdgeInsets.symmetric(vertical: 8),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+        return Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceContainerLowest,
+            borderRadius: BorderRadius.zero,
+            border: Border.all(color: AppColors.surfaceContainerHigh, width: 1),
           ),
-          clipBehavior: Clip.antiAlias,
           child: Column(
             children: [
               Container(
-                height: 4,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      AppColors.secondary,
-                      AppColors.secondary.withOpacity(0.5),
-                    ],
-                  ),
-                ),
+                height: 2,
+                width: double.infinity,
+                color: AppColors.secondary,
               ),
               InkWell(
                 onTap: () => context.pushNamed(
@@ -312,17 +341,20 @@ class SpgDashboardCard extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          CircleAvatar(
-                            radius: 20,
-                            backgroundColor: _getAvatarColor(
-                              spg.name,
-                            ).withOpacity(0.2),
+                          Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: AppColors.surfaceContainerHigh,
+                              borderRadius: BorderRadius.zero,
+                            ),
+                            alignment: Alignment.center,
                             child: Text(
                               _getInitials(spg.name),
-                              style: TextStyle(
-                                color: _getAvatarColor(spg.name),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
+                              style: const TextStyle(
+                                color: AppColors.onSurface,
+                                fontWeight: FontWeight.w900,
+                                fontSize: 13,
                               ),
                             ),
                           ),
@@ -332,11 +364,11 @@ class SpgDashboardCard extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  spg.name,
-                                  style: Theme.of(context).textTheme.titleMedium
+                                  spg.name.toUpperCase(),
+                                  style: Theme.of(context).textTheme.bodyMedium
                                       ?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        letterSpacing: 0.2,
+                                        fontWeight: FontWeight.w900,
+                                        letterSpacing: 0.5,
                                       ),
                                 ),
                                 if (eventSpg.spbId != null)
@@ -348,12 +380,15 @@ class SpgDashboardCard extends StatelessWidget {
                                       final spbName =
                                           spb?.name ?? eventSpg.spbId!;
                                       return Text(
-                                        'SPB: $spbName',
+                                        'SPB_LOG: ${spbName.toUpperCase()}',
                                         style: Theme.of(context)
                                             .textTheme
-                                            .bodySmall
+                                            .labelSmall
                                             ?.copyWith(
                                               color: AppColors.onSurfaceVariant,
+                                              fontSize: 8,
+                                              fontWeight: FontWeight.bold,
+                                              letterSpacing: 0.5,
                                             ),
                                       );
                                     },
@@ -421,12 +456,12 @@ class SpgDashboardCard extends StatelessWidget {
                       isMatch = (cashTotal - expectedCash) == 0;
                     }
 
-                    if (isLoading) return _chip("Syncing", Colors.grey);
+                    if (isLoading) return _chip("SYNCING", Colors.grey);
                     if (!hasData)
-                      return _chip("No Data", AppColors.onSurfaceVariant);
+                      return _chip("NO_DATA", AppColors.onSurfaceVariant);
 
                     return _chip(
-                      isMatch ? "Ready" : "Review",
+                      isMatch ? "READY" : "REVIEW",
                       isMatch ? AppColors.success : AppColors.warning,
                     );
                   },
@@ -444,17 +479,31 @@ class SpgDashboardCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.zero,
         border: Border.all(color: color.withOpacity(0.3), width: 1),
       ),
-      child: Text(
-        label.toUpperCase(),
-        style: TextStyle(
-          color: color,
-          fontSize: 9,
-          fontWeight: FontWeight.w800,
-          letterSpacing: 0.5,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 4,
+            height: 4,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.zero,
+            ),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            label.toUpperCase(),
+            style: TextStyle(
+              color: color,
+              fontSize: 9,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1.0,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -511,456 +560,500 @@ class _SpgDashboardStats extends StatelessWidget {
                   totalTerjual: totalTerjual,
                 );
 
-                return Theme(
-                  data: Theme.of(
-                    context,
-                  ).copyWith(dividerColor: Colors.transparent),
-                  child: ExpansionTile(
-                    tilePadding: EdgeInsets.zero,
-                    childrenPadding: EdgeInsets.zero,
-                    title: Column(
-                      children: [
-                        Row(
-                          children: [
-                            _buildStatItem(
-                              context,
-                              'Distributed',
-                              totalGiven.toString(),
-                              AppColors.success,
-                            ),
-                            const SizedBox(width: 12),
-                            _buildStatItem(
-                              context,
-                              'Sold',
-                              totalTerjual.toString(),
-                              AppColors.secondary,
-                            ),
-                            const SizedBox(width: 12),
-                            _buildStatItem(
-                              context,
-                              'Stock',
-                              sisaSystem.toString(),
-                              AppColors.onSurface,
-                            ),
-                          ],
+                return Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceContainerLowest,
+                        borderRadius: BorderRadius.zero,
+                        border: Border.all(
+                          color: AppColors.surfaceContainerHigh,
                         ),
-                        const SizedBox(height: 12),
-                        BlocBuilder<EventProductBloc, EventProductState>(
-                          builder: (context, epState) {
-                            double expectedCash = 0;
-                            if (epState is AvailableProductsLoaded) {
-                              for (final sale in spgSales) {
-                                final ep = epState.assignedProducts
-                                    .firstWhereOrNull(
-                                      (p) => p.productId == sale.productId,
-                                    );
-                                if (ep != null) {
-                                  expectedCash += sale.qtySold * ep.price;
-                                }
-                              }
+                      ),
+                      child: Row(
+                        children: [
+                          _buildStatItem(
+                            context,
+                            'DIST',
+                            initialQty + topupQty,
+                            AppColors.success,
+                          ),
+                          Container(
+                            width: 1,
+                            height: 24,
+                            color: AppColors.surfaceContainerHigh,
+                          ),
+                          const SizedBox(width: 12),
+                          _buildStatItem(
+                            context,
+                            'SOLD',
+                            totalTerjual,
+                            AppColors.secondary,
+                          ),
+                          Container(
+                            width: 1,
+                            height: 24,
+                            color: AppColors.surfaceContainerHigh,
+                          ),
+                          const SizedBox(width: 12),
+                          _buildStatItem(
+                            context,
+                            'STOCK',
+                            sisaSystem,
+                            AppColors.onSurface,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    BlocBuilder<EventProductBloc, EventProductState>(
+                      builder: (context, epState) {
+                        double expectedCash = 0;
+                        if (epState is AvailableProductsLoaded) {
+                          for (final sale in spgSales) {
+                            final ep = epState.assignedProducts
+                                .firstWhereOrNull(
+                                  (p) => p.productId == sale.productId,
+                                );
+                            if (ep != null) {
+                              expectedCash += sale.qtySold * ep.price;
                             }
+                          }
+                        }
 
-                            final cashTunai = spgCash?.cashReceived ?? 0;
-                            final qris = spgCash?.qrisReceived ?? 0;
-                            final totalActual = cashTunai + qris;
-                            final surplus = totalActual - expectedCash;
+                        final cashTunai = spgCash?.cashReceived ?? 0;
+                        final qris = spgCash?.qrisReceived ?? 0;
+                        final totalActual = cashTunai + qris;
+                        final surplus = totalActual - expectedCash;
 
-                            return Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: AppColors.surfaceContainerHigh,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Column(
+                        return Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppColors.surfaceContainerLowest,
+                            borderRadius: BorderRadius.zero,
+                            border: Border.all(
+                              color: AppColors.surfaceContainerHigh,
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              Row(
                                 children: [
-                                  Row(
+                                  const Icon(
+                                    Icons.account_balance_wallet_rounded,
+                                    size: 14,
+                                    color: AppColors.onSurfaceVariant,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'EXPECTED REVENUE',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelSmall
+                                        ?.copyWith(
+                                          color: AppColors.onSurfaceVariant,
+                                          fontWeight: FontWeight.w900,
+                                          fontSize: 9,
+                                          letterSpacing: 1.0,
+                                        ),
+                                  ),
+                                  const Spacer(),
+                                  Text(
+                                    app_formatters.Formatters.formatCurrency(
+                                      expectedCash,
+                                    ),
+                                    style: Theme.of(context).textTheme.bodySmall
+                                        ?.copyWith(
+                                          color: AppColors.onSurface,
+                                          fontWeight: FontWeight.w900,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                              const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 8),
+                                child: Divider(
+                                  height: 1,
+                                  color: AppColors.surfaceContainerHigh,
+                                ),
+                              ),
+                              Row(
+                                children: [
+                                  Text(
+                                    'CASH_SETTLEMENT',
+                                    style: _ledgerLabelStyle(context),
+                                  ),
+                                  const Spacer(),
+                                  Text(
+                                    app_formatters.Formatters.formatCurrency(
+                                      cashTunai,
+                                    ),
+                                    style: _ledgerValueStyle(context),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Text(
+                                    'QRIS_SETTLEMENT',
+                                    style: _ledgerLabelStyle(context),
+                                  ),
+                                  const Spacer(),
+                                  Text(
+                                    app_formatters.Formatters.formatCurrency(
+                                      qris,
+                                    ),
+                                    style: _ledgerValueStyle(context),
+                                  ),
+                                ],
+                              ),
+                              const Divider(
+                                height: 16,
+                                color: AppColors.surfaceContainerHigh,
+                              ),
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.payments_rounded,
+                                    size: 14,
+                                    color: AppColors.primary,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'TOTAL SETTLEMENT',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelSmall
+                                        ?.copyWith(
+                                          color: AppColors.primary,
+                                          fontWeight: FontWeight.w900,
+                                          fontSize: 9,
+                                          letterSpacing: 1.0,
+                                        ),
+                                  ),
+                                  const Spacer(),
+                                  Text(
+                                    app_formatters.Formatters.formatCurrency(
+                                      totalActual,
+                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                          color: AppColors.primary,
+                                          fontWeight: FontWeight.w900,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                              if (surplus != 0)
+                                Container(
+                                  margin: const EdgeInsets.only(top: 12),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color:
+                                        (surplus > 0
+                                                ? AppColors.success
+                                                : AppColors.error)
+                                            .withOpacity(0.1),
+                                    borderRadius: BorderRadius.zero,
+                                  ),
+                                  child: Row(
                                     children: [
                                       Icon(
-                                        Icons.account_balance_wallet_outlined,
-                                        size: 16,
-                                        color: AppColors.secondary,
+                                        surplus > 0
+                                            ? Icons.add_circle_outline
+                                            : Icons.remove_circle_outline,
+                                        size: 10,
+                                        color: surplus > 0
+                                            ? AppColors.success
+                                            : AppColors.error,
                                       ),
-                                      const SizedBox(width: 8),
+                                      const SizedBox(width: 6),
                                       Text(
-                                        'EXPECTED',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .labelSmall
-                                            ?.copyWith(
-                                              color: AppColors.onSurfaceVariant,
-                                              fontWeight: FontWeight.bold,
-                                            ),
+                                        surplus > 0
+                                            ? 'REVENUE SURPLUS'
+                                            : 'SETTLEMENT DEFICIT',
+                                        style: TextStyle(
+                                          color: surplus > 0
+                                              ? AppColors.success
+                                              : AppColors.error,
+                                          fontSize: 8,
+                                          fontWeight: FontWeight.w900,
+                                          letterSpacing: 0.5,
+                                        ),
                                       ),
                                       const Spacer(),
                                       Text(
                                         app_formatters
                                             .Formatters.formatCurrency(
-                                          expectedCash,
+                                          surplus.abs(),
                                         ),
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium
-                                            ?.copyWith(
-                                              color: AppColors.onSurfaceVariant,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Row(
-                                    children: [
-                                      const SizedBox(width: 24),
-                                      Text(
-                                        'Cash Tunai',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodySmall
-                                            ?.copyWith(
-                                              color: AppColors.onSurfaceVariant,
-                                            ),
-                                      ),
-                                      const Spacer(),
-                                      Text(
-                                        app_formatters
-                                            .Formatters.formatCurrency(
-                                          cashTunai,
+                                        style: TextStyle(
+                                          color: surplus > 0
+                                              ? AppColors.success
+                                              : AppColors.error,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w900,
                                         ),
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodySmall
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.w600,
-                                            ),
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      const SizedBox(width: 24),
-                                      Text(
-                                        'QRIS',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodySmall
-                                            ?.copyWith(
-                                              color: AppColors.onSurfaceVariant,
-                                            ),
-                                      ),
-                                      const Spacer(),
-                                      Text(
-                                        app_formatters
-                                            .Formatters.formatCurrency(qris),
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodySmall
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                      ),
-                                    ],
+                                ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    Theme(
+                      data: Theme.of(context).copyWith(
+                        dividerColor: Colors.transparent,
+                        splashColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                      ),
+                      child: ExpansionTile(
+                        tilePadding: EdgeInsets.zero,
+                        childrenPadding: EdgeInsets.zero,
+                        title: const Text(
+                          'VIEW MISSION DETAILS',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        children: [
+                          BlocBuilder<SpgTargetBloc, SpgTargetState>(
+                            builder: (context, targetState) {
+                              if (targetState is! SpgTargetsLoaded) {
+                                return const SizedBox.shrink();
+                              }
+
+                              final spgTargets = targetState.targets
+                                  .where((t) => t.spgId == spgId)
+                                  .toList();
+
+                              if (spgTargets.isEmpty) {
+                                return const SizedBox.shrink();
+                              }
+
+                              int totalTarget = spgTargets.fold(
+                                0,
+                                (sum, t) => sum + t.targetQty,
+                              );
+                              if (totalTarget == 0) {
+                                return const SizedBox.shrink();
+                              }
+
+                              final totalSold = spgSales.fold(
+                                0,
+                                (sum, s) => sum + s.qtySold,
+                              );
+                              final percentage = (totalSold / totalTarget * 100)
+                                  .clamp(0, 100);
+                              final color = percentage < 50
+                                  ? AppColors.error
+                                  : percentage < 80
+                                  ? AppColors.warning
+                                  : AppColors.success;
+
+                              return Container(
+                                margin: const EdgeInsets.only(bottom: 12),
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: AppColors.surfaceContainerLowest,
+                                  borderRadius: BorderRadius.zero,
+                                  border: Border.all(
+                                    color: AppColors.surfaceContainerHigh,
                                   ),
-                                  const Divider(height: 16),
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        Icons.payments_outlined,
-                                        size: 16,
-                                        color: AppColors.primary,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        'TOTAL ACTUAL',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .labelSmall
-                                            ?.copyWith(
-                                              color: AppColors.primary,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                      ),
-                                      const Spacer(),
-                                      Text(
-                                        app_formatters
-                                            .Formatters.formatCurrency(
-                                          totalActual,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.track_changes_rounded,
+                                          size: 14,
+                                          color: AppColors.onSurfaceVariant,
                                         ),
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleSmall
-                                            ?.copyWith(
-                                              color: AppColors.primary,
-                                              fontWeight: FontWeight.bold,
-                                            ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          'MISSION STATUS',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .labelSmall
+                                              ?.copyWith(
+                                                color:
+                                                    AppColors.onSurfaceVariant,
+                                                fontWeight: FontWeight.w900,
+                                                fontSize: 9,
+                                                letterSpacing: 1.0,
+                                              ),
+                                        ),
+                                        const Spacer(),
+                                        Text(
+                                          '${percentage.toInt()}%',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w900,
+                                            fontSize: 12,
+                                            color: color,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 10),
+                                    LinearProgressIndicator(
+                                      value: percentage / 100,
+                                      backgroundColor: color.withOpacity(0.1),
+                                      color: color,
+                                      minHeight: 6,
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        _miniLabel(context, 'SOLD: $totalSold'),
+                                        _miniLabel(
+                                          context,
+                                          'QUOTA: $totalTarget',
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.inventory_2_rounded,
+                                size: 14,
+                                color: AppColors.onSurfaceVariant,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'PRODUCT INVENTORY MANIFEST',
+                                style: Theme.of(context).textTheme.labelSmall
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.w900,
+                                      color: AppColors.onSurfaceVariant,
+                                      fontSize: 9,
+                                      letterSpacing: 1.0,
+                                    ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          BlocBuilder<EventProductBloc, EventProductState>(
+                            builder: (context, eventProductState) {
+                              if (eventProductState
+                                  is! AvailableProductsLoaded) {
+                                return const Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: LinearProgressIndicator(minHeight: 2),
+                                );
+                              }
+
+                              final assignedProducts =
+                                  eventProductState.assignedProducts;
+                              if (assignedProducts.isEmpty) {
+                                return const Text('No products assigned');
+                              }
+
+                              return Column(
+                                children: assignedProducts.map((ep) {
+                                  final product = eventProductState.products
+                                      .firstWhereOrNull(
+                                        (p) => p.id == ep.productId,
+                                      );
+
+                                  final prodMutations = spgMutations
+                                      .where((m) => m.productId == ep.productId)
+                                      .toList();
+                                  final prodSales = spgSales
+                                      .where((s) => s.productId == ep.productId)
+                                      .toList();
+
+                                  final pGiven = prodMutations
+                                      .where(
+                                        (m) =>
+                                            m.type !=
+                                            MutationType.returnMutation,
+                                      )
+                                      .fold(0, (sum, m) => sum + m.qty);
+                                  final pReturn = prodMutations
+                                      .where(
+                                        (m) =>
+                                            m.type ==
+                                            MutationType.returnMutation,
+                                      )
+                                      .fold(0, (sum, m) => sum + m.qty);
+                                  final pSold = prodSales.fold(
+                                    0,
+                                    (sum, s) => sum + s.qtySold,
+                                  );
+                                  final pSisa = pGiven - pReturn - pSold;
+
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 10),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(10),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.surfaceContainerLowest
+                                            .withOpacity(0.5),
+                                        borderRadius: BorderRadius.zero,
                                       ),
-                                    ],
-                                  ),
-                                  if (surplus != 0)
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 8),
                                       child: Row(
                                         children: [
-                                          Icon(
-                                            surplus > 0
-                                                ? Icons.arrow_upward
-                                                : Icons.arrow_downward,
-                                            size: 14,
-                                            color: surplus > 0
-                                                ? AppColors.success
-                                                : AppColors.error,
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Text(
-                                            surplus > 0 ? 'SURPLUS' : 'DEFICIT',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .labelSmall
-                                                ?.copyWith(
-                                                  color: surplus > 0
-                                                      ? AppColors.success
-                                                      : AppColors.error,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                          ),
-                                          const Spacer(),
-                                          Text(
-                                            app_formatters
-                                                .Formatters.formatCurrency(
-                                              surplus.abs(),
+                                          Expanded(
+                                            flex: 3,
+                                            child: Text(
+                                              product?.name ?? 'Unknown',
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodySmall
+                                                  ?.copyWith(
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
                                             ),
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodyMedium
-                                                ?.copyWith(
-                                                  color: surplus > 0
-                                                      ? AppColors.success
-                                                      : AppColors.error,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
+                                          ),
+                                          _badge(
+                                            'D',
+                                            pGiven.toString(),
+                                            AppColors.success,
+                                          ),
+                                          const SizedBox(width: 6),
+                                          _badge(
+                                            'T',
+                                            pSold.toString(),
+                                            AppColors.secondary,
+                                          ),
+                                          const SizedBox(width: 6),
+                                          _badge(
+                                            'S',
+                                            pSisa.toString(),
+                                            AppColors.onSurface,
                                           ),
                                         ],
                                       ),
                                     ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 12),
-                        child: Divider(height: 1),
-                      ),
-                      BlocBuilder<SpgTargetBloc, SpgTargetState>(
-                        builder: (context, targetState) {
-                          if (targetState is! SpgTargetsLoaded) {
-                            return const SizedBox.shrink();
-                          }
-
-                          final spgTargets = targetState.targets
-                              .where((t) => t.spgId == spgId)
-                              .toList();
-
-                          if (spgTargets.isEmpty) {
-                            return const SizedBox.shrink();
-                          }
-
-                          int totalTarget = spgTargets.fold(0, (sum, t) => sum + t.targetQty);
-                          if (totalTarget == 0) {
-                            return const SizedBox.shrink();
-                          }
-
-                          final totalSold = spgSales.fold(0, (sum, s) => sum + s.qtySold);
-                          final percentage = (totalSold / totalTarget * 100).clamp(0, 100);
-                          final color = percentage < 50
-                              ? AppColors.error
-                              : percentage < 80
-                                  ? AppColors.warning
-                                  : AppColors.success;
-
-                          return Container(
-                            margin: const EdgeInsets.only(bottom: 12),
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: color.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: color.withOpacity(0.3)),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(Icons.track_changes, size: 16, color: color),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      'TARGET PROGRESS',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w900,
-                                        color: color,
-                                        letterSpacing: 1.0,
-                                      ),
-                                    ),
-                                    const Spacer(),
-                                    Text(
-                                      '${percentage.toInt()}%',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: color,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 8),
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(4),
-                                  child: LinearProgressIndicator(
-                                    value: percentage / 100,
-                                    backgroundColor: color.withOpacity(0.2),
-                                    color: color,
-                                    minHeight: 8,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      'Sold: $totalSold',
-                                      style: const TextStyle(fontSize: 12),
-                                    ),
-                                    Text(
-                                      'Target: $totalTarget',
-                                      style: const TextStyle(fontSize: 12),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'PRODUCT BREAKDOWN',
-                            style: Theme.of(context).textTheme.labelSmall
-                                ?.copyWith(
-                                  fontWeight: FontWeight.w900,
-                                  color: AppColors.onSurfaceVariant,
-                                  letterSpacing: 1.0,
-                                ),
-                          ),
-                          const Icon(
-                            Icons.inventory_2_outlined,
-                            size: 14,
-                            color: AppColors.onSurfaceVariant,
+                                  );
+                                }).toList(),
+                              );
+                            },
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
-                      BlocBuilder<EventProductBloc, EventProductState>(
-                        builder: (context, eventProductState) {
-                          if (eventProductState is! AvailableProductsLoaded) {
-                            return const Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: LinearProgressIndicator(minHeight: 2),
-                            );
-                          }
-
-                          final assignedProducts =
-                              eventProductState.assignedProducts;
-                          if (assignedProducts.isEmpty) {
-                            return const Text('No products assigned');
-                          }
-
-                          return Column(
-                            children: assignedProducts.map((ep) {
-                              final product = eventProductState.products
-                                  .firstWhereOrNull(
-                                    (p) => p.id == ep.productId,
-                                  );
-
-                              final prodMutations = spgMutations
-                                  .where((m) => m.productId == ep.productId)
-                                  .toList();
-                              final prodSales = spgSales
-                                  .where((s) => s.productId == ep.productId)
-                                  .toList();
-
-                              final pGiven = prodMutations
-                                  .where(
-                                    (m) =>
-                                        m.type != MutationType.returnMutation,
-                                  )
-                                  .fold(0, (sum, m) => sum + m.qty);
-                              final pReturn = prodMutations
-                                  .where(
-                                    (m) =>
-                                        m.type == MutationType.returnMutation,
-                                  )
-                                  .fold(0, (sum, m) => sum + m.qty);
-                              final pSold = prodSales.fold(
-                                0,
-                                (sum, s) => sum + s.qtySold,
-                              );
-                              final pSisa = pGiven - pReturn - pSold;
-
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 10),
-                                child: Container(
-                                  padding: const EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.surfaceContainerLowest
-                                        .withOpacity(0.5),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        flex: 3,
-                                        child: Text(
-                                          product?.name ?? 'Unknown',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodySmall
-                                              ?.copyWith(
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                        ),
-                                      ),
-                                      _badge(
-                                        'D',
-                                        pGiven.toString(),
-                                        AppColors.success,
-                                      ),
-                                      const SizedBox(width: 6),
-                                      _badge(
-                                        'T',
-                                        pSold.toString(),
-                                        AppColors.secondary,
-                                      ),
-                                      const SizedBox(width: 6),
-                                      _badge(
-                                        'S',
-                                        pSisa.toString(),
-                                        AppColors.onSurface,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 );
               },
             );
@@ -970,10 +1063,37 @@ class _SpgDashboardStats extends StatelessWidget {
     );
   }
 
+  TextStyle _ledgerLabelStyle(BuildContext context) {
+    return Theme.of(context).textTheme.bodySmall!.copyWith(
+      color: AppColors.onSurfaceVariant,
+      fontWeight: FontWeight.bold,
+      fontSize: 10,
+    );
+  }
+
+  TextStyle _ledgerValueStyle(BuildContext context) {
+    return Theme.of(context).textTheme.bodySmall!.copyWith(
+      color: AppColors.onSurface,
+      fontWeight: FontWeight.w900,
+      fontSize: 11,
+    );
+  }
+
+  Widget _miniLabel(BuildContext context, String text) {
+    return Text(
+      text.toUpperCase(),
+      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+        color: AppColors.onSurfaceVariant,
+        fontSize: 9,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+  }
+
   Widget _buildStatItem(
     BuildContext context,
     String label,
-    String value,
+    dynamic value,
     Color color,
   ) {
     return Expanded(
@@ -981,18 +1101,18 @@ class _SpgDashboardStats extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            label.toUpperCase(),
+            label,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
               color: AppColors.onSurfaceVariant,
-              fontSize: 9,
+              fontSize: 8,
               fontWeight: FontWeight.w900,
-              letterSpacing: 0.5,
+              letterSpacing: 1.0,
             ),
           ),
           const SizedBox(height: 2),
           Text(
-            value,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            value.toString(),
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
               color: color,
               fontWeight: FontWeight.w900,
             ),
@@ -1004,11 +1124,12 @@ class _SpgDashboardStats extends StatelessWidget {
 
   Widget _badge(String label, String value, Color color) {
     return Container(
-      width: 42,
+      width: 44,
       padding: const EdgeInsets.symmetric(vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(4),
+        color: color.withOpacity(0.05),
+        borderRadius: BorderRadius.zero,
+        border: Border.all(color: color.withOpacity(0.2)),
       ),
       child: Column(
         children: [
@@ -1016,15 +1137,15 @@ class _SpgDashboardStats extends StatelessWidget {
             label,
             style: TextStyle(
               color: color,
-              fontSize: 8,
-              fontWeight: FontWeight.bold,
+              fontSize: 7,
+              fontWeight: FontWeight.w900,
             ),
           ),
           Text(
             value,
             style: TextStyle(
               color: color,
-              fontSize: 11,
+              fontSize: 10,
               fontWeight: FontWeight.w900,
             ),
           ),

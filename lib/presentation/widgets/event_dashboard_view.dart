@@ -45,40 +45,40 @@ class EventDashboardView extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    event.name.toUpperCase(),
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -1,
-                      height: 1.1,
-                    ),
+            const Icon(Icons.hub_outlined, color: AppColors.primary, size: 14),
+            const SizedBox(width: 8),
+            Text(
+              'MISSION TELEMETRY ACTIVE',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 2,
                   ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.calendar_today,
-                        size: 14,
-                        color: AppColors.onSurfaceVariant,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        app_formatters.Formatters.formatDate(event.date),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.onSurfaceVariant,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Text(
+          event.name.toUpperCase(),
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.w900,
+                letterSpacing: -1,
+                height: 1.1,
               ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            const Icon(Icons.event_seat_outlined, size: 14, color: AppColors.onSurfaceVariant),
+            const SizedBox(width: 8),
+            Text(
+              app_formatters.Formatters.formatDate(event.date).toUpperCase(),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.onSurfaceVariant,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.5,
+                  ),
             ),
           ],
         ),
@@ -101,8 +101,7 @@ class EventDashboardView extends StatelessWidget {
                     .where(
                       (m) =>
                           m.spgId != 'WAREHOUSE' &&
-                          (m.type == MutationType.initial ||
-                              m.type == MutationType.topup),
+                          (m.type == MutationType.initial || m.type == MutationType.topup),
                     )
                     .fold(0, (sum, m) => sum + m.qty);
 
@@ -129,17 +128,17 @@ class EventDashboardView extends StatelessWidget {
                         Expanded(
                           child: _buildStatCard(
                             context,
-                            'WAREHOUSE',
+                            'WAREHOUSE INVENTORY',
                             warehouseStock.toString(),
                             AppColors.primary,
-                            Icons.inventory_2_outlined,
+                            Icons.inventory_outlined,
                           ),
                         ),
-                        const SizedBox(width: 16),
+                        const SizedBox(width: 12),
                         Expanded(
                           child: _buildStatCard(
                             context,
-                            'SOLD',
+                            'ASSETS SOLD',
                             totalSold.toString(),
                             AppColors.secondary,
                             Icons.local_fire_department_outlined,
@@ -147,15 +146,12 @@ class EventDashboardView extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                     Container(
-                      padding: const EdgeInsets.all(24),
+                      padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: AppColors.surfaceContainerHigh,
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(
-                          color: AppColors.onSurface.withOpacity(0.05),
-                        ),
+                        color: AppColors.surfaceContainerLowest,
+                        border: Border.all(color: AppColors.surfaceContainerHigh),
                       ),
                       child: Row(
                         children: [
@@ -163,9 +159,9 @@ class EventDashboardView extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Text(
-                                'TOTAL REVENUE',
+                                'CASH TELEMETRY (ACTUAL + QRIS)',
                                 style: TextStyle(
-                                  fontSize: 10,
+                                  fontSize: 9,
                                   fontWeight: FontWeight.w900,
                                   color: AppColors.onSurfaceVariant,
                                   letterSpacing: 1.5,
@@ -173,27 +169,20 @@ class EventDashboardView extends StatelessWidget {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                app_formatters.Formatters.formatCurrency(
-                                  totalRevenue,
-                                ),
-                                style: Theme.of(context).textTheme.headlineSmall
-                                    ?.copyWith(
+                                app_formatters.Formatters.formatCurrency(totalRevenue),
+                                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                                       fontWeight: FontWeight.w900,
                                       color: AppColors.secondary,
+                                      letterSpacing: -0.5,
                                     ),
                               ),
                             ],
                           ),
                           const Spacer(),
-                          CircleAvatar(
-                            radius: 24,
-                            backgroundColor: AppColors.secondary.withOpacity(
-                              0.1,
-                            ),
-                            child: const Icon(
-                              Icons.payments_outlined,
-                              color: AppColors.secondary,
-                            ),
+                          const Icon(
+                            Icons.analytics_outlined,
+                            color: AppColors.onSurfaceVariant,
+                            size: 24,
                           ),
                         ],
                       ),
@@ -216,11 +205,10 @@ class EventDashboardView extends StatelessWidget {
     IconData icon,
   ) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainer,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.onSurface.withOpacity(0.05)),
+        color: AppColors.surfaceContainerLowest,
+        border: Border.all(color: AppColors.surfaceContainerHigh),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -231,20 +219,20 @@ class EventDashboardView extends StatelessWidget {
               Text(
                 label,
                 style: const TextStyle(
-                  fontSize: 10,
+                  fontSize: 9,
                   fontWeight: FontWeight.w900,
                   color: AppColors.onSurfaceVariant,
-                  letterSpacing: 1.2,
+                  letterSpacing: 1,
                 ),
               ),
-              Icon(icon, size: 16, color: AppColors.onSurfaceVariant),
+              Icon(icon, size: 14, color: AppColors.onSurfaceVariant),
             ],
           ),
           const SizedBox(height: 8),
           Text(
             value,
             style: TextStyle(
-              fontSize: 32,
+              fontSize: 28,
               fontWeight: FontWeight.w900,
               color: color,
               letterSpacing: -1,
@@ -258,21 +246,20 @@ class EventDashboardView extends StatelessWidget {
   Widget _buildProductPerformance(BuildContext context) {
     return BlocBuilder<EventProductBloc, EventProductState>(
       builder: (context, epState) {
-        if (epState is! AvailableProductsLoaded ||
-            epState.assignedProducts.isEmpty) {
+        if (epState is! AvailableProductsLoaded || epState.assignedProducts.isEmpty) {
           return const SizedBox.shrink();
         }
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSectionLabel(context, 'PRODUCT PERFORMANCE'),
+            _buildSectionLabel(context, 'PRODUCT TELEMETRY'),
             const SizedBox(height: 16),
             ...epState.assignedProducts.map((ep) {
               final product = epState.products.cast<dynamic>().firstWhere(
-                (p) => p.id == ep.productId,
-                orElse: () => null,
-              );
+                    (p) => p.id == ep.productId,
+                    orElse: () => null,
+                  );
               if (product == null) return const SizedBox.shrink();
               return _buildProductRow(context, product, ep);
             }),
@@ -294,17 +281,16 @@ class EventDashboardView extends StatelessWidget {
             final totalIn = stockState.mutations
                 .where(
                   (m) =>
-                      m.productId == ep.productId &&
-                      m.type == MutationType.distributorToEvent,
+                      m.productId == ep.productId && m.type == MutationType.distributorToEvent,
                 )
                 .fold(0, (sum, m) => sum + m.qty);
 
             return Container(
-              margin: const EdgeInsets.only(bottom: 12),
+              margin: const EdgeInsets.only(bottom: 8),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: AppColors.surfaceContainerLowest,
-                borderRadius: BorderRadius.circular(20),
+                border: Border(left: BorderSide(color: AppColors.primary, width: 4)),
               ),
               child: Row(
                 children: [
@@ -313,26 +299,29 @@ class EventDashboardView extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          product.name,
+                          product.name.toUpperCase(),
                           style: const TextStyle(
-                            fontWeight: FontWeight.w800,
-                            fontSize: 14,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 13,
                           ),
                         ),
+                        const SizedBox(height: 4),
                         Text(
-                          'SKU: ${product.sku}',
+                          'SIG: ${product.sku}'.toUpperCase(),
                           style: const TextStyle(
-                            fontSize: 11,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
                             color: AppColors.onSurfaceVariant,
+                            letterSpacing: 1,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  _buildMiniStat('IN', totalIn.toString(), AppColors.primary),
-                  const SizedBox(width: 16),
+                  _buildMiniStat('INFLOW', totalIn.toString(), AppColors.primary),
+                  const SizedBox(width: 20),
                   _buildMiniStat(
-                    'SOLD',
+                    'OUTFLOW',
                     totalSold.toString(),
                     AppColors.secondary,
                   ),
@@ -355,14 +344,16 @@ class EventDashboardView extends StatelessWidget {
             fontSize: 8,
             fontWeight: FontWeight.w900,
             color: AppColors.onSurfaceVariant,
+            letterSpacing: 1,
           ),
         ),
         Text(
           value,
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 18,
             fontWeight: FontWeight.w900,
             color: color,
+            letterSpacing: -0.5,
           ),
         ),
       ],
@@ -373,49 +364,49 @@ class EventDashboardView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionLabel(context, 'MANAGEMENT'),
+        _buildSectionLabel(context, 'COMMAND PROTOCOLS'),
         const SizedBox(height: 16),
         _buildActionTile(
           context,
-          icon: Icons.people_outline,
-          title: 'Daftar SPG',
-          subtitle: 'Absensi dan performa individu',
+          icon: Icons.shield_outlined,
+          title: 'UNIT COMMANDERS',
+          subtitle: 'Absensi dan performa SPG',
           color: AppColors.primary,
           onTap: () => context.pushNamed(
             'spg_list',
             pathParameters: {'eventId': event.id},
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         _buildActionTile(
           context,
-          icon: Icons.history_outlined,
-          title: 'Riwayat Distribusi',
-          subtitle: 'Audit semua mutation records',
+          icon: Icons.swap_vert_circle_outlined,
+          title: 'LOGISTICS HISTORY',
+          subtitle: 'Audit mutasi inventaris',
           color: AppColors.secondary,
           onTap: () => context.pushNamed(
             'stock_history',
             pathParameters: {'eventId': event.id},
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         _buildActionTile(
           context,
-          icon: Icons.settings_outlined,
-          title: 'Setup Event',
-          subtitle: 'Konfigurasi produk & petugas',
+          icon: Icons.tune_outlined,
+          title: 'MISSION CONFIG',
+          subtitle: 'Setup produk & petugas',
           color: AppColors.onSurfaceVariant,
           onTap: () => context.pushNamed(
             'event_setup',
             pathParameters: {'eventId': event.id},
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         _buildActionTile(
           context,
-          icon: Icons.track_changes_outlined,
-          title: 'Target Penjualan',
-          subtitle: 'Set target qty per SPG',
+          icon: Icons.gps_fixed_outlined,
+          title: 'OBJECTIVE TARGETS',
+          subtitle: 'Set target operasional',
           color: AppColors.success,
           onTap: () => context.pushNamed(
             'sales_targets',
@@ -427,14 +418,20 @@ class EventDashboardView extends StatelessWidget {
   }
 
   Widget _buildSectionLabel(BuildContext context, String label) {
-    return Text(
-      label,
-      style: const TextStyle(
-        fontSize: 11,
-        fontWeight: FontWeight.w900,
-        color: AppColors.onSurfaceVariant,
-        letterSpacing: 1.5,
-      ),
+    return Row(
+      children: [
+        Container(width: 4, height: 12, color: AppColors.primary),
+        const SizedBox(width: 8),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w900,
+            color: AppColors.onSurfaceVariant,
+            letterSpacing: 2,
+          ),
+        ),
+      ],
     );
   }
 
@@ -446,53 +443,48 @@ class EventDashboardView extends StatelessWidget {
     required Color color,
     required VoidCallback onTap,
   }) {
-    return Material(
-      color: AppColors.surfaceContainer,
-      borderRadius: BorderRadius.circular(20),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(icon, color: color, size: 20),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 15,
-                      ),
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceContainerLowest,
+          border: Border.all(color: AppColors.surfaceContainerHigh),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: color, size: 20),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 14,
+                      letterSpacing: 0.5,
                     ),
-                    Text(
-                      subtitle,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColors.onSurfaceVariant,
-                      ),
+                  ),
+                  Text(
+                    subtitle.toUpperCase(),
+                    style: const TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.onSurfaceVariant,
+                      letterSpacing: 0.5,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              const Icon(
-                Icons.chevron_right,
-                size: 20,
-                color: AppColors.onSurfaceVariant,
-              ),
-            ],
-          ),
+            ),
+            const Icon(
+              Icons.arrow_forward_ios,
+              size: 14,
+              color: AppColors.onSurfaceVariant,
+            ),
+          ],
         ),
       ),
     );

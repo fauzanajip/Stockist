@@ -150,7 +150,7 @@ class AppTheme {
       cardTheme: CardThemeData(
         color: AppColors.surfaceContainer,
         elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
       ),
 
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -159,7 +159,7 @@ class AppTheme {
           foregroundColor: AppColors.onPrimary,
           minimumSize: const Size(0, 48),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
           textStyle: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
@@ -173,7 +173,7 @@ class AppTheme {
           foregroundColor: AppColors.secondary,
           minimumSize: const Size(0, 48),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
           side: const BorderSide(color: AppColors.secondary, width: 1),
           textStyle: const TextStyle(
             fontSize: 14,
@@ -203,25 +203,25 @@ class AppTheme {
           horizontal: 16,
           vertical: 16,
         ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+        border: const OutlineInputBorder(
+          borderRadius: BorderRadius.zero,
           borderSide: BorderSide.none,
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+        enabledBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.zero,
           borderSide: BorderSide.none,
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: AppColors.secondary, width: 2),
+        focusedBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.zero,
+          borderSide: BorderSide(color: AppColors.secondary, width: 2),
         ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: AppColors.error, width: 1),
+        errorBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.zero,
+          borderSide: BorderSide(color: AppColors.error, width: 1),
         ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: AppColors.error, width: 2),
+        focusedErrorBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.zero,
+          borderSide: BorderSide(color: AppColors.error, width: 2),
         ),
         labelStyle: const TextStyle(color: AppColors.onSurfaceVariant),
         hintStyle: const TextStyle(color: AppColors.onSurfaceVariant),

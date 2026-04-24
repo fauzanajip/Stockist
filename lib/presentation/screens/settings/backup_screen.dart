@@ -7,100 +7,139 @@ class BackupScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Backup & Restore')),
+      backgroundColor: AppColors.surface,
+      appBar: AppBar(
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'RECOVERY PROTOCOL',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 2,
+                  ),
+            ),
+            Text(
+              'SYSTEM DATA ARCHIVE',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.5,
+                  ),
+            ),
+          ],
+        ),
+        backgroundColor: AppColors.surfaceContainerLowest,
+        elevation: 0,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(color: AppColors.surfaceContainerHigh, height: 1),
+        ),
+      ),
       body: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(
-                            Icons.backup,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          'Backup Data',
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Ekspor database ke file JSON dan share ke WhatsApp/Google Drive',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.onSurfaceVariant,
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceContainerLowest,
+                border: Border.all(color: AppColors.surfaceContainerHigh),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.archive_outlined, color: AppColors.primary, size: 20),
+                      const SizedBox(width: 12),
+                      const Text(
+                        'DATA EXFILTRATION',
+                        style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton.icon(
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'EXPORT SYSTEM DATABASE TO ENCRYPTED JSON ARCHIVE. FORWARD TO SECURE EXTERNAL REPOSITORIES.',
+                    style: TextStyle(fontSize: 10, color: AppColors.onSurfaceVariant, height: 1.5, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton.icon(
                       onPressed: () {
                         // TODO: Implement backup functionality
                       },
-                      icon: const Icon(Icons.file_download),
-                      label: const Text('Ekspor Data Event'),
+                      icon: const Icon(Icons.cloud_upload_outlined, size: 18),
+                      label: const Text('EXECUTE EXPORT', style: TextStyle(fontWeight: FontWeight.w900)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                        elevation: 0,
+                      ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 16),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: AppColors.secondary.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(
-                            Icons.restore,
-                            color: AppColors.secondary,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          'Restore Data',
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Import file JSON backup untuk restore data',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.onSurfaceVariant,
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceContainerLowest,
+                border: Border.all(color: AppColors.surfaceContainerHigh),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.unarchive_outlined, color: AppColors.secondary, size: 20),
+                      const SizedBox(width: 12),
+                      const Text(
+                        'DATA INFILTRATION',
+                        style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    OutlinedButton.icon(
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'RE-ESTABLISH MISSION DATA FROM EXTERNAL ARCHIVE. EXISTING LOCAL TELEMETRY WILL BE OVERWRITTEN.',
+                    style: TextStyle(fontSize: 10, color: AppColors.onSurfaceVariant, height: 1.5, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: OutlinedButton.icon(
                       onPressed: () {
                         // TODO: Implement restore functionality
                       },
-                      icon: const Icon(Icons.file_upload),
-                      label: const Text('Import Backup'),
+                      icon: const Icon(Icons.file_open_outlined, size: 18),
+                      label: const Text('IMPORT ARCHIVE', style: TextStyle(fontWeight: FontWeight.w900)),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: AppColors.secondary),
+                        foregroundColor: AppColors.secondary,
+                        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                      ),
                     ),
-                  ],
+                  ),
+                ],
+              ),
+            ),
+            const Spacer(),
+            Center(
+              child: Text(
+                'LOG_ENCRYPTION_LINK: AES-256V2_ACTIVE',
+                style: TextStyle(
+                  fontSize: 8,
+                  color: AppColors.onSurfaceVariant.withOpacity(0.5),
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.5,
                 ),
               ),
             ),

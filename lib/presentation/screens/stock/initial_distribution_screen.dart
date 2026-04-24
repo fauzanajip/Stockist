@@ -94,7 +94,35 @@ class _InitialDistributionScreenState extends State<InitialDistributionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Distribusi Awal')),
+      backgroundColor: AppColors.surface,
+      appBar: AppBar(
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'LOGISTICS_LINK: ACTIVE',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 2,
+                  ),
+            ),
+            Text(
+              'INITIAL SUPPLY MANIFEST',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.5,
+                  ),
+            ),
+          ],
+        ),
+        backgroundColor: AppColors.surfaceContainerLowest,
+        elevation: 0,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(color: AppColors.surfaceContainerHigh, height: 1),
+        ),
+      ),
       body: BlocBuilder<SpgBloc, SpgState>(
         builder: (context, spgState) {
           String spgName = widget.spgId;
@@ -109,11 +137,12 @@ class _InitialDistributionScreenState extends State<InitialDistributionScreen> {
           return Column(
             children: [
               _buildHeader(context, spgName),
+              Container(height: 1, color: AppColors.surfaceContainerHigh),
               Expanded(
                 child: BlocBuilder<EventProductBloc, EventProductState>(
                   builder: (context, state) {
                     if (state is EventProductLoading) {
-                      return const Center(child: CircularProgressIndicator());
+                      return const Center(child: CircularProgressIndicator(strokeWidth: 2));
                     }
                     if (state is EventProductError) {
                       return _buildErrorState(state.message);
@@ -124,7 +153,7 @@ class _InitialDistributionScreenState extends State<InitialDistributionScreen> {
                       }
                       return _buildProductList(state);
                     }
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(child: CircularProgressIndicator(strokeWidth: 2));
                   },
                 ),
               ),
@@ -139,24 +168,39 @@ class _InitialDistributionScreenState extends State<InitialDistributionScreen> {
   Widget _buildHeader(BuildContext context, String spgName) {
     return Container(
       width: double.infinity,
-      color: AppColors.surface,
-      padding: const EdgeInsets.all(16),
+      color: AppColors.surfaceContainerLowest,
+      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'SPG: $spgName',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: AppColors.secondary,
-              fontWeight: FontWeight.bold,
+            'PERSONNEL_ASSIGNMENT'.toUpperCase(),
+            style: const TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.w900,
+              color: AppColors.onSurfaceVariant,
+              letterSpacing: 1.5,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           Text(
-            'Input stok awal yang diberikan kepada SPG untuk event ini.',
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: AppColors.onSurfaceVariant),
+            spgName.toUpperCase(),
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w900,
+              color: AppColors.primary,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'INITIAL INVENTORY ALLOCATION PROTOCOL. INPUT ALL ASSETS DISTRIBUTED TO UNIT FOR MISSION START.'.toUpperCase(),
+            style: const TextStyle(
+              fontSize: 9,
+              color: AppColors.onSurfaceVariant,
+              height: 1.5,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ],
       ),
@@ -165,7 +209,7 @@ class _InitialDistributionScreenState extends State<InitialDistributionScreen> {
 
   Widget _buildProductList(AvailableProductsLoaded state) {
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       itemCount: state.assignedProducts.length,
       itemBuilder: (context, index) {
         final assignedProduct = state.assignedProducts[index];
@@ -173,39 +217,45 @@ class _InitialDistributionScreenState extends State<InitialDistributionScreen> {
           (p) => p.id == assignedProduct.productId,
         );
 
-        return Card(
-          margin: const EdgeInsets.only(bottom: 12),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        product.name,
-                        style: Theme.of(context).textTheme.titleMedium,
+        return Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceContainerLowest,
+            border: Border.all(color: AppColors.surfaceContainerHigh),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      product.name.toUpperCase(),
+                      style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'SKU_ID: ${product.sku}'.toUpperCase(),
+                      style: const TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.onSurfaceVariant,
+                        letterSpacing: 1,
                       ),
-                      Text(
-                        'SKU: ${product.sku}',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                _QuantityCounter(
-                  initialValue: _quantities[product.id] ?? 0,
-                  onChanged: (val) {
-                    setState(() {
-                      _quantities[product.id] = val;
-                    });
-                  },
-                ),
-              ],
-            ),
+              ),
+              _QuantityCounter(
+                initialValue: _quantities[product.id] ?? 0,
+                onChanged: (val) {
+                  setState(() {
+                    _quantities[product.id] = val;
+                  });
+                },
+              ),
+            ],
           ),
         );
       },
@@ -217,17 +267,17 @@ class _InitialDistributionScreenState extends State<InitialDistributionScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
-            Icons.inventory_2_outlined,
-            size: 64,
-            color: AppColors.onSurfaceVariant,
+          const Icon(Icons.inventory_2_outlined, size: 48, color: AppColors.onSurfaceVariant),
+          const SizedBox(height: 16),
+          Text(
+            'NO ASSETS ASSIGNED TO MISSION'.toUpperCase(),
+            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12, letterSpacing: 1),
           ),
           const SizedBox(height: 16),
-          const Text('Belum ada produk yang di-assign ke event ini'),
-          const SizedBox(height: 8),
-          ElevatedButton(
+          OutlinedButton(
             onPressed: () => context.pop(),
-            child: const Text('Ke Event Setup'),
+            style: OutlinedButton.styleFrom(shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero)),
+            child: const Text('ABORT PROTOCOL'),
           ),
         ],
       ),
@@ -239,32 +289,48 @@ class _InitialDistributionScreenState extends State<InitialDistributionScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline, size: 64, color: AppColors.error),
+          const Icon(Icons.error_outline, size: 48, color: AppColors.error),
           const SizedBox(height: 16),
-          Text('Error: $message'),
+          Text('SYSTEM_FAILURE: ${message.toUpperCase()}', style: const TextStyle(fontWeight: FontWeight.w900)),
           const SizedBox(height: 16),
-          ElevatedButton(onPressed: _loadData, child: const Text('Retry')),
+          ElevatedButton(
+            onPressed: _loadData,
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error, shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero)),
+            child: const Text('RETRY SYNC'),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildBottomAction() {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.surfaceContainerLowest,
+        border: Border(top: BorderSide(color: AppColors.surfaceContainerHigh)),
+      ),
+      padding: EdgeInsets.fromLTRB(20, 16, 20, 16 + MediaQuery.of(context).padding.bottom),
+      child: SizedBox(
+        width: double.infinity,
+        height: 54,
         child: ElevatedButton(
           onPressed: _isSubmitting ? null : _submitDistribusi,
           style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 16),
+            backgroundColor: AppColors.primary,
+            foregroundColor: Colors.white,
+            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+            elevation: 0,
           ),
           child: _isSubmitting
               ? const SizedBox(
                   height: 20,
                   width: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                 )
-              : const Text('Simpan Distribusi'),
+              : const Text(
+                  'EXECUTE SUPPLY PROTOCOL',
+                  style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.5),
+                ),
         ),
       ),
     );
@@ -309,34 +375,53 @@ class _QuantityCounterState extends State<_QuantityCounter> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        IconButton(
-          onPressed: () => _updateValue(_value - 1),
-          icon: const Icon(Icons.remove_circle_outline, color: AppColors.error),
-        ),
-        SizedBox(
-          width: 60,
-          child: TextField(
-            controller: _controller,
-            keyboardType: TextInputType.number,
-            textAlign: TextAlign.center,
-            decoration: const InputDecoration(
-              isDense: true,
-              contentPadding: EdgeInsets.symmetric(vertical: 8),
-            ),
-            onChanged: (val) {
-              final newValue = int.tryParse(val) ?? 0;
-              setState(() => _value = newValue);
-              widget.onChanged(_value);
-            },
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: AppColors.surfaceContainerHigh),
+        color: AppColors.surface,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            onPressed: () => _updateValue(_value - 1),
+            icon: const Icon(Icons.remove, size: 16),
+            constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+            padding: EdgeInsets.zero,
+            color: AppColors.error,
           ),
-        ),
-        IconButton(
-          onPressed: () => _updateValue(_value + 1),
-          icon: const Icon(Icons.add_circle_outline, color: AppColors.success),
-        ),
-      ],
+          Container(
+            width: 50,
+            height: 40,
+            decoration: const BoxDecoration(
+              border: Border.symmetric(vertical: BorderSide(color: AppColors.surfaceContainerHigh)),
+            ),
+            child: TextField(
+              controller: _controller,
+              keyboardType: TextInputType.number,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14),
+              decoration: const InputDecoration(
+                isDense: true,
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(vertical: 10),
+              ),
+              onChanged: (val) {
+                final newValue = int.tryParse(val) ?? 0;
+                setState(() => _value = newValue);
+                widget.onChanged(_value);
+              },
+            ),
+          ),
+          IconButton(
+            onPressed: () => _updateValue(_value + 1),
+            icon: const Icon(Icons.add, size: 16),
+            constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+            padding: EdgeInsets.zero,
+            color: AppColors.success,
+          ),
+        ],
+      ),
     );
   }
 }

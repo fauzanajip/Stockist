@@ -11,81 +11,152 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Pengaturan')),
+      backgroundColor: AppColors.surface,
+      appBar: AppBar(
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'CONTROL PANEL',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 2,
+                  ),
+            ),
+            Text(
+              'SYSTEM CONFIGURATION',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.5,
+                  ),
+            ),
+          ],
+        ),
+        backgroundColor: AppColors.surfaceContainerLowest,
+        elevation: 0,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(color: AppColors.surfaceContainerHigh, height: 1),
+        ),
+      ),
       body: ListView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
         children: [
-          _buildCategory(context, 'OPERASIONAL'),
+          _buildCategory(context, 'OPERATIONAL PROTOCOLS'),
+          const SizedBox(height: 12),
           _buildMenuTile(
             context,
             icon: Icons.add_circle_outline,
-            title: 'Tambah Event Baru',
+            title: 'INITIALIZE MISSION',
             subtitle: 'Buat event, produk, dan SPG baru',
             color: AppColors.primary,
             onTap: () => context.pushNamed('create_event'),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           _buildMenuTile(
             context,
-            icon: Icons.star_outline,
-            title: 'Fokus Event',
+            icon: Icons.radar_outlined,
+            title: 'MISSION DEPLOYMENT',
             subtitle: 'Pilih event utama di Home Screen',
             color: AppColors.secondary,
             onTap: () => context.pushNamed('event_focus'),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           _buildMenuTile(
             context,
-            icon: Icons.backup_outlined,
-            title: 'Backup & Restore',
-            subtitle: 'Amankan data Anda ke file',
+            icon: Icons.save_as_outlined,
+            title: 'DATA ARCHIVE',
+            subtitle: 'Backup & Restore database sistem',
             color: AppColors.primary,
             onTap: () => context.pushNamed('backup'),
           ),
           const SizedBox(height: 32),
-          _buildCategory(context, 'MASTER DATA'),
+          _buildCategory(context, 'CORE MASTER ASSETS'),
+          const SizedBox(height: 12),
           _buildMenuTile(
             context,
             icon: Icons.inventory_2_outlined,
-            title: 'Daftar Produk',
+            title: 'PRODUCT DATABASE',
             subtitle: 'Kelola database produk default',
             color: AppColors.onSurfaceVariant,
             onTap: () => context.pushNamed('product_master'),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           _buildMenuTile(
             context,
-            icon: Icons.people_outline,
-            title: 'Database SPG',
-            subtitle: 'Daftar personel SPG',
+            icon: Icons.groups_3_outlined,
+            title: 'SPG PERSONNEL',
+            subtitle: 'Daftar personel SPG terdaftar',
             color: AppColors.onSurfaceVariant,
             onTap: () => context.pushNamed('spg_master'),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           _buildMenuTile(
             context,
-            icon: Icons.person_pin_outlined,
-            title: 'Daftar SPB',
+            icon: Icons.badge_outlined,
+            title: 'SUPERVISOR ROSTER',
             subtitle: 'Manajemen supervisor (SPB)',
             color: AppColors.onSurfaceVariant,
             onTap: () => context.pushNamed('spb_master'),
           ),
-          const SizedBox(height: 32),
-          _buildCategory(context, 'DANGER ZONE'),
-          _buildMenuTile(
-            context,
-            icon: Icons.delete_forever_outlined,
-            title: 'Reset Semua Data',
-            subtitle: 'Hapus seluruh data & master permanen',
-            color: AppColors.error,
-            onTap: () => _showResetConfirmation(context),
+          const SizedBox(height: 48),
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: AppColors.error.withOpacity(0.05),
+              border: Border.all(color: AppColors.error.withOpacity(0.2)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.warning_amber_rounded, color: AppColors.error, size: 16),
+                    const SizedBox(width: 8),
+                    Text(
+                      'HIGH-LEVEL OVERRIDE',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: AppColors.error,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.5,
+                          ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'SYSTEM HARD RESET',
+                  style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Purge all mission data, transactions, and master records from local storage. Non-reversible.',
+                  style: TextStyle(fontSize: 11, color: AppColors.onSurfaceVariant),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => _showResetConfirmation(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.error,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                    ),
+                    child: const Text('EXECUTE HARD RESET', style: TextStyle(fontWeight: FontWeight.w900)),
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 40),
           Center(
             child: Text(
-              'Stockist App v1.0',
+              'STOCKIST OS V1.0.42_STABLE',
               style: TextStyle(
-                fontSize: 10,
+                fontSize: 9,
                 color: AppColors.onSurface.withOpacity(0.3),
                 fontWeight: FontWeight.w900,
                 letterSpacing: 2,
@@ -101,33 +172,35 @@ class SettingsScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
         title: const Text(
-          'Reset Semua Data?',
-          style: TextStyle(fontWeight: FontWeight.w900),
+          'CONFIRM HARD RESET',
+          style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1),
         ),
         content: const Text(
-          'Aksi ini akan menghapus seluruh data event, produk, SPG, dan transaksi secara permanen. Pastikan Anda sudah membackup data jika diperlukan.',
-          style: TextStyle(fontSize: 14),
+          'ARE YOU ABSOLUTELY SURE? This protocol will destroy all mission data, inventory logs, and personnel records without recovery.',
+          style: TextStyle(fontSize: 12, height: 1.5),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('BATAL'),
+            child: const Text('CANCEL', style: TextStyle(color: AppColors.onSurfaceVariant)),
           ),
           ElevatedButton(
             onPressed: () {
               Navigator.pop(dialogContext);
               context.read<EventBloc>().add(ResetAllData());
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Seluruh data berhasil dihapus')),
+                const SnackBar(content: Text('PURGE COMPLETE: SYSTEM WIPED')),
               );
               context.goNamed('home');
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.error,
               foregroundColor: Colors.white,
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
             ),
-            child: const Text('RESET SEKARANG'),
+            child: const Text('PURGE SYSTEM'),
           ),
         ],
       ),
@@ -135,17 +208,20 @@ class SettingsScreen extends StatelessWidget {
   }
 
   Widget _buildCategory(BuildContext context, String label) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 4, bottom: 12),
-      child: Text(
-        label,
-        style: const TextStyle(
-          fontSize: 10,
-          fontWeight: FontWeight.w900,
-          color: AppColors.onSurfaceVariant,
-          letterSpacing: 1.5,
+    return Row(
+      children: [
+        Container(width: 4, height: 12, color: AppColors.primary),
+        const SizedBox(width: 8),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w900,
+            color: AppColors.onSurfaceVariant,
+            letterSpacing: 1.5,
+          ),
         ),
-      ),
+      ],
     );
   }
 
@@ -157,53 +233,47 @@ class SettingsScreen extends StatelessWidget {
     required Color color,
     required VoidCallback onTap,
   }) {
-    return Material(
-      color: AppColors.surfaceContainer,
-      borderRadius: BorderRadius.circular(20),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(icon, color: color, size: 22),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 15,
-                      ),
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceContainerLowest,
+          border: Border.all(color: AppColors.surfaceContainerHigh),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: color, size: 20),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 14,
                     ),
-                    Text(
-                      subtitle,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColors.onSurfaceVariant,
-                      ),
+                  ),
+                  Text(
+                    subtitle.toUpperCase(),
+                    style: const TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.onSurfaceVariant,
+                      letterSpacing: 0.5,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              const Icon(
-                Icons.chevron_right,
-                color: AppColors.onSurfaceVariant,
-                size: 20,
-              ),
-            ],
-          ),
+            ),
+            const Icon(
+              Icons.arrow_forward_ios,
+              color: AppColors.onSurfaceVariant,
+              size: 14,
+            ),
+          ],
         ),
       ),
     );

@@ -98,7 +98,32 @@ class _TopupScreenState extends State<TopupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Tambah Stok')),
+      backgroundColor: AppColors.surface,
+      appBar: AppBar(
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'LOGISTICS_LINK: RESUPPLY',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: AppColors.success,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 2,
+                  ),
+            ),
+            const Text(
+              'RESUPPLY PROTOCOL',
+              style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: -0.5),
+            ),
+          ],
+        ),
+        backgroundColor: AppColors.surfaceContainerLowest,
+        elevation: 0,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(color: AppColors.surfaceContainerHigh, height: 1),
+        ),
+      ),
       body: BlocBuilder<SpgBloc, SpgState>(
         builder: (context, spgState) {
           String spgName = widget.spgId;
@@ -113,11 +138,12 @@ class _TopupScreenState extends State<TopupScreen> {
           return Column(
             children: [
               _buildHeader(context, spgName),
+              Container(height: 1, color: AppColors.surfaceContainerHigh),
               Expanded(
                 child: BlocBuilder<EventProductBloc, EventProductState>(
                   builder: (context, state) {
                     if (state is EventProductLoading) {
-                      return const Center(child: CircularProgressIndicator());
+                      return const Center(child: CircularProgressIndicator(strokeWidth: 2));
                     }
                     if (state is EventProductError) {
                       return _buildErrorState(state.message);
@@ -128,7 +154,7 @@ class _TopupScreenState extends State<TopupScreen> {
                       }
                       return _buildProductList(state);
                     }
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(child: CircularProgressIndicator(strokeWidth: 2));
                   },
                 ),
               ),
@@ -143,39 +169,39 @@ class _TopupScreenState extends State<TopupScreen> {
   Widget _buildHeader(BuildContext context, String spgName) {
     return Container(
       width: double.infinity,
-      color: AppColors.surface,
-      padding: const EdgeInsets.all(16),
+      color: AppColors.surfaceContainerLowest,
+      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(Icons.add_circle, color: AppColors.success, size: 24),
-              const SizedBox(width: 8),
-              Text(
-                'TOPUP STOK',
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: AppColors.success,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 1.2,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
           Text(
-            'SPG: $spgName',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: AppColors.secondary,
-              fontWeight: FontWeight.bold,
+            'TARGET_UNIT_IDENTIFICATION'.toUpperCase(),
+            style: const TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.w900,
+              color: AppColors.onSurfaceVariant,
+              letterSpacing: 1.5,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           Text(
-            'Pilih produk dan masukkan jumlah stok tambahan.',
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: AppColors.onSurfaceVariant),
+            spgName.toUpperCase(),
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w900,
+              color: AppColors.primary,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'INVENTORY REPLENISHMENT PROTOCOL. AUTHORIZE ADDITIONAL ASSET ALLOCATION TO ACTIVE FIELD UNIT.'.toUpperCase(),
+            style: const TextStyle(
+              fontSize: 9,
+              color: AppColors.onSurfaceVariant,
+              height: 1.5,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ],
       ),
@@ -184,15 +210,16 @@ class _TopupScreenState extends State<TopupScreen> {
 
   Widget _buildProductList(AvailableProductsLoaded state) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'PILIH PRODUK',
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            'ASSET_REGISTRY_SELECTION'.toUpperCase(),
+            style: const TextStyle(
               fontWeight: FontWeight.w900,
-              letterSpacing: 1.2,
+              letterSpacing: 1.5,
+              fontSize: 9,
               color: AppColors.onSurfaceVariant,
             ),
           ),
@@ -203,16 +230,13 @@ class _TopupScreenState extends State<TopupScreen> {
             );
             final isSelected = _selectedProductId == product.id;
 
-            return Card(
+            return Container(
               margin: const EdgeInsets.only(bottom: 8),
-              color: isSelected ? AppColors.success.withOpacity(0.1) : null,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: BorderSide(
-                  color: isSelected
-                      ? AppColors.success
-                      : AppColors.onSurfaceVariant,
-                  width: isSelected ? 2 : 1,
+              decoration: BoxDecoration(
+                color: isSelected ? AppColors.success.withOpacity(0.05) : AppColors.surfaceContainerLowest,
+                border: Border.all(
+                  color: isSelected ? AppColors.success : AppColors.surfaceContainerHigh,
+                  width: isSelected ? 1.5 : 1,
                 ),
               ),
               child: InkWell(
@@ -221,30 +245,33 @@ class _TopupScreenState extends State<TopupScreen> {
                     _selectedProductId = product.id;
                   });
                 },
-                borderRadius: BorderRadius.circular(12),
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Row(
                     children: [
                       Icon(
-                        isSelected ? Icons.check_circle : Icons.circle_outlined,
-                        color: isSelected
-                            ? AppColors.success
-                            : AppColors.onSurfaceVariant,
+                        isSelected ? Icons.check_circle_outlined : Icons.circle_outlined,
+                        color: isSelected ? AppColors.success : AppColors.onSurfaceVariant,
+                        size: 20,
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 16),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              product.name,
-                              style: Theme.of(context).textTheme.titleMedium,
+                              product.name.toUpperCase(),
+                              style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13),
                             ),
+                            const SizedBox(height: 4),
                             Text(
-                              'SKU: ${product.sku}',
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(color: AppColors.onSurfaceVariant),
+                              'SKU_ID: ${product.sku}'.toUpperCase(),
+                              style: const TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.onSurfaceVariant,
+                                letterSpacing: 1,
+                              ),
                             ),
                           ],
                         ),
@@ -255,13 +282,14 @@ class _TopupScreenState extends State<TopupScreen> {
               ),
             );
           }),
-          const SizedBox(height: 24),
           if (_selectedProductId != null) ...[
+            const SizedBox(height: 32),
             Text(
-              'JUMLAH TOPUP',
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              'ALLOCATION_QUANTITY'.toUpperCase(),
+              style: const TextStyle(
                 fontWeight: FontWeight.w900,
-                letterSpacing: 1.2,
+                letterSpacing: 1.5,
+                fontSize: 9,
                 color: AppColors.onSurfaceVariant,
               ),
             ),
@@ -274,27 +302,29 @@ class _TopupScreenState extends State<TopupScreen> {
                 });
               },
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
             Text(
-              'CATATAN (Opsional)',
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              'REASON_FOR_ALLOCATION (OPTIONAL)'.toUpperCase(),
+              style: const TextStyle(
                 fontWeight: FontWeight.w900,
-                letterSpacing: 1.2,
+                letterSpacing: 1.5,
+                fontSize: 9,
                 color: AppColors.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _noteController,
-              maxLines: 2,
+              maxLines: 3,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
               decoration: InputDecoration(
-                hintText: 'Contoh: Topup karena stok habis...',
+                hintText: 'INPUT REASONING...',
+                hintStyle: TextStyle(color: AppColors.onSurfaceVariant.withOpacity(0.5), fontSize: 13),
                 filled: true,
-                fillColor: AppColors.surfaceContainer,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
+                fillColor: AppColors.surfaceContainerLowest,
+                border: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: AppColors.surfaceContainerHigh)),
+                enabledBorder: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: AppColors.surfaceContainerHigh)),
+                focusedBorder: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: AppColors.primary)),
               ),
             ),
           ],
@@ -308,17 +338,17 @@ class _TopupScreenState extends State<TopupScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
-            Icons.inventory_2_outlined,
-            size: 64,
-            color: AppColors.onSurfaceVariant,
+          const Icon(Icons.inventory_2_outlined, size: 48, color: AppColors.onSurfaceVariant),
+          const SizedBox(height: 16),
+          Text(
+            'NO ASSETS ASSIGNED TO MISSION'.toUpperCase(),
+            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12, letterSpacing: 1),
           ),
           const SizedBox(height: 16),
-          const Text('Belum ada produk yang di-assign ke event ini'),
-          const SizedBox(height: 8),
-          ElevatedButton(
+          OutlinedButton(
             onPressed: () => context.pop(),
-            child: const Text('Ke Event Setup'),
+            style: OutlinedButton.styleFrom(shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero)),
+            child: const Text('ABORT PROTOCOL'),
           ),
         ],
       ),
@@ -330,55 +360,47 @@ class _TopupScreenState extends State<TopupScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline, size: 64, color: AppColors.error),
+          const Icon(Icons.error_outline, size: 48, color: AppColors.error),
           const SizedBox(height: 16),
-          Text('Error: $message'),
+          Text('SYSTEM_FAILURE: ${message.toUpperCase()}', style: const TextStyle(fontWeight: FontWeight.w900)),
           const SizedBox(height: 16),
-          ElevatedButton(onPressed: _loadData, child: const Text('Retry')),
+          ElevatedButton(
+            onPressed: _loadData,
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error, shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero)),
+            child: const Text('RETRY SYNC'),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildBottomAction() {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.surfaceContainerLowest,
+        border: Border(top: BorderSide(color: AppColors.surfaceContainerHigh)),
+      ),
+      padding: EdgeInsets.fromLTRB(20, 16, 20, 16 + MediaQuery.of(context).padding.bottom),
+      child: SizedBox(
+        width: double.infinity,
+        height: 54,
         child: ElevatedButton(
-          onPressed:
-              (_isSubmitting || _selectedProductId == null || _quantity <= 0)
-              ? null
-              : _submitTopup,
+          onPressed: (_isSubmitting || _selectedProductId == null || _quantity <= 0) ? null : _submitTopup,
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.success,
             foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+            elevation: 0,
           ),
           child: _isSubmitting
               ? const SizedBox(
                   height: 20,
                   width: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
-                  ),
+                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                 )
-              : const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.add_circle_outline),
-                    SizedBox(width: 8),
-                    Text(
-                      'SIMPAN TOPUP',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.2,
-                      ),
-                    ),
-                  ],
+              : const Text(
+                  'EXECUTE RESUPPLY PROTOCOL',
+                  style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.5),
                 ),
         ),
       ),
@@ -427,37 +449,34 @@ class _QuantityInputState extends State<_QuantityInput> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainer,
-        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.surfaceContainerHigh),
+        color: AppColors.surfaceContainerLowest,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           IconButton(
             onPressed: () => _updateValue(widget.value - 1),
-            icon: const Icon(
-              Icons.remove_circle,
-              color: AppColors.error,
-              size: 32,
-            ),
+            icon: const Icon(Icons.remove, size: 20),
+            constraints: const BoxConstraints(minWidth: 54, minHeight: 54),
+            color: AppColors.error,
           ),
-          const SizedBox(width: 16),
-          SizedBox(
-            width: 80,
+          Container(
+            width: 100,
+            height: 54,
+            decoration: const BoxDecoration(
+              border: Border.symmetric(vertical: BorderSide(color: AppColors.surfaceContainerHigh)),
+            ),
             child: TextField(
               controller: _controller,
               keyboardType: TextInputType.number,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: AppColors.success,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 20, color: AppColors.success),
               decoration: const InputDecoration(
                 isDense: true,
-                contentPadding: EdgeInsets.symmetric(vertical: 8),
                 border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(vertical: 14),
               ),
               onChanged: (val) {
                 final newValue = int.tryParse(val) ?? 0;
@@ -465,14 +484,11 @@ class _QuantityInputState extends State<_QuantityInput> {
               },
             ),
           ),
-          const SizedBox(width: 16),
           IconButton(
             onPressed: () => _updateValue(widget.value + 1),
-            icon: const Icon(
-              Icons.add_circle,
-              color: AppColors.success,
-              size: 32,
-            ),
+            icon: const Icon(Icons.add, size: 20),
+            constraints: const BoxConstraints(minWidth: 54, minHeight: 54),
+            color: AppColors.success,
           ),
         ],
       ),

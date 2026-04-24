@@ -248,20 +248,48 @@ class _HomeScreenState extends State<HomeScreen> {
             : null;
 
         return Scaffold(
+          backgroundColor: AppColors.surface,
           appBar: AppBar(
-            title: Text(activeEvent != null ? 'Dashboard' : 'Stockist App'),
+            backgroundColor: AppColors.surfaceContainerLowest,
+            centerTitle: false,
+            elevation: 0,
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'STOCKIST BASE COMMAND',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 2,
+                  ),
+                ),
+                Text(
+                  activeEvent != null ? 'MISSION TELEMETRY' : 'READY FOR DEPLOYMENT',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+              ],
+            ),
             actions: [
               if (activeEvent != null)
                 IconButton(
-                  icon: const Icon(Icons.file_download_outlined),
+                  icon: const Icon(Icons.analytics_outlined, color: AppColors.primary),
                   tooltip: 'Export Laporan Excel',
                   onPressed: () => _exportData(activeEvent),
                 ),
               IconButton(
-                icon: const Icon(Icons.settings_outlined),
+                icon: const Icon(Icons.settings_input_component_outlined),
                 onPressed: () => context.pushNamed('settings'),
               ),
+              const SizedBox(width: 8),
             ],
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(1),
+              child: Container(color: AppColors.surfaceContainerHigh, height: 1),
+            ),
           ),
           body: _buildBody(context, state, activeEvent),
         );
@@ -275,13 +303,15 @@ class _HomeScreenState extends State<HomeScreen> {
     EventEntity? activeEvent,
   ) {
     if (state is EventLoading || state is EventInitial) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: CircularProgressIndicator(strokeWidth: 2));
     }
 
     if (state is EventsLoaded) {
       if (activeEvent != null) {
         return RefreshIndicator(
           onRefresh: _onRefresh,
+          displacement: 20,
+          color: AppColors.primary,
           child: EventDashboardView(event: activeEvent),
         );
       }
@@ -291,81 +321,145 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (state is EventError) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline, size: 64, color: AppColors.error),
-            const SizedBox(height: 16),
-            Text('Error: ${state.message}'),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => context.read<EventBloc>().add(LoadAllEvents()),
-              child: const Text('Retry'),
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.gpp_bad_outlined, size: 48, color: AppColors.error),
+              const SizedBox(height: 24),
+              Text(
+                'SYSTEM DATA ERROR'.toUpperCase(),
+                style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                state.message,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 12, color: AppColors.onSurfaceVariant),
+              ),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: 200,
+                child: ElevatedButton(
+                  onPressed: () => context.read<EventBloc>().add(LoadAllEvents()),
+                  style: ElevatedButton.styleFrom(
+                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                  ),
+                  child: const Text('RETRY SYNC'),
+                ),
+              ),
+            ],
+          ),
         ),
       );
     }
 
-    return const Center(child: CircularProgressIndicator());
+    return const Center(child: CircularProgressIndicator(strokeWidth: 2));
   }
 
   Widget _buildEmptyState(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 40),
-        child: Column(
+    return Container(
+      width: double.infinity,
+      color: AppColors.surface,
+      child: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 40),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(32),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceContainerLowest,
+                  border: Border.all(color: AppColors.surfaceContainerHigh),
+                ),
+                child: const Icon(
+                  Icons.radar_outlined,
+                  size: 64,
+                  color: AppColors.primary,
+                ),
+              ),
+              const SizedBox(height: 40),
+              const Text(
+                'NO ACTIVE MISSIONS',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'SYSTEM IS ONLINE BUT NO MISSION CRITERIA HAS BEEN SELECTED FOR TELEMETRY MONITORING.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: AppColors.onSurfaceVariant,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
+                  height: 1.6,
+                ),
+              ),
+              const SizedBox(height: 48),
+              _buildTacticalButton(
+                context,
+                label: 'DEPLOY ACTIVE EVENT',
+                icon: Icons.rocket_launch_outlined,
+                onPressed: () => context.pushNamed('event_focus'),
+                primary: true,
+              ),
+              const SizedBox(height: 12),
+              _buildTacticalButton(
+                context,
+                label: 'INITIALIZE NEW MISSION',
+                icon: Icons.add_moderator_outlined,
+                onPressed: () => context.pushNamed('create_event'),
+                primary: false,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTacticalButton(
+    BuildContext context, {
+    required String label,
+    required IconData icon,
+    required VoidCallback onPressed,
+    required bool primary,
+  }) {
+    return InkWell(
+      onTap: onPressed,
+      child: Container(
+        height: 60,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: primary ? AppColors.primary : AppColors.surfaceContainerLowest,
+          border: Border.all(
+            color: primary ? AppColors.primary : AppColors.surfaceContainerHigh,
+          ),
+        ),
+        child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.dashboard_customize_outlined,
-                size: 64,
-                color: AppColors.primary,
-              ),
+            Icon(
+              icon,
+              size: 20,
+              color: primary ? Colors.white : AppColors.onSurface,
             ),
-            const SizedBox(height: 32),
-            const Text(
-              'Dashboard Belum Aktif',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900),
-            ),
-            const SizedBox(height: 12),
+            const SizedBox(width: 12),
             Text(
-              'Pilih event yang ingin Anda fokuskan atau buat event baru untuk ditampilkan di Dashboard ini.',
-              textAlign: TextAlign.center,
+              label,
               style: TextStyle(
-                fontSize: 14,
-                color: AppColors.onSurface.withOpacity(0.6),
-                height: 1.5,
+                fontWeight: FontWeight.w900,
+                color: primary ? Colors.white : AppColors.onSurface,
+                letterSpacing: 1,
+                fontSize: 13,
               ),
-            ),
-            const SizedBox(height: 48),
-            ElevatedButton(
-              onPressed: () => context.pushNamed('event_focus'),
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 54),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-              child: const Text('PILIH EVENT AKTIF'),
-            ),
-            const SizedBox(height: 16),
-            OutlinedButton(
-              onPressed: () => context.pushNamed('create_event'),
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 54),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-              child: const Text('BUAT EVENT BARU'),
             ),
           ],
         ),

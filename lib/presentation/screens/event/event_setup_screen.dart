@@ -69,12 +69,10 @@ class _EventSetupScreenState extends State<EventSetupScreen>
       LoadAvailableSpgs(eventId: widget.eventId),
     );
     context.read<StockBloc>().add(LoadStockByEvent(eventId: widget.eventId));
-    // Needed for integrity check
     context.read<SalesBloc>().add(LoadAllSalesByEvent(eventId: widget.eventId));
   }
 
   void _saveSetup() {
-    // 1. Sync Products
     context.read<EventProductBloc>().add(
       SyncEventProducts(
         eventId: widget.eventId,
@@ -82,7 +80,6 @@ class _EventSetupScreenState extends State<EventSetupScreen>
       ),
     );
 
-    // 2. Sync SPGs
     context.read<EventSpgBloc>().add(
       SyncEventSpgs(
         eventId: widget.eventId,
@@ -90,7 +87,6 @@ class _EventSetupScreenState extends State<EventSetupScreen>
       ),
     );
 
-    // 3. Sync Stock Mutations (Delta approach)
     final stockState = context.read<StockBloc>().state;
     for (final productId in _draftStocks.keys) {
       final initialStock = stockState.mutations
@@ -117,69 +113,95 @@ class _EventSetupScreenState extends State<EventSetupScreen>
     context.goNamed('home');
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(const SnackBar(content: Text('Setup berhasil disimpan')));
+    ).showSnackBar(const SnackBar(content: Text('CONFIGURATION SYNC: SUCCESS')));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Setup Event')),
-      body: Column(
-        children: [
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: AppColors.surfaceContainerHigh,
-              borderRadius: BorderRadius.circular(12),
+      backgroundColor: AppColors.surface,
+      appBar: AppBar(
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'MISSION CONTROL',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 2,
+                  ),
             ),
-            child: TabBar(
-              controller: _tabController,
-              indicatorSize: TabBarIndicatorSize.tab,
-              dividerColor: Colors.transparent,
-              indicator: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(8),
+            Text(
+              'STAGING CONFIGURATION',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.5,
+                  ),
+            ),
+          ],
+        ),
+        backgroundColor: AppColors.surfaceContainerLowest,
+        elevation: 0,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(49),
+          child: Column(
+            children: [
+              Container(color: AppColors.surfaceContainerHigh, height: 1),
+              Container(
+                color: AppColors.surfaceContainerLowest,
+                child: TabBar(
+                  controller: _tabController,
+                  dividerColor: Colors.transparent,
+                  indicator: const BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(color: AppColors.primary, width: 3),
+                    ),
+                  ),
+                  labelColor: AppColors.primary,
+                  unselectedLabelColor: AppColors.onSurfaceVariant,
+                  labelStyle: const TextStyle(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 11,
+                    letterSpacing: 1,
+                  ),
+                  tabs: const [
+                    Tab(text: 'ASSET_REGISTRY'),
+                    Tab(text: 'PERSONNEL_ROSTER'),
+                  ],
+                ),
               ),
-              labelColor: Colors.white,
-              unselectedLabelColor: AppColors.onSurfaceVariant,
-              tabs: const [
-                Tab(text: 'Produk'),
-                Tab(text: 'SPG'),
-              ],
-            ),
+            ],
           ),
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [_buildProductTab(), _buildSpgTab()],
-            ),
-          ),
-        ],
+        ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [_buildProductTab(), _buildSpgTab()],
       ),
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: AppColors.surface,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              blurRadius: 10,
-              offset: const Offset(0, -5),
-            ),
-          ],
+          color: AppColors.surfaceContainerLowest,
+          border: const Border(
+            top: BorderSide(color: AppColors.surfaceContainerHigh),
+          ),
         ),
         child: SafeArea(
-          child: ElevatedButton(
-            onPressed: _saveSetup,
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+          child: SizedBox(
+            height: 52,
+            child: ElevatedButton(
+              onPressed: _saveSetup,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                elevation: 0,
               ),
-            ),
-            child: const Text(
-              'SIMPAN SETUP',
-              style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1),
+              child: const Text(
+                'COMMIT CONFIGURATION DATA',
+                style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1),
+              ),
             ),
           ),
         ),
@@ -194,46 +216,55 @@ class _EventSetupScreenState extends State<EventSetupScreen>
     required String hint,
   }) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+      padding: const EdgeInsets.all(20),
+      color: AppColors.surfaceContainerLowest,
       child: Row(
         children: [
           Expanded(
             child: Container(
+              height: 44,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                color: AppColors.surfaceContainer,
-                borderRadius: BorderRadius.circular(12),
+                color: AppColors.surface,
+                border: Border.all(color: AppColors.surfaceContainerHigh),
               ),
               child: TextField(
                 onChanged: onChanged,
-                style: const TextStyle(fontSize: 14),
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
                 decoration: InputDecoration(
                   icon: const Icon(
-                    Icons.search,
-                    size: 20,
+                    Icons.search_outlined,
+                    size: 18,
                     color: AppColors.onSurfaceVariant,
                   ),
-                  hintText: hint,
+                  hintText: hint.toUpperCase(),
                   border: InputBorder.none,
-                  hintStyle: const TextStyle(color: AppColors.onSurfaceVariant),
+                  hintStyle: const TextStyle(
+                    color: AppColors.onSurfaceVariant,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.5,
+                  ),
                 ),
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
           InkWell(
             onTap: onFilterToggle,
-            borderRadius: BorderRadius.circular(12),
             child: Container(
-              padding: const EdgeInsets.all(12),
+              height: 44,
+              width: 44,
               decoration: BoxDecoration(
-                color: isFilterActive
-                    ? AppColors.primary
-                    : AppColors.surfaceContainer,
-                borderRadius: BorderRadius.circular(12),
+                color: isFilterActive ? AppColors.primary : AppColors.surface,
+                border: Border.all(
+                  color: isFilterActive
+                      ? AppColors.primary
+                      : AppColors.surfaceContainerHigh,
+                ),
               ),
               child: Icon(
-                Icons.filter_list,
+                Icons.filter_list_outlined,
                 size: 20,
                 color: isFilterActive ? Colors.white : AppColors.primary,
               ),
@@ -252,10 +283,9 @@ class _EventSetupScreenState extends State<EventSetupScreen>
             return BlocBuilder<EventProductBloc, EventProductState>(
               builder: (context, state) {
                 if (state is EventProductLoading || stockState.isLoading) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(child: CircularProgressIndicator(strokeWidth: 2));
                 }
                 if (state is AvailableProductsLoaded) {
-                  // Initialize drafts if not done
                   if (!_isInitialized) {
                     for (var ep in state.assignedProducts) {
                       _draftProducts[ep.productId] = ep;
@@ -292,7 +322,7 @@ class _EventSetupScreenState extends State<EventSetupScreen>
                   return Column(
                     children: [
                       _buildSearchBar(
-                        hint: 'Cari produk atau SKU...',
+                        hint: 'SEARCH_ASSET_REGISTRY',
                         onChanged: (v) =>
                             setState(() => _productSearchQuery = v),
                         onFilterToggle: () => setState(
@@ -301,9 +331,10 @@ class _EventSetupScreenState extends State<EventSetupScreen>
                         ),
                         isFilterActive: _showOnlyActiveProducts,
                       ),
+                      Container(height: 1, color: AppColors.surfaceContainerHigh),
                       Expanded(
                         child: ListView.builder(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
                           itemCount: filteredProducts.length,
                           itemBuilder: (context, index) {
                             final product = filteredProducts[index];
@@ -319,7 +350,6 @@ class _EventSetupScreenState extends State<EventSetupScreen>
                                     price: product.price,
                                   );
 
-                            // DATA INTEGRITY CHECK - must filter by event!
                             final hasHistory =
                                 stockState.mutations.any(
                                   (m) =>
@@ -389,7 +419,7 @@ class _EventSetupScreenState extends State<EventSetupScreen>
             return BlocBuilder<EventSpgBloc, EventSpgState>(
               builder: (context, state) {
                 if (state is EventSpgLoading) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(child: CircularProgressIndicator(strokeWidth: 2));
                 }
                 if (state is AvailableSpgsLoaded) {
                   if (!_spgInitialized) {
@@ -413,16 +443,17 @@ class _EventSetupScreenState extends State<EventSetupScreen>
                   return Column(
                     children: [
                       _buildSearchBar(
-                        hint: 'Cari SPG...',
+                        hint: 'SEARCH_PERSONNEL_ROSTER',
                         onChanged: (v) => setState(() => _spgSearchQuery = v),
                         onFilterToggle: () => setState(
                           () => _showOnlyActiveSpgs = !_showOnlyActiveSpgs,
                         ),
                         isFilterActive: _showOnlyActiveSpgs,
                       ),
+                      Container(height: 1, color: AppColors.surfaceContainerHigh),
                       Expanded(
                         child: ListView.builder(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
                           itemCount: filteredSpgs.length,
                           itemBuilder: (context, index) {
                             final spg = filteredSpgs[index];
@@ -435,7 +466,6 @@ class _EventSetupScreenState extends State<EventSetupScreen>
                                     spgId: spg.id,
                                   );
 
-                            // DATA INTEGRITY CHECK - must filter by event!
                             final hasHistory =
                                 stockState.mutations.any(
                                   (m) =>
@@ -558,56 +588,41 @@ class _ProductAssignmentCardState extends State<ProductAssignmentCard> {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      margin: const EdgeInsets.only(bottom: 16),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: widget.isAssigned
-            ? AppColors.surfaceContainerHigh
-            : AppColors.surfaceContainer,
-        borderRadius: BorderRadius.circular(16),
-        border: widget.isAssigned
-            ? Border.all(
-                color: AppColors.primary.withValues(alpha: 0.5),
-                width: 1,
-              )
-            : null,
+        color: AppColors.surfaceContainerLowest,
+        border: Border.all(
+          color: widget.isAssigned ? AppColors.primary : AppColors.surfaceContainerHigh,
+          width: widget.isAssigned ? 2 : 1,
+        ),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Row(
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(
-                    Icons.inventory_2_outlined,
-                    color: AppColors.primary,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        widget.product.name,
+                        widget.product.name.toUpperCase(),
                         style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 14,
+                          letterSpacing: 0.5,
                         ),
                       ),
+                      const SizedBox(height: 4),
                       Text(
-                        'SKU: ${widget.product.sku}',
+                        'SKU_LINK: ${widget.product.sku}'.toUpperCase(),
                         style: const TextStyle(
                           color: AppColors.onSurfaceVariant,
-                          fontSize: 12,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1,
                         ),
                       ),
                     ],
@@ -615,15 +630,12 @@ class _ProductAssignmentCardState extends State<ProductAssignmentCard> {
                 ),
                 Switch(
                   value: widget.isAssigned,
-                  activeThumbColor: AppColors.primary,
+                  activeColor: AppColors.primary,
                   onChanged: (v) {
                     if (widget.hasHistory && widget.isAssigned) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text(
-                            'Produk tidak bisa dinonaktifkan karena sudah memiliki transaksi.',
-                          ),
-                          backgroundColor: Colors.orange,
+                          content: Text('ASSET IN USE: TERMINATION DENIED'),
                         ),
                       );
                       return;
@@ -633,84 +645,103 @@ class _ProductAssignmentCardState extends State<ProductAssignmentCard> {
                 ),
               ],
             ),
-            if (widget.isAssigned) ...[
-              const SizedBox(height: 16),
-              const Divider(height: 1),
-              const SizedBox(height: 16),
-              Row(
+          ),
+          if (widget.isAssigned) ...[
+            Container(height: 1, color: AppColors.surfaceContainerHigh),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
                 children: [
-                  const Text(
-                    'HARGA EVENT',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.onSurfaceVariant,
-                      letterSpacing: 1,
-                    ),
+                  Row(
+                    children: [
+                      const Text(
+                        'MISSION_VALUE',
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.onSurfaceVariant,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                      const Spacer(),
+                      SizedBox(
+                        width: 140,
+                        height: 44,
+                        child: TextField(
+                          controller: _priceController,
+                          keyboardType: TextInputType.number,
+                          textAlign: TextAlign.right,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w900,
+                            color: AppColors.secondary,
+                            fontSize: 14,
+                          ),
+                          decoration: InputDecoration(
+                            prefixText: 'RP ',
+                            prefixStyle: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                            fillColor: AppColors.surface,
+                            filled: true,
+                            border: OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: AppColors.surfaceContainerHigh)),
+                            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: AppColors.surfaceContainerHigh)),
+                            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: AppColors.primary)),
+                          ),
+                          onChanged: (v) {
+                            _currentPrice = double.tryParse(v) ?? 0;
+                            widget.onPriceChanged(_currentPrice);
+                          },
+                        ),
+                      ),
+                    ],
                   ),
-                  const Spacer(),
-                  SizedBox(
-                    width: 120,
-                    height: 40,
-                    child: TextField(
-                      controller: _priceController,
-                      keyboardType: TextInputType.number,
-                      textAlign: TextAlign.right,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.secondary,
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      const Text(
+                        'WAREHOUSE_STOCK',
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.onSurfaceVariant,
+                          letterSpacing: 1,
+                        ),
                       ),
-                      decoration: const InputDecoration(
-                        prefixText: 'Rp',
-                        contentPadding: EdgeInsets.symmetric(horizontal: 8),
+                      const Spacer(),
+                      SizedBox(
+                        width: 140,
+                        height: 44,
+                        child: TextField(
+                          controller: _stockController,
+                          keyboardType: TextInputType.number,
+                          textAlign: TextAlign.right,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w900,
+                            color: AppColors.primary,
+                            fontSize: 14,
+                          ),
+                          decoration: InputDecoration(
+                            suffixText: ' PCS',
+                            suffixStyle: const TextStyle(fontSize: 9, fontWeight: FontWeight.w900),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                            fillColor: AppColors.surface,
+                            filled: true,
+                            border: OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: AppColors.surfaceContainerHigh)),
+                            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: AppColors.surfaceContainerHigh)),
+                            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: AppColors.primary)),
+                          ),
+                          onChanged: (v) {
+                            final qty = int.tryParse(v) ?? 0;
+                            widget.onDistributorStockChanged(qty);
+                          },
+                        ),
                       ),
-                      onChanged: (v) {
-                        _currentPrice = double.tryParse(v) ?? 0;
-                        widget.onPriceChanged(_currentPrice);
-                      },
-                    ),
+                    ],
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  const Text(
-                    'STOK DISTRIBUTOR',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.onSurfaceVariant,
-                      letterSpacing: 1,
-                    ),
-                  ),
-                  const Spacer(),
-                  SizedBox(
-                    width: 120,
-                    height: 40,
-                    child: TextField(
-                      controller: _stockController,
-                      keyboardType: TextInputType.number,
-                      textAlign: TextAlign.right,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
-                      ),
-                      decoration: const InputDecoration(
-                        suffixText: 'pcs',
-                        contentPadding: EdgeInsets.symmetric(horizontal: 8),
-                      ),
-                      onChanged: (v) {
-                        final qty = int.tryParse(v) ?? 0;
-                        widget.onDistributorStockChanged(qty);
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ],
+            ),
           ],
-        ),
+        ],
       ),
     );
   }
@@ -738,56 +769,54 @@ class SpgAssignmentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      margin: const EdgeInsets.only(bottom: 16),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: isAssigned
-            ? AppColors.surfaceContainerHigh
-            : AppColors.surfaceContainer,
-        borderRadius: BorderRadius.circular(16),
-        border: isAssigned
-            ? Border.all(color: AppColors.success.withOpacity(0.5), width: 1)
-            : null,
+        color: AppColors.surfaceContainerLowest,
+        border: Border.all(
+          color: isAssigned ? AppColors.primary : AppColors.surfaceContainerHigh,
+          width: isAssigned ? 2 : 1,
+        ),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Row(
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
               children: [
-                CircleAvatar(
-                  radius: 20,
-                  backgroundColor: AppColors.success.withOpacity(0.1),
-                  child: Text(
-                    spg.name[0].toUpperCase(),
-                    style: const TextStyle(
-                      color: AppColors.success,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
                 Expanded(
-                  child: Text(
-                    spg.name,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        spg.name.toUpperCase(),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w900,
+                          fontSize: 14,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      const Text(
+                        'RANK: FIELD_UNIT',
+                        style: TextStyle(
+                          color: AppColors.onSurfaceVariant,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 Switch(
                   value: isAssigned,
-                  activeThumbColor: AppColors.success,
+                  activeColor: AppColors.primary,
                   onChanged: (v) {
                     if (hasHistory && isAssigned) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text(
-                            'SPG tidak bisa dinonaktifkan karena sudah memiliki transaksi.',
-                          ),
-                          backgroundColor: Colors.orange,
+                          content: Text('PERSONNEL ACTIVE: DEPLOYMENT LOCKED'),
                         ),
                       );
                       return;
@@ -797,54 +826,57 @@ class SpgAssignmentCard extends StatelessWidget {
                 ),
               ],
             ),
-            if (isAssigned) ...[
-              const SizedBox(height: 16),
-              const Divider(height: 1),
-              const SizedBox(height: 12),
-              Row(
+          ),
+          if (isAssigned) ...[
+            Container(height: 1, color: AppColors.surfaceContainerHigh),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
                 children: [
                   const Text(
-                    'ASSIGN SPB',
+                    'SUPERVISOR_LINK',
                     style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w900,
                       color: AppColors.onSurfaceVariant,
                       letterSpacing: 1,
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
+                  const Spacer(),
+                  Container(
+                    width: 180,
+                    height: 44,
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      border: Border.all(color: AppColors.surfaceContainerHigh),
+                    ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<String>(
                         value: spbId,
-                        isExpanded: true,
                         hint: const Text(
-                          'Pilih SPB',
-                          style: TextStyle(fontSize: 14),
+                          'SELECT_COMMANDER',
+                          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: AppColors.onSurfaceVariant),
                         ),
-                        dropdownColor: AppColors.surfaceContainerHigh,
-                        items: [
-                          const DropdownMenuItem(
-                            value: null,
-                            child: Text('Tidak ada SPB'),
-                          ),
-                          ...spbs.map(
-                            (s) => DropdownMenuItem(
-                              value: s.id,
-                              child: Text(s.name),
-                            ),
-                          ),
-                        ],
-                        onChanged: (v) => onSpbChanged(v),
+                        isExpanded: true,
+                        style: const TextStyle(fontWeight: FontWeight.w900, color: AppColors.primary, fontSize: 13),
+                        items: spbs.map((s) {
+                          return DropdownMenuItem<String>(
+                            value: s.id,
+                            child: Text(s.name.toUpperCase()),
+                          );
+                        }).toList(),
+                        onChanged: onSpbChanged,
                       ),
                     ),
                   ),
                 ],
               ),
-            ],
+            ),
           ],
-        ),
+        ],
       ),
     );
   }
 }
+

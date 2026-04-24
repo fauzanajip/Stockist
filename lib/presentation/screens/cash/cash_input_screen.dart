@@ -187,11 +187,38 @@ class _CashInputScreenState extends State<CashInputScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.surface,
       appBar: AppBar(
-        title: const Text('Input Cash'),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'COMMERCE_LOGS: SETTLEMENT',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 2,
+                  ),
+            ),
+            const Text(
+              'FINANCIAL AUDIT PROTOCOL',
+              style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14, letterSpacing: -0.5),
+            ),
+          ],
+        ),
+        backgroundColor: AppColors.surfaceContainerLowest,
+        elevation: 0,
         actions: [
-          IconButton(onPressed: _loadData, icon: const Icon(Icons.refresh)),
+          IconButton(
+            onPressed: _loadData,
+            icon: const Icon(Icons.sync_rounded),
+            tooltip: 'RECALCULATE_FINANCIALS'.toUpperCase(),
+          ),
         ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(color: AppColors.surfaceContainerHigh, height: 1),
+        ),
       ),
       body: BlocBuilder<SpgBloc, SpgState>(
         builder: (context, spgState) {
@@ -210,6 +237,7 @@ class _CashInputScreenState extends State<CashInputScreen> {
               return Column(
                 children: [
                   _buildHeader(context, spgName),
+                  Container(height: 1, color: AppColors.surfaceContainerHigh),
                   Expanded(child: _buildForm(context)),
                 ],
               );
@@ -241,72 +269,65 @@ class _CashInputScreenState extends State<CashInputScreen> {
 
             return Container(
               width: double.infinity,
-              color: AppColors.primary.withOpacity(0.1),
-              padding: const EdgeInsets.all(16),
+              color: AppColors.surfaceContainerLowest,
+              padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.account_balance_wallet_outlined,
-                        color: AppColors.primary,
-                        size: 24,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'INPUT KAS',
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 1.2,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
                   Text(
-                    'SPG: $spgName',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: AppColors.secondary,
-                      fontWeight: FontWeight.bold,
+                    'AUDIT_TARGET_UNIT'.toUpperCase(),
+                    style: const TextStyle(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.onSurfaceVariant,
+                      letterSpacing: 1.5,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
+                  Text(
+                    spgName.toUpperCase(),
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.primary,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: AppColors.surfaceContainer,
-                      borderRadius: BorderRadius.circular(12),
+                      color: AppColors.surface,
+                      border: Border.all(color: AppColors.surfaceContainerHigh),
                     ),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Expected Cash',
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(color: AppColors.onSurfaceVariant),
-                            ),
-                            Text(
-                              app_formatters.Formatters.formatCurrency(
-                                expectedCash,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'EXPECTED_MISSION_REVENUE'.toUpperCase(),
+                                style: const TextStyle(
+                                  fontSize: 8,
+                                  fontWeight: FontWeight.w900,
+                                  color: AppColors.onSurfaceVariant,
+                                  letterSpacing: 1,
+                                ),
                               ),
-                              style: Theme.of(context).textTheme.titleMedium
-                                  ?.copyWith(
-                                    color: AppColors.secondary,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                            ),
-                          ],
+                              const SizedBox(height: 4),
+                              Text(
+                                app_formatters.Formatters.formatCurrency(expectedCash).toUpperCase(),
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900,
+                                  color: AppColors.secondary,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        Icon(
-                          Icons.calculate,
-                          color: AppColors.secondary,
-                          size: 28,
-                        ),
+                        const Icon(Icons.calculate_rounded, color: AppColors.onSurfaceVariant, size: 24),
                       ],
                     ),
                   ),
@@ -321,99 +342,93 @@ class _CashInputScreenState extends State<CashInputScreen> {
 
   Widget _buildForm(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'CASH TUNAI',
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              fontWeight: FontWeight.w900,
-              letterSpacing: 1.2,
-              color: AppColors.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 8),
-          TextField(
+          _buildAmountInput(
+            label: 'PHYSICAL_CASH_TOTAL',
             controller: _cashController,
-            keyboardType: const TextInputType.numberWithOptions(decimal: false),
-            inputFormatters: [_ThousandsFormatter()],
-            decoration: InputDecoration(
-              hintText: '0',
-              prefixText: 'Rp ',
-              filled: true,
-              fillColor: AppColors.surfaceContainer,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-            ),
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            iconPath: Icons.payments_outlined,
           ),
           const SizedBox(height: 24),
-          Text(
-            'QRIS',
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              fontWeight: FontWeight.w900,
-              letterSpacing: 1.2,
-              color: AppColors.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 8),
-          TextField(
+          _buildAmountInput(
+            label: 'DIGITAL_QR_SETTLEMENT',
             controller: _qrisController,
-            keyboardType: const TextInputType.numberWithOptions(decimal: false),
-            inputFormatters: [_ThousandsFormatter()],
-            decoration: InputDecoration(
-              hintText: '0',
-              prefixText: 'Rp ',
-              filled: true,
-              fillColor: AppColors.surfaceContainer,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-            ),
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            iconPath: Icons.qr_code_scanner_rounded,
           ),
           const SizedBox(height: 8),
           Text(
-            '(QRIS boleh 0 jika tidak ada pembayaran via QR)',
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: AppColors.onSurfaceVariant),
+            'LOG DIGITAL TRANSACTIONS SEPARATELY FOR AUDIT TRAIL.'.toUpperCase(),
+            style: const TextStyle(fontSize: 8, color: AppColors.onSurfaceVariant, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 32),
           Text(
-            'CATATAN (Opsional)',
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            'AUDIT_OBSERVATIONS (OPTIONAL)'.toUpperCase(),
+            style: const TextStyle(
+              fontSize: 9,
               fontWeight: FontWeight.w900,
-              letterSpacing: 1.2,
               color: AppColors.onSurfaceVariant,
+              letterSpacing: 1.5,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           TextField(
             controller: _noteController,
-            maxLines: 2,
+            maxLines: 3,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
             decoration: InputDecoration(
-              hintText: 'Catatan tambahan...',
+              hintText: 'INPUT OBSERVATIONS...',
+              hintStyle: TextStyle(color: AppColors.onSurfaceVariant.withOpacity(0.5), fontSize: 13),
               filled: true,
-              fillColor: AppColors.surfaceContainer,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
+              fillColor: AppColors.surfaceContainerLowest,
+              border: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: AppColors.surfaceContainerHigh)),
+              enabledBorder: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: AppColors.surfaceContainerHigh)),
+              focusedBorder: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: AppColors.primary)),
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 40),
           _buildTotalSummary(context),
         ],
       ),
+    );
+  }
+
+  Widget _buildAmountInput({
+    required String label,
+    required TextEditingController controller,
+    required IconData iconPath,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label.toUpperCase(),
+          style: const TextStyle(
+            fontSize: 9,
+            fontWeight: FontWeight.w900,
+            color: AppColors.onSurfaceVariant,
+            letterSpacing: 1.5,
+          ),
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: controller,
+          keyboardType: const TextInputType.numberWithOptions(decimal: false),
+          inputFormatters: [_ThousandsFormatter()],
+          style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 24, color: AppColors.primary),
+          decoration: InputDecoration(
+            prefixText: 'RP ',
+            prefixStyle: const TextStyle(color: AppColors.onSurfaceVariant, fontWeight: FontWeight.w900, fontSize: 16),
+            suffixIcon: Icon(iconPath, color: AppColors.onSurfaceVariant, size: 20),
+            filled: true,
+            fillColor: AppColors.surfaceContainerLowest,
+            border: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: AppColors.surfaceContainerHigh)),
+            enabledBorder: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: AppColors.surfaceContainerHigh)),
+            focusedBorder: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: AppColors.primary)),
+          ),
+        ),
+      ],
     );
   }
 
@@ -423,23 +438,20 @@ class _CashInputScreenState extends State<CashInputScreen> {
     final total = cash + qris;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.primary.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+        color: AppColors.surfaceContainerLowest,
+        border: Border.all(color: AppColors.primary, width: 2),
       ),
       child: Column(
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Cash Tunai', style: Theme.of(context).textTheme.bodyMedium),
+              Text('PHYSICAL_TOTAL'.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 10, color: AppColors.onSurfaceVariant)),
               Text(
-                app_formatters.Formatters.formatCurrency(cash),
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+                app_formatters.Formatters.formatCurrency(cash).toUpperCase(),
+                style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12),
               ),
             ],
           ),
@@ -447,30 +459,34 @@ class _CashInputScreenState extends State<CashInputScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('QRIS', style: Theme.of(context).textTheme.bodyMedium),
+              Text('DIGITAL_TOTAL'.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 10, color: AppColors.onSurfaceVariant)),
               Text(
-                app_formatters.Formatters.formatCurrency(qris),
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+                app_formatters.Formatters.formatCurrency(qris).toUpperCase(),
+                style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12),
               ),
             ],
           ),
-          const Divider(height: 24),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: Divider(height: 1, thickness: 1, color: AppColors.surfaceContainerHigh),
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'TOTAL ACTUAL',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+                'ACTUAL_SETTLEMENT'.toUpperCase(),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 12,
                   color: AppColors.primary,
+                  letterSpacing: 1,
                 ),
               ),
               Text(
-                app_formatters.Formatters.formatCurrency(total),
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                app_formatters.Formatters.formatCurrency(total).toUpperCase(),
+                style: const TextStyle(
                   fontWeight: FontWeight.w900,
+                  fontSize: 18,
                   color: AppColors.primary,
                 ),
               ),
@@ -490,41 +506,32 @@ class _CashInputScreenState extends State<CashInputScreen> {
         final isExistingRecord = cashState.hasRecord;
         final canSave = isExistingRecord || hasInput;
 
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
+        return Container(
+          decoration: const BoxDecoration(
+            color: AppColors.surfaceContainerLowest,
+            border: Border(top: BorderSide(color: AppColors.surfaceContainerHigh)),
+          ),
+          padding: EdgeInsets.fromLTRB(20, 16, 20, 16 + MediaQuery.of(context).padding.bottom),
+          child: SizedBox(
+            width: double.infinity,
+            height: 54,
             child: ElevatedButton(
               onPressed: (_isSubmitting || !canSave) ? null : _submitCash,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                elevation: 0,
               ),
               child: _isSubmitting
                   ? const SizedBox(
                       height: 20,
                       width: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                     )
-                  : Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.save),
-                        const SizedBox(width: 8),
-                        Text(
-                          isExistingRecord ? 'UPDATE KAS' : 'SIMPAN KAS',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.2,
-                          ),
-                        ),
-                      ],
+                  : Text(
+                      isExistingRecord ? 'REVISE SETTLEMENT DATA' : 'EXECUTE SETTLEMENT PROTOCOL',
+                      style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.5),
                     ),
             ),
           ),
