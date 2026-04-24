@@ -6,6 +6,7 @@ import '../../../core/constants/app_theme.dart';
 import '../../../core/utils/formatters.dart' as app_formatters;
 import '../../../core/utils/stock_calculator.dart';
 import '../../../domain/entities/stock_mutation_entity.dart';
+import '../../../domain/entities/spg_product_target_entity.dart';
 import '../../blocs/event_product_bloc/event_product_bloc.dart';
 import '../../blocs/event_product_bloc/event_product_event.dart';
 import '../../blocs/event_product_bloc/event_product_state.dart';
@@ -21,6 +22,9 @@ import '../../blocs/spg_bloc/spg_state.dart';
 import '../../blocs/stock_bloc/stock_bloc.dart';
 import '../../blocs/stock_bloc/stock_event.dart';
 import '../../blocs/stock_bloc/stock_state.dart';
+import '../../blocs/spg_target_bloc/spg_target_bloc.dart';
+import '../../blocs/spg_target_bloc/spg_target_event.dart';
+import '../../blocs/spg_target_bloc/spg_target_state.dart';
 
 class SpgClosingScreen extends StatefulWidget {
   final String eventId;
@@ -60,6 +64,9 @@ class _SpgClosingScreenState extends State<SpgClosingScreen> {
     );
     context.read<CashBloc>().add(
       LoadCashRecord(eventId: widget.eventId, spgId: widget.spgId),
+    );
+    context.read<SpgTargetBloc>().add(
+      LoadTargetsByEventSpg(eventId: widget.eventId, spgId: widget.spgId),
     );
   }
 
@@ -179,6 +186,8 @@ class _SpgClosingScreenState extends State<SpgClosingScreen> {
 
                           _validateClosing();
 
+                          return BlocBuilder<SpgTargetBloc, SpgTargetState>(
+                        builder: (context, targetState) {
                           return Column(
                             children: [
                               _buildHeader(context, spgName),
@@ -188,6 +197,7 @@ class _SpgClosingScreenState extends State<SpgClosingScreen> {
                                   productState,
                                   stockState,
                                   salesState,
+                                  targetState,
                                 ),
                               ),
                               _buildSummarySection(
@@ -199,6 +209,8 @@ class _SpgClosingScreenState extends State<SpgClosingScreen> {
                               _buildStatusIndicator(context),
                             ],
                           );
+                        },
+                      );
                         },
                       );
                     },
@@ -259,7 +271,12 @@ class _SpgClosingScreenState extends State<SpgClosingScreen> {
     AvailableProductsLoaded productState,
     StockState stockState,
     SalesState salesState,
+    SpgTargetState targetState,
   ) {
+    final targets = targetState is SpgTargetsLoaded
+        ? targetState.targets
+        : <SpgProductTargetEntity>[];
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Table(
@@ -270,12 +287,14 @@ class _SpgClosingScreenState extends State<SpgClosingScreen> {
         defaultVerticalAlignment: TableCellVerticalAlignment.middle,
         columnWidths: const {
           0: FlexColumnWidth(2),
-          1: FixedColumnWidth(60),
-          2: FixedColumnWidth(60),
-          3: FixedColumnWidth(60),
-          4: FixedColumnWidth(70),
-          5: FixedColumnWidth(70),
+          1: FixedColumnWidth(55),
+          2: FixedColumnWidth(55),
+          3: FixedColumnWidth(55),
+          4: FixedColumnWidth(55),
+          5: FixedColumnWidth(55),
           6: FixedColumnWidth(60),
+          7: FixedColumnWidth(65),
+          8: FixedColumnWidth(55),
         },
         children: [
           _buildTableHeader(context),
@@ -301,6 +320,13 @@ class _SpgClosingScreenState extends State<SpgClosingScreen> {
               sisaReal: sisaRealValue,
             );
 
+            final productTarget = targets
+                .where((t) => t.productId == product.id)
+                .fold(0, (sum, t) => sum + t.targetQty);
+            final progressPercent = productTarget > 0
+                ? (totalSold / productTarget * 100).clamp(0.0, 999.0)
+                : 0.0;
+
             return TableRow(
               decoration: BoxDecoration(
                 color: selisihFisik != 0
@@ -312,6 +338,8 @@ class _SpgClosingScreenState extends State<SpgClosingScreen> {
                 _buildTableCell(context, totalGiven.toString()),
                 _buildTableCell(context, totalReturned.toString()),
                 _buildTableCell(context, totalSold.toString()),
+                _buildTableCell(context, productTarget.toString()),
+                _buildProgressCell(context, progressPercent),
                 _buildTableCell(context, sisaSystem.toString()),
                 _buildSisaRealCell(context, product.id, sisaRealValue),
                 _buildTableCell(
@@ -341,6 +369,8 @@ class _SpgClosingScreenState extends State<SpgClosingScreen> {
         _buildHeaderCell(context, 'Dikasih'),
         _buildHeaderCell(context, 'Return'),
         _buildHeaderCell(context, 'Terjual'),
+        _buildHeaderCell(context, 'Target'),
+        _buildHeaderCell(context, 'Progress'),
         _buildHeaderCell(context, 'Sisa Sys'),
         _buildHeaderCell(context, 'Sisa Real'),
         _buildHeaderCell(context, 'Selisih'),
@@ -377,6 +407,35 @@ class _SpgClosingScreenState extends State<SpgClosingScreen> {
           color: color,
         ),
         textAlign: TextAlign.center,
+      ),
+    );
+  }
+
+  Widget _buildProgressCell(BuildContext context, double percent) {
+    final displayPercent = percent > 999 ? '999+' : '${percent.toInt()}%';
+    final color = percent < 50
+        ? AppColors.error
+        : percent < 80
+            ? AppColors.warning
+            : AppColors.success;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(color: color.withOpacity(0.5)),
+        ),
+        child: Text(
+          displayPercent,
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: color,
+            fontWeight: FontWeight.bold,
+          ),
+          textAlign: TextAlign.center,
+        ),
       ),
     );
   }

@@ -17,6 +17,7 @@ import '../../presentation/screens/settings/event_focus_screen.dart';
 import '../../presentation/screens/settings/product_master_screen.dart';
 import '../../presentation/screens/settings/spg_master_screen.dart';
 import '../../presentation/screens/settings/spb_master_screen.dart';
+import '../../presentation/screens/settings/sales_target_screen.dart';
 
 class AppRouter {
   AppRouter._();
@@ -117,6 +118,16 @@ class AppRouter {
         builder: (context, state) {
           final eventId = state.pathParameters['eventId']!;
           return StockHistoryScreen(eventId: eventId);
+        },
+      ),
+
+      // Sales Target Route
+      GoRoute(
+        path: '/event/:eventId/targets',
+        name: 'sales_targets',
+        builder: (context, state) {
+          final eventId = state.pathParameters['eventId']!;
+          return SalesTargetScreen(eventId: eventId);
         },
       ),
 

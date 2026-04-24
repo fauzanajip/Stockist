@@ -10,6 +10,7 @@ import '../data/repositories/stock_mutation_repository_impl.dart';
 import '../data/repositories/sales_repository_impl.dart';
 import '../data/repositories/cash_record_repository_impl.dart';
 import '../data/repositories/backup_log_repository_impl.dart';
+import '../data/repositories/spg_product_target_repository_impl.dart';
 import '../domain/repositories/event_repository.dart';
 import '../domain/repositories/product_repository.dart';
 import '../domain/repositories/spg_repository.dart';
@@ -20,6 +21,7 @@ import '../domain/repositories/stock_mutation_repository.dart';
 import '../domain/repositories/sales_repository.dart';
 import '../domain/repositories/cash_record_repository.dart';
 import '../domain/repositories/backup_log_repository.dart';
+import '../domain/repositories/spg_product_target_repository.dart';
 import '../domain/usecases/event_usecases.dart';
 import '../domain/usecases/product_usecases.dart';
 import '../domain/usecases/spg_usecases.dart';
@@ -29,6 +31,7 @@ import '../domain/usecases/event_spg_usecases.dart';
 import '../domain/usecases/stock_mutation_usecases.dart';
 import '../domain/usecases/sales_usecases.dart';
 import '../domain/usecases/cash_record_usecases.dart';
+import '../domain/usecases/spg_product_target_usecases.dart';
 import '../presentation/blocs/event_bloc/event_bloc.dart';
 import '../presentation/blocs/spg_bloc/spg_bloc.dart';
 import '../presentation/blocs/product_bloc/product_bloc.dart';
@@ -38,6 +41,7 @@ import '../presentation/blocs/cash_bloc/cash_bloc.dart';
 import '../presentation/blocs/event_spg_bloc/event_spg_bloc.dart';
 import '../presentation/blocs/event_product_bloc/event_product_bloc.dart';
 import '../presentation/blocs/spb_bloc/spb_bloc.dart';
+import '../presentation/blocs/spg_target_bloc/spg_target_bloc.dart';
 
 final sl = GetIt.instance;
 
@@ -75,6 +79,9 @@ Future<void> initDependencies() async {
   );
   sl.registerLazySingleton<BackupLogRepository>(
     () => BackupLogRepositoryImpl(dbHelper: sl()),
+  );
+  sl.registerLazySingleton<SpgProductTargetRepository>(
+    () => SpgProductTargetRepositoryImpl(dbHelper: sl()),
   );
 
   // Use Cases - Event
@@ -141,6 +148,15 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton(() => CreateOrUpdateCashRecord(sl()));
   sl.registerLazySingleton(() => GetCashRecordByEventSpg(sl()));
   sl.registerLazySingleton(() => GetCashRecordsByEvent(sl()));
+
+  // Use Cases - SPG Product Target
+  sl.registerLazySingleton(() => GetTargetsByEvent(sl()));
+  sl.registerLazySingleton(() => GetTargetsByEventSpg(sl()));
+  sl.registerLazySingleton(() => GetTargetByEventSpgProduct(sl()));
+  sl.registerLazySingleton(() => CreateSpgProductTarget(sl()));
+  sl.registerLazySingleton(() => UpdateSpgProductTarget(sl()));
+  sl.registerLazySingleton(() => DeleteSpgProductTarget(sl()));
+  sl.registerLazySingleton(() => BulkCreateOrUpdateTargets(sl()));
 
   // Blocs
   sl.registerFactory(
@@ -226,6 +242,16 @@ Future<void> initDependencies() async {
       assignSpgToEvent: sl(),
       removeSpgFromEvent: sl(),
       updateEventSpg: sl(),
+    ),
+  );
+  sl.registerFactory(
+    () => SpgTargetBloc(
+      getTargetsByEvent: sl(),
+      getTargetsByEventSpg: sl(),
+      createSpgProductTarget: sl(),
+      updateSpgProductTarget: sl(),
+      deleteSpgProductTarget: sl(),
+      bulkCreateOrUpdateTargets: sl(),
     ),
   );
 }

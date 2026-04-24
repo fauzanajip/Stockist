@@ -27,6 +27,10 @@ import '../../blocs/cash_bloc/cash_state.dart';
 import '../../blocs/event_product_bloc/event_product_bloc.dart';
 import '../../blocs/event_product_bloc/event_product_event.dart';
 import '../../blocs/event_product_bloc/event_product_state.dart';
+import '../../blocs/spg_target_bloc/spg_target_bloc.dart';
+import '../../blocs/spg_target_bloc/spg_target_event.dart';
+import '../../blocs/spg_target_bloc/spg_target_state.dart';
+import '../../../domain/entities/spg_product_target_entity.dart';
 
 enum _SpgSortMode { name, spb }
 
@@ -58,6 +62,9 @@ class _SpgListScreenState extends State<SpgListScreen> {
     context.read<CashBloc>().add(LoadAllCashByEvent(eventId: widget.eventId));
     context.read<EventProductBloc>().add(
       LoadAvailableProducts(eventId: widget.eventId),
+    );
+    context.read<SpgTargetBloc>().add(
+      LoadTargetsByEvent(eventId: widget.eventId),
     );
   }
 
@@ -746,6 +753,96 @@ class _SpgDashboardStats extends StatelessWidget {
                       const Padding(
                         padding: EdgeInsets.symmetric(vertical: 12),
                         child: Divider(height: 1),
+                      ),
+                      BlocBuilder<SpgTargetBloc, SpgTargetState>(
+                        builder: (context, targetState) {
+                          if (targetState is! SpgTargetsLoaded) {
+                            return const SizedBox.shrink();
+                          }
+
+                          final spgTargets = targetState.targets
+                              .where((t) => t.spgId == spgId)
+                              .toList();
+
+                          if (spgTargets.isEmpty) {
+                            return const SizedBox.shrink();
+                          }
+
+                          int totalTarget = spgTargets.fold(0, (sum, t) => sum + t.targetQty);
+                          if (totalTarget == 0) {
+                            return const SizedBox.shrink();
+                          }
+
+                          final totalSold = spgSales.fold(0, (sum, s) => sum + s.qtySold);
+                          final percentage = (totalSold / totalTarget * 100).clamp(0, 100);
+                          final color = percentage < 50
+                              ? AppColors.error
+                              : percentage < 80
+                                  ? AppColors.warning
+                                  : AppColors.success;
+
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: color.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: color.withOpacity(0.3)),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(Icons.track_changes, size: 16, color: color),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'TARGET PROGRESS',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w900,
+                                        color: color,
+                                        letterSpacing: 1.0,
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                    Text(
+                                      '${percentage.toInt()}%',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: color,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(4),
+                                  child: LinearProgressIndicator(
+                                    value: percentage / 100,
+                                    backgroundColor: color.withOpacity(0.2),
+                                    color: color,
+                                    minHeight: 8,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Sold: $totalSold',
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
+                                    Text(
+                                      'Target: $totalTarget',
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          );
+                        },
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -410,6 +410,18 @@ class EventDashboardView extends StatelessWidget {
             pathParameters: {'eventId': event.id},
           ),
         ),
+        const SizedBox(height: 12),
+        _buildActionTile(
+          context,
+          icon: Icons.track_changes_outlined,
+          title: 'Target Penjualan',
+          subtitle: 'Set target qty per SPG',
+          color: AppColors.success,
+          onTap: () => context.pushNamed(
+            'sales_targets',
+            pathParameters: {'eventId': event.id},
+          ),
+        ),
       ],
     );
   }

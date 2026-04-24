@@ -164,6 +164,22 @@ class DatabaseHelper {
         FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE
       )
     ''');
+
+    // SPG Product Targets
+    await db.execute('''
+      CREATE TABLE spg_product_targets (
+        id TEXT PRIMARY KEY,
+        event_id TEXT NOT NULL,
+        spg_id TEXT NOT NULL,
+        product_id TEXT NOT NULL,
+        target_qty INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
+        FOREIGN KEY (spg_id) REFERENCES spgs(id),
+        FOREIGN KEY (product_id) REFERENCES products(id)
+      )
+    ''');
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -173,11 +189,28 @@ class DatabaseHelper {
         'ALTER TABLE events ADD COLUMN is_active INTEGER NOT NULL DEFAULT 0',
       );
     }
+    if (oldVersion < 3) {
+      await db.execute('''
+        CREATE TABLE spg_product_targets (
+          id TEXT PRIMARY KEY,
+          event_id TEXT NOT NULL,
+          spg_id TEXT NOT NULL,
+          product_id TEXT NOT NULL,
+          target_qty INTEGER NOT NULL DEFAULT 0,
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL,
+          FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
+          FOREIGN KEY (spg_id) REFERENCES spgs(id),
+          FOREIGN KEY (product_id) REFERENCES products(id)
+        )
+      ''');
+    }
   }
 
   Future<void> clearAllData() async {
     final db = await database;
     await db.transaction((txn) async {
+      await txn.delete('spg_product_targets');
       await txn.delete('backup_logs');
       await txn.delete('cash_records');
       await txn.delete('sales');
