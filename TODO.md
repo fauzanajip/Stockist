@@ -210,6 +210,15 @@
 | 61  | SPB Bloc: Add UpdateSpbEvent handler                         | ✅ DONE    | Injected usecase, added on<UpdateSpbEvent>  |
 | 62  | SPG Bloc: Add UpdateSpgEvent handler                         | ✅ DONE    | Injected existing UpdateSpg usecase         |
 
+## SPG List Sorting Feature (Session 2026-04-24)
+
+| #   | Task                                                         | Status     | Notes                                       |
+| --- | ------------------------------------------------------------ | ---------- | ------------------------------------------- |
+| 63  | Add sort mode enum and state variable                        | ✅ DONE    | _SpgSortMode { name, spb }                  |
+| 64  | Add sort chips in AppBar actions                             | ✅ DONE    | FilterChip with Name/SPB toggle             |
+| 65  | Implement sort logic for EventSpgEntity list                 | ✅ DONE    | Sort by SPG name or SPB name (nulls last)   |
+| 66  | Wrap _buildSpgList with BlocBuilder<SpgBloc>                 | ✅ DONE    | Required for SPG name lookup during sorting |
+
 ## Phase 2 - Save + Open + Share (Session 2026-04-24)
 
 | #   | Task                                                         | Status     | Notes                                       |

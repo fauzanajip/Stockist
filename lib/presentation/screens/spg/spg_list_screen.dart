@@ -28,6 +28,8 @@ import '../../blocs/event_product_bloc/event_product_bloc.dart';
 import '../../blocs/event_product_bloc/event_product_event.dart';
 import '../../blocs/event_product_bloc/event_product_state.dart';
 
+enum _SpgSortMode { name, spb }
+
 class SpgListScreen extends StatefulWidget {
   final String eventId;
 
@@ -38,6 +40,8 @@ class SpgListScreen extends StatefulWidget {
 }
 
 class _SpgListScreenState extends State<SpgListScreen> {
+  _SpgSortMode _sortMode = _SpgSortMode.name;
+
   @override
   void initState() {
     super.initState();
@@ -63,6 +67,17 @@ class _SpgListScreenState extends State<SpgListScreen> {
       appBar: AppBar(
         title: const Text('SPG List'),
         actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildSortChip('Name', _SpgSortMode.name),
+                const SizedBox(width: 4),
+                _buildSortChip('SPB', _SpgSortMode.spb),
+              ],
+            ),
+          ),
           IconButton(icon: const Icon(Icons.refresh), onPressed: _loadData),
         ],
       ),
@@ -131,19 +146,85 @@ class _SpgListScreenState extends State<SpgListScreen> {
     );
   }
 
+  Widget _buildSortChip(String label, _SpgSortMode mode) {
+    final isSelected = _sortMode == mode;
+    return FilterChip(
+      label: Text(
+        label,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          color: isSelected ? AppColors.primary : AppColors.onSurfaceVariant,
+        ),
+      ),
+      selected: isSelected,
+      onSelected: (_) => setState(() => _sortMode = mode),
+      backgroundColor: isSelected ? AppColors.primary.withOpacity(0.1) : null,
+      selectedColor: AppColors.primary.withOpacity(0.2),
+      checkmarkColor: AppColors.primary,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: isSelected ? AppColors.primary : Colors.transparent,
+          width: 1,
+        ),
+      ),
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      visualDensity: VisualDensity.compact,
+    );
+  }
+
+  List<EventSpgEntity> _sortEventSpgs(
+    List<EventSpgEntity> eventSpgs,
+    List<SpbEntity> spbs,
+    SpgState spgState,
+  ) {
+    if (spgState is! SpqsLoaded) return eventSpgs;
+
+    final sorted = List<EventSpgEntity>.from(eventSpgs);
+
+    if (_sortMode == _SpgSortMode.name) {
+      sorted.sort((a, b) {
+        final spgA = spgState.spqs.firstWhereOrNull((s) => s.id == a.spgId);
+        final spgB = spgState.spqs.firstWhereOrNull((s) => s.id == b.spgId);
+        final nameA = spgA?.name ?? '';
+        final nameB = spgB?.name ?? '';
+        return nameA.compareTo(nameB);
+      });
+    } else {
+      sorted.sort((a, b) {
+        final spbA = spbs.firstWhereOrNull((s) => s.id == a.spbId);
+        final spbB = spbs.firstWhereOrNull((s) => s.id == b.spbId);
+        final nameA = spbA?.name ?? '';
+        final nameB = spbB?.name ?? '';
+        if (a.spbId == null && b.spbId != null) return 1;
+        if (a.spbId != null && b.spbId == null) return -1;
+        return nameA.compareTo(nameB);
+      });
+    }
+
+    return sorted;
+  }
+
   Widget _buildSpgList(
     BuildContext context,
     List<EventSpgEntity> eventSpgs,
     List<SpbEntity> spbs,
   ) {
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      itemCount: eventSpgs.length,
-      itemBuilder: (context, index) {
-        return SpgDashboardCard(
-          eventId: widget.eventId,
-          eventSpg: eventSpgs[index],
-          spbs: spbs,
+    return BlocBuilder<SpgBloc, SpgState>(
+      builder: (context, spgState) {
+        final sortedSpgs = _sortEventSpgs(eventSpgs, spbs, spgState);
+
+        return ListView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          itemCount: sortedSpgs.length,
+          itemBuilder: (context, index) {
+            return SpgDashboardCard(
+              eventId: widget.eventId,
+              eventSpg: sortedSpgs[index],
+              spbs: spbs,
+            );
+          },
         );
       },
     );
