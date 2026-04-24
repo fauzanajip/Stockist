@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter/services.dart';
 import 'dart:io';
 import '../../../core/constants/app_theme.dart';
 import '../../../domain/entities/event_entity.dart';
@@ -247,7 +248,36 @@ class _HomeScreenState extends State<HomeScreen> {
               )
             : null;
 
-        return Scaffold(
+        return PopScope(
+          canPop: false,
+          onPopInvoked: (bool didPop) async {
+            if (didPop) return;
+            
+            final shouldExit = await showDialog<bool>(
+              context: context,
+              builder: (context) => AlertDialog(
+                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                backgroundColor: AppColors.surfaceContainerLowest,
+                title: const Text('EXIT PROTOCOL', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w900, fontSize: 16, letterSpacing: 1.0)),
+                content: const Text('Apakah Anda yakin ingin keluar dari Command Center (Aplikasi)?', style: TextStyle(color: AppColors.onSurface, fontSize: 14)),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: const Text('BATAL', style: TextStyle(color: AppColors.onSurfaceVariant, fontWeight: FontWeight.w900)),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(true),
+                    child: const Text('KELUAR', style: TextStyle(color: AppColors.secondary, fontWeight: FontWeight.w900)),
+                  ),
+                ],
+              ),
+            );
+
+            if (shouldExit ?? false) {
+              await SystemNavigator.pop();
+            }
+          },
+          child: Scaffold(
           backgroundColor: AppColors.surface,
           appBar: AppBar(
             backgroundColor: AppColors.surfaceContainerLowest,
@@ -292,6 +322,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           body: _buildBody(context, state, activeEvent),
+        ),
         );
       },
     );
