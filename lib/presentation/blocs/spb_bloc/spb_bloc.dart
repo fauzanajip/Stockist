@@ -6,15 +6,18 @@ import 'spb_state.dart';
 class SpbBloc extends Bloc<SpbEvent, SpbState> {
   final spb_usecase.GetAllSpbs getAllSpbs;
   final spb_usecase.CreateSpb createSpb;
+  final spb_usecase.UpdateSpb updateSpb;
   final spb_usecase.DeleteSpb deleteSpb;
 
   SpbBloc({
     required this.getAllSpbs,
     required this.createSpb,
+    required this.updateSpb,
     required this.deleteSpb,
   }) : super(SpbInitial()) {
     on<LoadAllSpbs>(_onLoadAllSpbs);
     on<CreateSpbEvent>(_onCreateSpb);
+    on<UpdateSpbEvent>(_onUpdateSpb);
     on<DeleteSpbEvent>(_onDeleteSpb);
   }
 
@@ -35,6 +38,20 @@ class SpbBloc extends Bloc<SpbEvent, SpbState> {
     try {
       final newSpb = await createSpb(event.name);
       emit(SpbCreated(spb: newSpb));
+    } catch (e) {
+      emit(SpbError(message: e.toString()));
+    }
+  }
+
+  Future<void> _onUpdateSpb(
+    UpdateSpbEvent event,
+    Emitter<SpbState> emit,
+  ) async {
+    try {
+      emit(SpbLoading());
+      final updatedSpb = await updateSpb(event.spb);
+      emit(SpbUpdated(spb: updatedSpb));
+      add(LoadAllSpbs());
     } catch (e) {
       emit(SpbError(message: e.toString()));
     }

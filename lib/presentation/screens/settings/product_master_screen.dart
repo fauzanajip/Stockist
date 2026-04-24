@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_theme.dart';
 import '../../../core/utils/validators.dart';
+import '../../../domain/entities/product_entity.dart';
 import '../../blocs/product_bloc/product_bloc.dart';
 import '../../blocs/product_bloc/product_event.dart';
 import '../../blocs/product_bloc/product_state.dart';
@@ -58,6 +59,11 @@ class _ProductMasterScreenState extends State<ProductMasterScreen> {
             context.read<ProductBloc>().add(LoadActiveProducts());
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Produk berhasil ditambahkan')),
+            );
+          }
+          if (state is ProductUpdated) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Produk berhasil diperbarui')),
             );
           }
         },
@@ -171,12 +177,24 @@ class _ProductMasterScreenState extends State<ProductMasterScreen> {
                             subtitle: Text(
                               'SKU: ${product.sku} | Rp ${product.price.toInt()}',
                             ),
-                            trailing: IconButton(
-                              icon: const Icon(
-                                Icons.delete_outline,
-                                color: AppColors.error,
-                              ),
-                              onPressed: () => _confirmDelete(product),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.edit_outlined,
+                                    color: AppColors.primary,
+                                  ),
+                                  onPressed: () => _showEditDialog(product),
+                                ),
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.delete_outline,
+                                    color: AppColors.error,
+                                  ),
+                                  onPressed: () => _confirmDelete(product),
+                                ),
+                              ],
                             ),
                           ),
                         );
@@ -213,7 +231,7 @@ class _ProductMasterScreenState extends State<ProductMasterScreen> {
     );
   }
 
-  void _confirmDelete(product) {
+  void _confirmDelete(ProductEntity product) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -235,6 +253,78 @@ class _ProductMasterScreenState extends State<ProductMasterScreen> {
               'HAPUS',
               style: TextStyle(color: AppColors.error),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEditDialog(ProductEntity product) {
+    final nameController = TextEditingController(text: product.name);
+    final skuController = TextEditingController(text: product.sku);
+    final priceController = TextEditingController(text: product.price.toString());
+    final editFormKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Edit Produk'),
+        content: Form(
+          key: editFormKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Nama Produk',
+                  prefixIcon: Icon(Icons.inventory_2),
+                ),
+                validator: (value) =>
+                    Validators.validateRequired(value, 'Nama Produk'),
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: skuController,
+                decoration: const InputDecoration(
+                  labelText: 'SKU',
+                  prefixIcon: Icon(Icons.tag),
+                ),
+                validator: (value) =>
+                    Validators.validateRequired(value, 'SKU'),
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: priceController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Harga',
+                  prefixText: 'Rp ',
+                ),
+                validator: (value) =>
+                    Validators.validatePositiveNumber(value, 'Harga'),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('BATAL'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (editFormKey.currentState!.validate()) {
+                final updatedProduct = product.copyWith(
+                  name: nameController.text.trim(),
+                  sku: skuController.text.trim(),
+                  price: double.tryParse(priceController.text) ?? 0,
+                );
+                context.read<ProductBloc>().add(UpdateProduct(product: updatedProduct));
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('SIMPAN'),
           ),
         ],
       ),

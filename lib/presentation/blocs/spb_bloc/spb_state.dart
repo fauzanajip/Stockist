@@ -30,6 +30,15 @@ class SpbCreated extends SpbState {
   List<Object?> get props => [spb];
 }
 
+class SpbUpdated extends SpbState {
+  final SpbEntity spb;
+
+  const SpbUpdated({required this.spb});
+
+  @override
+  List<Object?> get props => [spb];
+}
+
 class SpbDeleted extends SpbState {}
 
 class SpbError extends SpbState {

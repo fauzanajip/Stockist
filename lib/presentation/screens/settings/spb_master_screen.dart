@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_theme.dart';
 import '../../../core/utils/validators.dart';
+import '../../../domain/entities/spb_entity.dart';
 import '../../blocs/spb_bloc/spb_bloc.dart';
 import '../../blocs/spb_bloc/spb_event.dart';
 import '../../blocs/spb_bloc/spb_state.dart';
@@ -48,6 +49,10 @@ class _SpbMasterScreenState extends State<SpbMasterScreen> {
             context.read<SpbBloc>().add(LoadAllSpbs());
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('SPB berhasil ditambahkan')),
+            );
+          } else if (state is SpbUpdated) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('SPB berhasil diperbarui')),
             );
           } else if (state is SpbDeleted) {
             context.read<SpbBloc>().add(LoadAllSpbs());
@@ -127,12 +132,24 @@ class _SpbMasterScreenState extends State<SpbMasterScreen> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            trailing: IconButton(
-                              icon: const Icon(
-                                Icons.delete_outline,
-                                color: AppColors.error,
-                              ),
-                              onPressed: () => _confirmDelete(spb),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.edit_outlined,
+                                    color: AppColors.primary,
+                                  ),
+                                  onPressed: () => _showEditDialog(spb),
+                                ),
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.delete_outline,
+                                    color: AppColors.error,
+                                  ),
+                                  onPressed: () => _confirmDelete(spb),
+                                ),
+                              ],
                             ),
                           ),
                         );
@@ -166,7 +183,7 @@ class _SpbMasterScreenState extends State<SpbMasterScreen> {
     );
   }
 
-  void _confirmDelete(spb) {
+  void _confirmDelete(SpbEntity spb) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -186,6 +203,48 @@ class _SpbMasterScreenState extends State<SpbMasterScreen> {
               'HAPUS',
               style: TextStyle(color: AppColors.error),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEditDialog(SpbEntity spb) {
+    final nameController = TextEditingController(text: spb.name);
+    final editFormKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Edit SPB'),
+        content: Form(
+          key: editFormKey,
+          child: TextFormField(
+            controller: nameController,
+            decoration: const InputDecoration(
+              labelText: 'Nama SPB',
+              prefixIcon: Icon(Icons.person_pin_outlined),
+            ),
+            validator: (value) =>
+                Validators.validateRequired(value, 'Nama SPB'),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('BATAL'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (editFormKey.currentState!.validate()) {
+                final updatedSpb = spb.copyWith(
+                  name: nameController.text.trim(),
+                );
+                context.read<SpbBloc>().add(UpdateSpbEvent(spb: updatedSpb));
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('SIMPAN'),
           ),
         ],
       ),

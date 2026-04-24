@@ -198,6 +198,18 @@
 | 45  | Excel Export - Detail SPB merge for consecutive same SPB     | ✅ DONE    | Group detection & vertical cell merging     |
 | 46  | Excel Export - TOTAL row merge SPB + Name                    | ✅ DONE    | Shows "TOTAL" label in merged cell          |
 
+## Master Data Edit Feature (Session 2026-04-24)
+
+| #   | Task                                                         | Status     | Notes                                       |
+| --- | ------------------------------------------------------------ | ---------- | ------------------------------------------- |
+| 56  | Add edit feature for Product Master                          | ✅ DONE    | Edit dialog + edit button in ListTile       |
+| 57  | Add edit feature for SPG Master                              | ✅ DONE    | UpdateSpgEvent + SpgUpdated state + UI      |
+| 58  | Add edit feature for SPB Master                              | ✅ DONE    | UpdateSpbEvent + SpbUpdated state + UI      |
+| 59  | SPB Repository: Add update() method                          | ✅ DONE    | Interface + implementation                  |
+| 60  | SPB Usecase: Add UpdateSpb                                   | ✅ DONE    | Registered in DI                            |
+| 61  | SPB Bloc: Add UpdateSpbEvent handler                         | ✅ DONE    | Injected usecase, added on<UpdateSpbEvent>  |
+| 62  | SPG Bloc: Add UpdateSpgEvent handler                         | ✅ DONE    | Injected existing UpdateSpg usecase         |
+
 ## Phase 2 - Save + Open + Share (Session 2026-04-24)
 
 | #   | Task                                                         | Status     | Notes                                       |

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../../domain/entities/spg_entity.dart';
 
 abstract class SpgEvent extends Equatable {
   const SpgEvent();
@@ -18,6 +19,15 @@ class CreateNewSpq extends SpgEvent {
 
   @override
   List<Object?> get props => [name];
+}
+
+class UpdateSpgEvent extends SpgEvent {
+  final SpgEntity spg;
+
+  const UpdateSpgEvent({required this.spg});
+
+  @override
+  List<Object?> get props => [spg];
 }
 
 class DeleteSpq extends SpgEvent {

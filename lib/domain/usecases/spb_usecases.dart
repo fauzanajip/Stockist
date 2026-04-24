@@ -40,3 +40,13 @@ class DeleteSpb {
     await repository.delete(id);
   }
 }
+
+class UpdateSpb {
+  final SpbRepository repository;
+
+  UpdateSpb(this.repository);
+
+  Future<SpbEntity> call(SpbEntity spb) async {
+    return await repository.update(spb);
+  }
+}

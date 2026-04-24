@@ -4,5 +4,6 @@ abstract class SpbRepository {
   Future<List<SpbEntity>> getAll();
   Future<SpbEntity?> getById(String id);
   Future<SpbEntity> create(SpbEntity spb);
+  Future<SpbEntity> update(SpbEntity spb);
   Future<void> delete(String id);
 }

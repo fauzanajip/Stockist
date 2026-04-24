@@ -105,6 +105,7 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton(() => GetAllSpbs(sl()));
   sl.registerLazySingleton(() => GetSpbById(sl()));
   sl.registerLazySingleton(() => CreateSpb(sl()));
+  sl.registerLazySingleton(() => UpdateSpb(sl()));
   sl.registerLazySingleton(() => DeleteSpb(sl()));
 
   // Use Cases - Event Product
@@ -167,11 +168,17 @@ Future<void> initDependencies() async {
       getAllSpgs: sl(),
       getActiveSpgs: sl(),
       createSpg: sl(),
+      updateSpg: sl(),
       softDeleteSpg: sl(),
     ),
   );
   sl.registerFactory(
-    () => SpbBloc(getAllSpbs: sl(), createSpb: sl(), deleteSpb: sl()),
+    () => SpbBloc(
+      getAllSpbs: sl(),
+      createSpb: sl(),
+      updateSpb: sl(),
+      deleteSpb: sl(),
+    ),
   );
   sl.registerFactory(
     () => StockBloc(

@@ -23,6 +23,8 @@ class SpqsLoaded extends SpgState {
 
 class SpqCreated extends SpgState {}
 
+class SpgUpdated extends SpgState {}
+
 class SpqDeleted extends SpgState {}
 
 class SpgError extends SpgState {

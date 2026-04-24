@@ -67,4 +67,21 @@ class SpbRepositoryImpl implements SpbRepository {
       throw AppDatabaseException(message: 'Gagal hapus SPB: $e');
     }
   }
+
+  @override
+  Future<SpbEntity> update(SpbEntity spb) async {
+    try {
+      final db = await dbHelper.database;
+      final model = SpbModel.fromEntity(spb).copyWith(createdAt: DateTime.now());
+      await db.update(
+        'spbs',
+        model.toMap(),
+        where: 'id = ?',
+        whereArgs: [spb.id],
+      );
+      return model;
+    } catch (e) {
+      throw AppDatabaseException(message: 'Gagal update SPB: $e');
+    }
+  }
 }

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../../domain/entities/spb_entity.dart';
 
 abstract class SpbEvent extends Equatable {
   const SpbEvent();
@@ -16,6 +17,15 @@ class CreateSpbEvent extends SpbEvent {
 
   @override
   List<Object?> get props => [name];
+}
+
+class UpdateSpbEvent extends SpbEvent {
+  final SpbEntity spb;
+
+  const UpdateSpbEvent({required this.spb});
+
+  @override
+  List<Object?> get props => [spb];
 }
 
 class DeleteSpbEvent extends SpbEvent {

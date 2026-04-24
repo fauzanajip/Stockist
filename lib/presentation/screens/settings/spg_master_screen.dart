@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/app_theme.dart';
 import '../../../core/utils/validators.dart';
+import '../../../domain/entities/spg_entity.dart';
 import '../../blocs/spg_bloc/spg_bloc.dart';
 import '../../blocs/spg_bloc/spg_event.dart';
 import '../../blocs/spg_bloc/spg_state.dart';
@@ -48,6 +49,11 @@ class _SpgMasterScreenState extends State<SpgMasterScreen> {
             context.read<SpgBloc>().add(LoadActiveSpqs());
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('SPG berhasil ditambahkan')),
+            );
+          }
+          if (state is SpgUpdated) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('SPG berhasil diperbarui')),
             );
           }
         },
@@ -125,12 +131,24 @@ class _SpgMasterScreenState extends State<SpgMasterScreen> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            trailing: IconButton(
-                              icon: const Icon(
-                                Icons.delete_outline,
-                                color: AppColors.error,
-                              ),
-                              onPressed: () => _confirmDelete(spg),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.edit_outlined,
+                                    color: AppColors.primary,
+                                  ),
+                                  onPressed: () => _showEditDialog(spg),
+                                ),
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.delete_outline,
+                                    color: AppColors.error,
+                                  ),
+                                  onPressed: () => _confirmDelete(spg),
+                                ),
+                              ],
                             ),
                           ),
                         );
@@ -164,7 +182,7 @@ class _SpgMasterScreenState extends State<SpgMasterScreen> {
     );
   }
 
-  void _confirmDelete(spg) {
+  void _confirmDelete(SpgEntity spg) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -184,6 +202,48 @@ class _SpgMasterScreenState extends State<SpgMasterScreen> {
               'HAPUS',
               style: TextStyle(color: AppColors.error),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEditDialog(SpgEntity spg) {
+    final nameController = TextEditingController(text: spg.name);
+    final editFormKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Edit SPG'),
+        content: Form(
+          key: editFormKey,
+          child: TextFormField(
+            controller: nameController,
+            decoration: const InputDecoration(
+              labelText: 'Nama SPG',
+              prefixIcon: Icon(Icons.person_outline),
+            ),
+            validator: (value) =>
+                Validators.validateRequired(value, 'Nama SPG'),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('BATAL'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (editFormKey.currentState!.validate()) {
+                final updatedSpg = spg.copyWith(
+                  name: nameController.text.trim(),
+                );
+                context.read<SpgBloc>().add(UpdateSpgEvent(spg: updatedSpg));
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('SIMPAN'),
           ),
         ],
       ),

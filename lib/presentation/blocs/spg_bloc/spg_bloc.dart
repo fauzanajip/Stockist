@@ -7,17 +7,20 @@ class SpgBloc extends Bloc<SpgEvent, SpgState> {
   final usecase.GetAllSpgs getAllSpgs;
   final usecase.GetActiveSpgs getActiveSpgs;
   final usecase.CreateSpg createSpg;
+  final usecase.UpdateSpg updateSpg;
   final usecase.SoftDeleteSpg softDeleteSpg;
 
   SpgBloc({
     required this.getAllSpgs,
     required this.getActiveSpgs,
     required this.createSpg,
+    required this.updateSpg,
     required this.softDeleteSpg,
   }) : super(SpgInitial()) {
     on<LoadAllSpqs>(_onLoadAllSpqs);
     on<LoadActiveSpqs>(_onLoadActiveSpqs);
     on<CreateNewSpq>(_onCreateNewSpq);
+    on<UpdateSpgEvent>(_onUpdateSpg);
     on<SoftDeleteSpqEvent>(_onSoftDeleteSpq);
   }
 
@@ -52,6 +55,20 @@ class SpgBloc extends Bloc<SpgEvent, SpgState> {
       emit(SpgLoading());
       await createSpg(event.name);
       emit(SpqCreated());
+      add(LoadActiveSpqs());
+    } catch (e) {
+      emit(SpgError(message: e.toString()));
+    }
+  }
+
+  Future<void> _onUpdateSpg(
+    UpdateSpgEvent event,
+    Emitter<SpgState> emit,
+  ) async {
+    try {
+      emit(SpgLoading());
+      await updateSpg(event.spg);
+      emit(SpgUpdated());
       add(LoadActiveSpqs());
     } catch (e) {
       emit(SpgError(message: e.toString()));
