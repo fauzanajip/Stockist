@@ -53,6 +53,15 @@ class CreateTopup extends StockEvent {
   List<Object?> get props => [eventId, spgId, productId, qty, note];
 }
 
+class BulkCreateTopupEvent extends StockEvent {
+  final List<BulkInitialParams> topups;
+
+  const BulkCreateTopupEvent({required this.topups});
+
+  @override
+  List<Object?> get props => [topups];
+}
+
 class CreateReturn extends StockEvent {
   final String eventId;
   final String spgId;

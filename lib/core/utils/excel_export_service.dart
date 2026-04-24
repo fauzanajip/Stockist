@@ -194,11 +194,11 @@ class ExcelExportService {
     // Headers
     final headers = [
       'SPG',
-      'Total Dikasih',
-      'Total Terjual',
-      'Total Return',
-      'Sisa Sistem',
-      'Cash Tunai',
+      'Distribusi',
+      'Terjual',
+      'Return',
+      'Sisa',
+      'Cash',
       'QRIS',
       'Expected Cash',
       'Surplus',

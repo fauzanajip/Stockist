@@ -441,6 +441,18 @@ class EventDashboardView extends StatelessWidget {
             pathParameters: {'eventId': event.id},
           ),
         ),
+        const SizedBox(height: 12),
+        _buildActionTile(
+          context,
+          icon: Icons.add_circle_outline,
+          title: 'RESUPPLY',
+          subtitle: 'Bulk topup to SPGs',
+          color: AppColors.secondary,
+          onTap: () => context.pushNamed(
+            'bulk_topup',
+            pathParameters: {'eventId': event.id},
+          ),
+        ),
       ],
     );
   }

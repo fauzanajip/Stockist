@@ -36,6 +36,7 @@ class StockBloc extends Bloc<StockEvent, StockState> {
     on<CreateInitialDistribution>(_onCreateInitialDistribution);
     on<BulkCreateOrUpdateInitialDistributionEvent>(_onBulkCreateOrUpdateInitialDistribution);
     on<CreateTopup>(_onCreateTopup);
+    on<BulkCreateTopupEvent>(_onBulkCreateTopup);
     on<CreateReturn>(_onCreateReturn);
     on<LoadStockByEventSpg>(_onLoadStockByEventSpg);
     on<LoadStockByEvent>(_onLoadStockByEvent);
@@ -132,6 +133,35 @@ class StockBloc extends Bloc<StockEvent, StockState> {
         ),
       );
       add(LoadStockByEvent(eventId: event.eventId));
+    } catch (e) {
+      emit(state.copyWith(isLoading: false, errorMessage: e.toString()));
+    }
+  }
+
+  Future<void> _onBulkCreateTopup(
+    BulkCreateTopupEvent event,
+    Emitter<StockState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(isLoading: true, errorMessage: null));
+      for (final topup in event.topups) {
+        if (topup.qty > 0) {
+          await createStockMutation(
+            CreateStockMutationParams(
+              eventId: topup.eventId,
+              spgId: topup.spgId,
+              productId: topup.productId,
+              qty: topup.qty,
+              type: MutationType.topup,
+              note: null,
+            ),
+          );
+        }
+      }
+      if (event.topups.isNotEmpty) {
+        add(LoadStockByEvent(eventId: event.topups.first.eventId));
+      }
+      emit(state.copyWith(isLoading: false));
     } catch (e) {
       emit(state.copyWith(isLoading: false, errorMessage: e.toString()));
     }

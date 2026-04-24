@@ -7,6 +7,7 @@ import '../../presentation/screens/spg/spg_detail_screen.dart';
 import '../../presentation/screens/spg/spg_closing_screen.dart';
 import '../../presentation/screens/stock/initial_distribution_screen.dart';
 import '../../presentation/screens/stock/bulk_initial_distribution_screen.dart';
+import '../../presentation/screens/stock/bulk_topup_screen.dart';
 import '../../presentation/screens/stock/topup_screen.dart';
 import '../../presentation/screens/stock/return_screen.dart';
 import '../../presentation/screens/stock/stock_history_screen.dart';
@@ -139,6 +140,16 @@ class AppRouter {
         builder: (context, state) {
           final eventId = state.pathParameters['eventId']!;
           return BulkInitialDistributionScreen(eventId: eventId);
+        },
+      ),
+
+      // Bulk Topup (Resupply) Route
+      GoRoute(
+        path: '/event/:eventId/bulk_topup',
+        name: 'bulk_topup',
+        builder: (context, state) {
+          final eventId = state.pathParameters['eventId']!;
+          return BulkTopupScreen(eventId: eventId);
         },
       ),
 

@@ -109,6 +109,16 @@
 | --- | ------------------------------------------------------------ | ---------- | ------------------------------------------- |
 | 72  | Event Dashboard PRODUCT TELEMETRY: IN/DIS/SOLD columns       | ✅ DONE    | IN = warehouse remaining, DIS = distributed |
 
+## Bulk Topup (RESUPPLY) Feature (Session 2026-04-25)
+
+| #   | Task                                                         | Status     | Notes                                       |
+| --- | ------------------------------------------------------------ | ---------- | ------------------------------------------- |
+| 73  | Bloc: BulkCreateTopupEvent + handler (additive, not upsert)  | ✅ DONE    | Creates new topup records, skips qty=0      |
+| 74  | UI: BulkTopupScreen with Industrial Precision                 | ✅ DONE    | Title "RESUPPLY", Secondary color           |
+| 75  | Success BottomSheet after save                               | ✅ DONE    | Shows SPG/product/qty summary + total       |
+| 76  | Route: /event/:eventId/bulk_topup                            | ✅ DONE    | Added to app_router.dart                    |
+| 77  | Menu: RESUPPLY tile in Event Dashboard                        | ✅ DONE    | Icon: add_circle_outline, Color: Secondary  |
+
 ## Completed Features (Summary)
 
 1. StockCalculator - all business logic calculations
@@ -135,8 +145,8 @@
 
 ## Progress Summary
 
-- ✅ Completed: 72/72 (100%)
-- ⏳ Pending: 0/72 (0%)
+- ✅ Completed: 77/77 (100%)
+- ⏳ Pending: 0/77 (0%)
 
 ## PRD Reference
 

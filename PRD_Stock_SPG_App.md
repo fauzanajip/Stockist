@@ -2,7 +2,7 @@
 
 ## Mobile Offline Stock & SPG Reconciliation App
 
-**Versi:** 2.9 — Sales Target & Bulk Initial Distribution  
+**Versi:** 2.10 — Bulk Topup (RESUPPLY) Feature  
 **Tanggal:** April 2026
 
 ---
@@ -792,6 +792,33 @@ Dynamic per SPG: adds back current SPG's existing stock to available pool.
 
 ---
 
+### 11.3 Bulk Topup (RESUPPLY) Feature
+
+**Purpose**: Additive topup to SPGs (creates new records, not upsert).
+
+**Topup Behavior**:
+- Additive: Each bulk creates NEW `MutationType.topup` records
+- Multiple topup records per SPG per product
+- Total topup = sum of all records
+
+**Warehouse Limit Calculation**:
+```
+warehouseAvailable = totalIn - totalDistributed + totalReturn
+```
+Static (same for all SPGs) - current warehouse stock remaining.
+
+**Validation**:
+- Real-time: Show "EXCEEDS" warning when input > warehouseAvailable
+- Disable COMMIT button if any row exceeds limit
+
+**qty=0 Handling**: Skip (no topup for that product)
+
+**UI Entry**: "RESUPPLY" menu in MANAGEMENT section (Secondary color)
+
+**Success BottomSheet**: Shows SPG list + product breakdown + total units replenished after save
+
+---
+
 ## 12. ✅ Success Metrics
 
 - Input time < 3 detik per transaksi
@@ -805,6 +832,7 @@ Dynamic per SPG: adds back current SPG's existing stock to available pool.
 
 | Versi | Perubahan                                                                                                                                                                                                                                                 |
 | ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v2.10 | **Bulk Topup (RESUPPLY)**: Additive topup records per SPG per product; Warehouse limit validation (static: IN - DIS + Return); Skip qty=0; Success BottomSheet showing SPG/product/qty summary; Industrial Precision UI with Secondary (orange) accent; Entry point: RESUPPLY menu tile. |
 | v2.9  | **Sales Target & Bulk Initial Distribution**: Target penjualan per SPG per product (upsert); Progress tracking in SPG dashboard & Closing screen; Bulk initial distribution with warehouse limit validation (Option B: dynamic per SPG); qty=0 = delete record; Real-time EXCEEDS warning; Industrial Precision UI consistency. PRODUCT TELEMETRY now shows IN/DIS/SOLD (warehouse remaining / distributed / sold). |
 | v2.8  | **Industrial Precision UI Overhaul**: Migrated entire app to "Command Center" aesthetic (Zero radius, w900 all-caps typography); Standardized BottomSheets for master data editing; Fixed `SpgListScreen` syntax & duplication errors. |
 | v2.7  | Add **Edit & Delete Stock Distribution** feature with validation (PRD 6.9); Stock History Screen reusable from Home Dashboard & SPG Detail; Validation logic to prevent negative stock; Update TODO.md tasks #25-28.                                       |
