@@ -4,7 +4,7 @@ import 'package:excel/excel.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:intl/intl.dart';
-import 'package:open_file_plus/open_file_plus.dart';
+import 'package:open_filex/open_filex.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path/path.dart' as p;
 import '../../../domain/entities/event_entity.dart';
@@ -137,7 +137,7 @@ class ExcelExportService {
   /// Open file with default app
   static Future<bool> openFile(String filePath) async {
     try {
-      final result = await OpenFile.open(filePath);
+      final result = await OpenFilex.open(filePath);
       return result.type == ResultType.done;
     } catch (e) {
       return false;
