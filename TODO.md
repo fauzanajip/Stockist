@@ -103,6 +103,12 @@
 | 70  | Real-time validation: EXCEEDS warning + disable COMMIT       | ✅ DONE    | Warehouse limit per product per SPG         |
 | 71  | Route + Menu tile in Event Dashboard                         | ✅ DONE    | `/event/:eventId/bulk_initial`              |
 
+## UI Fixes (Session 2026-04-25)
+
+| #   | Task                                                         | Status     | Notes                                       |
+| --- | ------------------------------------------------------------ | ---------- | ------------------------------------------- |
+| 72  | Event Dashboard PRODUCT TELEMETRY: IN/DIS/SOLD columns       | ✅ DONE    | IN = warehouse remaining, DIS = distributed |
+
 ## Completed Features (Summary)
 
 1. StockCalculator - all business logic calculations
@@ -129,8 +135,8 @@
 
 ## Progress Summary
 
-- ✅ Completed: 71/71 (100%)
-- ⏳ Pending: 0/71 (0%)
+- ✅ Completed: 72/72 (100%)
+- ⏳ Pending: 0/72 (0%)
 
 ## PRD Reference
 
