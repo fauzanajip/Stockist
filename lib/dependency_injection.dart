@@ -137,6 +137,10 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton(() => GetTotalReturn(sl()));
   sl.registerLazySingleton(() => UpdateStockMutationQty(sl()));
   sl.registerLazySingleton(() => DeleteStockMutationRecord(sl()));
+  sl.registerLazySingleton(() => BulkCreateOrUpdateInitialStock(sl()));
+  sl.registerLazySingleton(() => GetWarehouseStockByProduct(sl()));
+  sl.registerLazySingleton(() => GetDistributedByProduct(sl()));
+  sl.registerLazySingleton(() => GetReturnsByProduct(sl()));
 
   // Use Cases - Sales
   sl.registerLazySingleton(() => CreateOrUpdateSales(sl()));
@@ -206,6 +210,10 @@ Future<void> initDependencies() async {
       updateStockMutationQty: sl(),
       deleteStockMutationRecord: sl(),
       getTotalSold: sl(),
+      bulkCreateOrUpdateInitialStock: sl(),
+      getWarehouseStockByProduct: sl(),
+      getDistributedByProduct: sl(),
+      getReturnsByProduct: sl(),
     ),
   );
 

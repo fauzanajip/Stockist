@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../../domain/repositories/stock_mutation_repository.dart';
 
 abstract class StockEvent extends Equatable {
   const StockEvent();
@@ -22,6 +23,15 @@ class CreateInitialDistribution extends StockEvent {
 
   @override
   List<Object?> get props => [eventId, spgId, productId, qty];
+}
+
+class BulkCreateOrUpdateInitialDistributionEvent extends StockEvent {
+  final List<BulkInitialParams> distributions;
+
+  const BulkCreateOrUpdateInitialDistributionEvent({required this.distributions});
+
+  @override
+  List<Object?> get props => [distributions];
 }
 
 class CreateTopup extends StockEvent {

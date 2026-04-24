@@ -14,6 +14,10 @@ class StockBloc extends Bloc<StockEvent, StockState> {
   final UpdateStockMutationQty updateStockMutationQty;
   final DeleteStockMutationRecord deleteStockMutationRecord;
   final GetTotalSold getTotalSold;
+  final BulkCreateOrUpdateInitialStock bulkCreateOrUpdateInitialStock;
+  final GetWarehouseStockByProduct getWarehouseStockByProduct;
+  final GetDistributedByProduct getDistributedByProduct;
+  final GetReturnsByProduct getReturnsByProduct;
 
   StockBloc({
     required this.createStockMutation,
@@ -24,8 +28,13 @@ class StockBloc extends Bloc<StockEvent, StockState> {
     required this.updateStockMutationQty,
     required this.deleteStockMutationRecord,
     required this.getTotalSold,
+    required this.bulkCreateOrUpdateInitialStock,
+    required this.getWarehouseStockByProduct,
+    required this.getDistributedByProduct,
+    required this.getReturnsByProduct,
   }) : super(const StockState()) {
     on<CreateInitialDistribution>(_onCreateInitialDistribution);
+    on<BulkCreateOrUpdateInitialDistributionEvent>(_onBulkCreateOrUpdateInitialDistribution);
     on<CreateTopup>(_onCreateTopup);
     on<CreateReturn>(_onCreateReturn);
     on<LoadStockByEventSpg>(_onLoadStockByEventSpg);
@@ -85,6 +94,22 @@ class StockBloc extends Bloc<StockEvent, StockState> {
         ),
       );
       add(LoadStockByEvent(eventId: event.eventId));
+    } catch (e) {
+      emit(state.copyWith(isLoading: false, errorMessage: e.toString()));
+    }
+  }
+
+  Future<void> _onBulkCreateOrUpdateInitialDistribution(
+    BulkCreateOrUpdateInitialDistributionEvent event,
+    Emitter<StockState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(isLoading: true, errorMessage: null));
+      await bulkCreateOrUpdateInitialStock(event.distributions);
+      if (event.distributions.isNotEmpty) {
+        add(LoadStockByEvent(eventId: event.distributions.first.eventId));
+      }
+      emit(state.copyWith(isLoading: false));
     } catch (e) {
       emit(state.copyWith(isLoading: false, errorMessage: e.toString()));
     }

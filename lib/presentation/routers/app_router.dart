@@ -6,6 +6,7 @@ import '../../presentation/screens/spg/spg_list_screen.dart';
 import '../../presentation/screens/spg/spg_detail_screen.dart';
 import '../../presentation/screens/spg/spg_closing_screen.dart';
 import '../../presentation/screens/stock/initial_distribution_screen.dart';
+import '../../presentation/screens/stock/bulk_initial_distribution_screen.dart';
 import '../../presentation/screens/stock/topup_screen.dart';
 import '../../presentation/screens/stock/return_screen.dart';
 import '../../presentation/screens/stock/stock_history_screen.dart';
@@ -128,6 +129,16 @@ class AppRouter {
         builder: (context, state) {
           final eventId = state.pathParameters['eventId']!;
           return SalesTargetScreen(eventId: eventId);
+        },
+      ),
+
+      // Bulk Initial Distribution Route
+      GoRoute(
+        path: '/event/:eventId/bulk_initial',
+        name: 'bulk_initial',
+        builder: (context, state) {
+          final eventId = state.pathParameters['eventId']!;
+          return BulkInitialDistributionScreen(eventId: eventId);
         },
       ),
 

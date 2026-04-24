@@ -413,6 +413,18 @@ class EventDashboardView extends StatelessWidget {
             pathParameters: {'eventId': event.id},
           ),
         ),
+        const SizedBox(height: 12),
+        _buildActionTile(
+          context,
+          icon: Icons.inventory_outlined,
+          title: 'INITIAL DISTRIBUTION',
+          subtitle: 'Set initial stock per SPG',
+          color: AppColors.primary,
+          onTap: () => context.pushNamed(
+            'bulk_initial',
+            pathParameters: {'eventId': event.id},
+          ),
+        ),
       ],
     );
   }

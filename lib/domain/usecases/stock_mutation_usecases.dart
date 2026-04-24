@@ -99,3 +99,43 @@ class DeleteStockMutationRecord {
     return await repository.delete(id);
   }
 }
+
+class BulkCreateOrUpdateInitialStock {
+  final StockMutationRepository repository;
+
+  BulkCreateOrUpdateInitialStock(this.repository);
+
+  Future<void> call(List<BulkInitialParams> params) async {
+    return await repository.bulkCreateOrUpdateInitial(params);
+  }
+}
+
+class GetWarehouseStockByProduct {
+  final StockMutationRepository repository;
+
+  GetWarehouseStockByProduct(this.repository);
+
+  Future<int> call(String eventId, String productId) async {
+    return await repository.getWarehouseStockByProduct(eventId, productId);
+  }
+}
+
+class GetDistributedByProduct {
+  final StockMutationRepository repository;
+
+  GetDistributedByProduct(this.repository);
+
+  Future<int> call(String eventId, String productId, String excludeSpgId) async {
+    return await repository.getDistributedByProduct(eventId, productId, excludeSpgId);
+  }
+}
+
+class GetReturnsByProduct {
+  final StockMutationRepository repository;
+
+  GetReturnsByProduct(this.repository);
+
+  Future<int> call(String eventId, String productId) async {
+    return await repository.getReturnsByProduct(eventId, productId);
+  }
+}

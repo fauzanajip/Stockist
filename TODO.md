@@ -81,6 +81,28 @@
 | 58  | Refactor Global Theme enforcing tactical style               | ✅ DONE    | `app_theme.dart` updated                    |
 | 59  | Fix Syntax & Duplication in `SpgListScreen`                  | ✅ DONE    | Cleaned up manifest duplication             |
 
+## Sales Target Feature (Session 2026-04-25)
+
+| #   | Task                                                         | Status     | Notes                                       |
+| --- | ------------------------------------------------------------ | ---------- | ------------------------------------------- |
+| 60  | Data Layer: `spg_product_targets` table + migration          | ✅ DONE    | Database v3, BulkInitialParams class        |
+| 61  | Domain Layer: 7 usecases + DI registration                   | ✅ DONE    | BulkCreateOrUpdate, GetByEventSpgProduct    |
+| 62  | Bloc Layer: SpgTargetBloc (event, state, bloc)               | ✅ DONE    | Added to main.dart                          |
+| 63  | UI: SalesTargetScreen with Batch Configuration dialog        | ✅ DONE    | Industrial Precision design                 |
+| 64  | Target Progress display in SPG List (collapsed ExpansionTile)| ✅ DONE    | Red/Yellow/Green color coding               |
+| 65  | Target columns in Closing Screen table                       | ✅ DONE    | Target + Progress % columns                 |
+
+## Bulk Initial Distribution Feature (Session 2026-04-25)
+
+| #   | Task                                                         | Status     | Notes                                       |
+| --- | ------------------------------------------------------------ | ---------- | ------------------------------------------- |
+| 66  | Data Layer: BulkInitialParams + bulkCreateOrUpdateInitial    | ✅ DONE    | Upsert logic, qty=0 = delete record         |
+| 67  | Domain Layer: UseCases + warehouse stock helpers             | ✅ DONE    | GetWarehouseStockByProduct, GetDistributed  |
+| 68  | Bloc Layer: BulkCreateOrUpdateInitialDistributionEvent       | ✅ DONE    | StockBloc handler                           |
+| 69  | UI: BulkInitialDistributionScreen                            | ✅ DONE    | Industrial Precision, SELECT_ALL toggle     |
+| 70  | Real-time validation: EXCEEDS warning + disable COMMIT       | ✅ DONE    | Warehouse limit per product per SPG         |
+| 71  | Route + Menu tile in Event Dashboard                         | ✅ DONE    | `/event/:eventId/bulk_initial`              |
+
 ## Completed Features (Summary)
 
 1. StockCalculator - all business logic calculations
@@ -107,8 +129,8 @@
 
 ## Progress Summary
 
-- ✅ Completed: 60/60 (100%)
-- ⏳ Pending: 0/60 (0%)
+- ✅ Completed: 71/71 (100%)
+- ⏳ Pending: 0/71 (0%)
 
 ## PRD Reference
 
@@ -119,3 +141,5 @@
 - PRD Section 7.1: Home Screen (Active Event Dashboard) ✅
 - PRD Section 8: Export Excel ✅
 - **Design System**: Industrial Precision Tactical UI ✅
+- **Sales Target**: Per-SPG per-product target qty with progress tracking ✅
+- **Bulk Initial Distribution**: Upsert warehouse-limited initial stock ✅

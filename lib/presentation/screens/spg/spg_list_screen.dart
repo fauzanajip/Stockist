@@ -73,8 +73,30 @@ class _SpgListScreenState extends State<SpgListScreen> {
     return Scaffold(
       backgroundColor: AppColors.surface,
       appBar: AppBar(
-        title: const Text('FLEET TELEMETRY'),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'UNIT_MONITORING',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 2,
+                  ),
+            ),
+            const Text(
+              'FLEET TELEMETRY',
+              style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14, letterSpacing: -0.5),
+            ),
+          ],
+        ),
         centerTitle: false,
+        backgroundColor: AppColors.surfaceContainerLowest,
+        elevation: 0,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(color: AppColors.surfaceContainerHigh, height: 1),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh_rounded, size: 20),
@@ -1026,19 +1048,19 @@ class _SpgDashboardStats extends StatelessWidget {
                                             ),
                                           ),
                                           _badge(
-                                            'D',
+                                            'DST',
                                             pGiven.toString(),
                                             AppColors.success,
                                           ),
                                           const SizedBox(width: 6),
                                           _badge(
-                                            'T',
+                                            'SLD',
                                             pSold.toString(),
                                             AppColors.secondary,
                                           ),
                                           const SizedBox(width: 6),
                                           _badge(
-                                            'S',
+                                            'STK',
                                             pSisa.toString(),
                                             AppColors.onSurface,
                                           ),
@@ -1124,7 +1146,7 @@ class _SpgDashboardStats extends StatelessWidget {
 
   Widget _badge(String label, String value, Color color) {
     return Container(
-      width: 44,
+      width: 48,
       padding: const EdgeInsets.symmetric(vertical: 4),
       decoration: BoxDecoration(
         color: color.withOpacity(0.05),

@@ -2,7 +2,7 @@
 
 ## Mobile Offline Stock & SPG Reconciliation App
 
-**Versi:** 2.7 — Complete Stock Audit & Edit  
+**Versi:** 2.9 — Sales Target & Bulk Initial Distribution  
 **Tanggal:** April 2026
 
 ---
@@ -749,6 +749,49 @@ Aplikasi menggunakan estetika **Industrial Precision** yang dirancang untuk memb
 
 ---
 
+## 11. 🎯 Sales Target & Bulk Initial Distribution (v2.9)
+
+### 11.1 Sales Target Feature
+
+**Purpose**: Set sales target qty per SPG per product per event.
+
+**Data Model**:
+- Table: `spg_product_targets` (id, event_id, spg_id, product_id, target_qty)
+- Upsert: Check existing by (event_id, spg_id, product_id), update or insert
+
+**UI Entry**: "Target Penjualan" menu in MANAGEMENT section
+
+**Progress Display**:
+- SPG List: Collapsed ExpansionTile with aggregate progress bar (Red <50%, Yellow 50-80%, Green ≥80%)
+- Closing Screen: Target + Progress % columns per product row
+
+**Batch Configuration**: BottomSheet dialog to select SPGs + set qty per product
+
+---
+
+### 11.2 Bulk Initial Distribution Feature
+
+**Purpose**: Set initial stock distribution per SPG per product in bulk (upsert).
+
+**Warehouse Limit Calculation (Option B)**:
+```
+warehouseAvailable = originalWarehouse - distributedToOtherSPGs + returns + currentSPGInitial
+```
+Dynamic per SPG: adds back current SPG's existing stock to available pool.
+
+**Validation**:
+- Real-time: Show "EXCEEDS" warning when input > warehouseAvailable
+- Disable COMMIT button if any row exceeds limit
+- Per-product limit (not aggregate)
+
+**qty=0 Behavior**: Delete mutation record (clean approach, no zero-value clutter)
+
+**UI Entry**: "Distribusi Awal" menu in MANAGEMENT section
+
+**Batch Configuration**: BottomSheet with SELECT_ALL toggle + CheckboxListTile per SPG + qty inputs per product
+
+---
+
 ## 12. ✅ Success Metrics
 
 - Input time < 3 detik per transaksi
@@ -762,6 +805,7 @@ Aplikasi menggunakan estetika **Industrial Precision** yang dirancang untuk memb
 
 | Versi | Perubahan                                                                                                                                                                                                                                                 |
 | ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v2.9  | **Sales Target & Bulk Initial Distribution**: Target penjualan per SPG per product (upsert); Progress tracking in SPG dashboard & Closing screen; Bulk initial distribution with warehouse limit validation (Option B: dynamic per SPG); qty=0 = delete record; Real-time EXCEEDS warning; Industrial Precision UI consistency. |
 | v2.8  | **Industrial Precision UI Overhaul**: Migrated entire app to "Command Center" aesthetic (Zero radius, w900 all-caps typography); Standardized BottomSheets for master data editing; Fixed `SpgListScreen` syntax & duplication errors. |
 | v2.7  | Add **Edit & Delete Stock Distribution** feature with validation (PRD 6.9); Stock History Screen reusable from Home Dashboard & SPG Detail; Validation logic to prevent negative stock; Update TODO.md tasks #25-28.                                       |
 | v2.6  | Implementasi lengkap **Sales Input**, **Cash Input**, dan **Closing Screen** dengan full BLoC integration; Validasi closing per PRD 6.8 (selisih fisik & surplus); Status indicator ✅/⚠️; Progress 83% completion.                                       |

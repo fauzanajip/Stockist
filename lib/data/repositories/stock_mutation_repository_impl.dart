@@ -186,4 +186,127 @@ class StockMutationRepositoryImpl implements StockMutationRepository {
       throw AppDatabaseException(message: 'Gagal menghitung total return: $e');
     }
   }
+
+  @override
+  Future<void> bulkCreateOrUpdateInitial(List<BulkInitialParams> params) async {
+    try {
+      final db = await dbHelper.database;
+      final now = DateTime.now();
+      await db.transaction((txn) async {
+        for (final p in params) {
+          final existing = await txn.query(
+            'stock_mutations',
+            where: 'event_id = ? AND spg_id = ? AND product_id = ? AND type = ?',
+            whereArgs: [p.eventId, p.spgId, p.productId, 'initial'],
+            limit: 1,
+          );
+
+          if (p.qty == 0) {
+            if (existing.isNotEmpty) {
+              await txn.delete(
+                'stock_mutations',
+                where: 'id = ?',
+                whereArgs: [existing.first['id']],
+              );
+            }
+          } else {
+            final model = StockMutationModel(
+              id: existing.isNotEmpty ? existing.first['id'] as String : const Uuid().v4(),
+              eventId: p.eventId,
+              spgId: p.spgId,
+              productId: p.productId,
+              qty: p.qty,
+              type: MutationType.initial,
+              timestamp: now,
+              note: null,
+              createdAt: existing.isNotEmpty
+                  ? DatabaseHelper.stringToDateTime(existing.first['created_at'] as String)
+                  : now,
+            );
+
+            if (existing.isNotEmpty) {
+              await txn.update(
+                'stock_mutations',
+                model.toMap(),
+                where: 'id = ?',
+                whereArgs: [model.id],
+              );
+            } else {
+              await txn.insert('stock_mutations', model.toMap());
+            }
+          }
+        }
+      });
+    } catch (e) {
+      throw AppDatabaseException(message: 'Gagal bulk create/update initial: $e');
+    }
+  }
+
+  @override
+  Future<int> getWarehouseStockByProduct(String eventId, String productId) async {
+    try {
+      final db = await dbHelper.database;
+      final result = await db.rawQuery(
+        '''
+        SELECT SUM(qty) as total
+        FROM stock_mutations
+        WHERE event_id = ? AND product_id = ? AND type = 'distributorToEvent'
+      ''',
+        [eventId, productId],
+      );
+
+      if (result.isNotEmpty && result.first['total'] != null) {
+        return result.first['total'] as int;
+      }
+      return 0;
+    } catch (e) {
+      throw AppDatabaseException(message: 'Gagal menghitung warehouse stock: $e');
+    }
+  }
+
+  @override
+  Future<int> getDistributedByProduct(String eventId, String productId, String excludeSpgId) async {
+    try {
+      final db = await dbHelper.database;
+      final result = await db.rawQuery(
+        '''
+        SELECT SUM(qty) as total
+        FROM stock_mutations
+        WHERE event_id = ? AND product_id = ? AND spg_id != ?
+        AND (type = 'initial' OR type = 'topup')
+      ''',
+        [eventId, productId, excludeSpgId],
+      );
+
+      if (result.isNotEmpty && result.first['total'] != null) {
+        return result.first['total'] as int;
+      }
+      return 0;
+    } catch (e) {
+      throw AppDatabaseException(message: 'Gagal menghitung distributed: $e');
+    }
+  }
+
+  @override
+  Future<int> getReturnsByProduct(String eventId, String productId) async {
+    try {
+      final db = await dbHelper.database;
+      final result = await db.rawQuery(
+        '''
+        SELECT SUM(qty) as total
+        FROM stock_mutations
+        WHERE event_id = ? AND product_id = ?
+        AND type = 'returnMutation'
+      ''',
+        [eventId, productId],
+      );
+
+      if (result.isNotEmpty && result.first['total'] != null) {
+        return result.first['total'] as int;
+      }
+      return 0;
+    } catch (e) {
+      throw AppDatabaseException(message: 'Gagal menghitung returns: $e');
+    }
+  }
 }
