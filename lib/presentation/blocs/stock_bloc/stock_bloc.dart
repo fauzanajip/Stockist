@@ -84,7 +84,7 @@ class StockBloc extends Bloc<StockEvent, StockState> {
           type: MutationType.initial,
         ),
       );
-      add(LoadStockByEventSpg(eventId: event.eventId, spgId: event.spgId));
+      add(LoadStockByEvent(eventId: event.eventId));
     } catch (e) {
       emit(state.copyWith(isLoading: false, errorMessage: e.toString()));
     }
@@ -106,7 +106,7 @@ class StockBloc extends Bloc<StockEvent, StockState> {
           note: event.note,
         ),
       );
-      add(LoadStockByEventSpg(eventId: event.eventId, spgId: event.spgId));
+      add(LoadStockByEvent(eventId: event.eventId));
     } catch (e) {
       emit(state.copyWith(isLoading: false, errorMessage: e.toString()));
     }
@@ -128,7 +128,7 @@ class StockBloc extends Bloc<StockEvent, StockState> {
           note: event.note,
         ),
       );
-      add(LoadStockByEventSpg(eventId: event.eventId, spgId: event.spgId));
+      add(LoadStockByEvent(eventId: event.eventId));
     } catch (e) {
       emit(state.copyWith(isLoading: false, errorMessage: e.toString()));
     }
@@ -217,7 +217,7 @@ class StockBloc extends Bloc<StockEvent, StockState> {
       }
 
       await updateStockMutationQty(event.mutationId, event.newQty);
-      add(LoadStockByEventSpg(eventId: event.eventId, spgId: event.spgId));
+      add(LoadStockByEvent(eventId: event.eventId));
     } catch (e) {
       emit(state.copyWith(isLoading: false, errorMessage: e.toString()));
     }
@@ -271,7 +271,7 @@ class StockBloc extends Bloc<StockEvent, StockState> {
       }
 
       await deleteStockMutationRecord(event.mutationId);
-      add(LoadStockByEventSpg(eventId: event.eventId, spgId: event.spgId));
+      add(LoadStockByEvent(eventId: event.eventId));
     } catch (e) {
       emit(state.copyWith(isLoading: false, errorMessage: e.toString()));
     }

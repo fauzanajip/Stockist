@@ -33,7 +33,7 @@ class CashBloc extends Bloc<CashEvent, CashState> {
           note: event.note,
         ),
       );
-      add(LoadCashRecord(eventId: event.eventId, spgId: event.spgId));
+      add(LoadAllCashByEvent(eventId: event.eventId));
     } catch (e) {
       emit(state.copyWith(isLoading: false, errorMessage: e.toString()));
     }

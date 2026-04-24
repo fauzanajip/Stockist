@@ -219,6 +219,15 @@
 | 65  | Implement sort logic for EventSpgEntity list                 | ✅ DONE    | Sort by SPG name or SPB name (nulls last)   |
 | 66  | Wrap _buildSpgList with BlocBuilder<SpgBloc>                 | ✅ DONE    | Required for SPG name lookup during sorting |
 
+## Data Refresh Fix - Event-Level Loading (Session 2026-04-25)
+
+| #   | Task                                                         | Status     | Notes                                       |
+| --- | ------------------------------------------------------------ | ---------- | ------------------------------------------- |
+| 67  | stock_bloc: Change mutation handlers to LoadStockByEvent    | ✅ DONE    | 5 handlers: initial, topup, return, update, delete |
+| 68  | sales_bloc: Change handler to LoadAllSalesByEvent           | ✅ DONE    | _onUpdateSales now loads all event sales    |
+| 69  | cash_bloc: Change handler to LoadAllCashByEvent             | ✅ DONE    | _onUpdateCashRecord now loads all event cash |
+| 70  | Fix: SPG List not refreshing after mutations                | ✅ DONE    | BlocBuilder catches event-level updates now |
+
 ## Phase 2 - Save + Open + Share (Session 2026-04-24)
 
 | #   | Task                                                         | Status     | Notes                                       |

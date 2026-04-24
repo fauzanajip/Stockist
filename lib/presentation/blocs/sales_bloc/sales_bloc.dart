@@ -32,7 +32,7 @@ class SalesBloc extends Bloc<SalesEvent, SalesState> {
           qtySold: event.qtySold,
         ),
       );
-      add(LoadSales(eventId: event.eventId, spgId: event.spgId));
+      add(LoadAllSalesByEvent(eventId: event.eventId));
     } catch (e) {
       emit(state.copyWith(isLoading: false, errorMessage: e.toString()));
     }
