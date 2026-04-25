@@ -294,12 +294,15 @@ class EventDashboardView extends StatelessWidget {
                 )
                 .fold(0, (sum, m) => sum + m.qty);
 
-            final totalReturn = stockState.mutations
-                .where(
-                  (m) =>
-                      m.productId == ep.productId && m.type == MutationType.returnMutation,
-                )
-                .fold(0, (sum, m) => sum + m.qty);
+            // TODO: Uncomment when Return feature is active
+            // final totalReturn = stockState.mutations
+            //     .where(
+            //       (m) =>
+            //           m.productId == ep.productId && m.type == MutationType.returnMutation,
+            //     )
+            //     .fold(0, (sum, m) => sum + m.qty);
+
+            final totalReturn = 0; // Placeholder until Return feature is active
 
             final warehouseStock = totalIn - totalDistributed + totalReturn;
 
@@ -336,10 +339,12 @@ class EventDashboardView extends StatelessWidget {
                       ],
                     ),
                   ),
-                  _buildMiniStat('IN', warehouseStock.toString(), AppColors.primary),
-                  const SizedBox(width: 20),
+                  _buildMiniStat('INFLOW', totalIn.toString(), AppColors.primary),
+                  const SizedBox(width: 16),
+                  _buildMiniStat('WH', warehouseStock.toString(), AppColors.success),
+                  const SizedBox(width: 16),
                   _buildMiniStat('DIS', totalDistributed.toString(), AppColors.tertiary),
-                  const SizedBox(width: 20),
+                  const SizedBox(width: 16),
                   _buildMiniStat('SOLD', totalSold.toString(), AppColors.secondary),
                 ],
               ),

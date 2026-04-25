@@ -28,6 +28,7 @@ class BackupService {
         'stock_mutations': await db.query('stock_mutations'),
         'sales': await db.query('sales'),
         'cash_records': await db.query('cash_records'),
+        'spg_product_targets': await db.query('spg_product_targets'),
         'backup_logs': await db.query('backup_logs'),
       };
 
@@ -99,6 +100,11 @@ class BackupService {
           where: 'event_id = ?',
           whereArgs: [eventId],
         ),
+        'spg_product_targets': await db.query(
+          'spg_product_targets',
+          where: 'event_id = ?',
+          whereArgs: [eventId],
+        ),
       };
 
       final jsonString = JsonEncoder.withIndent('  ').convert(backupData);
@@ -134,41 +140,172 @@ class BackupService {
       final backupData = jsonDecode(jsonString) as Map<String, dynamic>;
 
       final db = await DatabaseHelper.instance.database;
+      final eventId = backupData['event_id'] as String?;
+      final isGlobalBackup = eventId == null || eventId.isEmpty;
 
       await db.transaction((txn) async {
-        // Import events
-        if (backupData['events'] != null) {
-          final events = List<Map<String, dynamic>>.from(backupData['events']);
-          for (final event in events) {
-            await txn.insert('events', event);
+        // === GLOBAL BACKUP: Replace all master data ===
+        if (isGlobalBackup) {
+          // Products - delete all, then insert
+          if (backupData['products'] != null) {
+            await txn.delete('products');
+            final products = List<Map<String, dynamic>>.from(backupData['products']);
+            for (final product in products) {
+              await txn.insert('products', product);
+            }
+          }
+
+          // SPGs - delete all, then insert
+          if (backupData['spgs'] != null) {
+            await txn.delete('spgs');
+            final spgs = List<Map<String, dynamic>>.from(backupData['spgs']);
+            for (final spg in spgs) {
+              await txn.insert('spgs', spg);
+            }
+          }
+
+          // SPBs - delete all, then insert
+          if (backupData['spbs'] != null) {
+            await txn.delete('spbs');
+            final spbs = List<Map<String, dynamic>>.from(backupData['spbs']);
+            for (final spb in spbs) {
+              await txn.insert('spbs', spb);
+            }
+          }
+
+          // Events - delete all, then insert
+          if (backupData['events'] != null) {
+            await txn.delete('events');
+            final events = List<Map<String, dynamic>>.from(backupData['events']);
+            for (final event in events) {
+              await txn.insert('events', event);
+            }
+          }
+
+          // Event SPGs - delete all, then insert
+          if (backupData['event_spgs'] != null) {
+            await txn.delete('event_spgs');
+            final eventSpgs = List<Map<String, dynamic>>.from(backupData['event_spgs']);
+            for (final es in eventSpgs) {
+              await txn.insert('event_spgs', es);
+            }
+          }
+
+          // Event Products - delete all, then insert
+          if (backupData['event_products'] != null) {
+            await txn.delete('event_products');
+            final eventProducts = List<Map<String, dynamic>>.from(backupData['event_products']);
+            for (final ep in eventProducts) {
+              await txn.insert('event_products', ep);
+            }
+          }
+
+          // Stock Mutations - delete all, then insert
+          if (backupData['stock_mutations'] != null) {
+            await txn.delete('stock_mutations');
+            final mutations = List<Map<String, dynamic>>.from(backupData['stock_mutations']);
+            for (final m in mutations) {
+              await txn.insert('stock_mutations', m);
+            }
+          }
+
+          // Sales - delete all, then insert
+          if (backupData['sales'] != null) {
+            await txn.delete('sales');
+            final sales = List<Map<String, dynamic>>.from(backupData['sales']);
+            for (final s in sales) {
+              await txn.insert('sales', s);
+            }
+          }
+
+          // Cash Records - delete all, then insert
+          if (backupData['cash_records'] != null) {
+            await txn.delete('cash_records');
+            final cashRecords = List<Map<String, dynamic>>.from(backupData['cash_records']);
+            for (final c in cashRecords) {
+              await txn.insert('cash_records', c);
+            }
+          }
+
+          // SPG Product Targets - delete all, then insert
+          if (backupData['spg_product_targets'] != null) {
+            await txn.delete('spg_product_targets');
+            final targets = List<Map<String, dynamic>>.from(backupData['spg_product_targets']);
+            for (final t in targets) {
+              await txn.insert('spg_product_targets', t);
+            }
+          }
+        } else {
+          // === EVENT-SPECIFIC BACKUP: Replace only event data ===
+
+          // Event - delete existing, then insert
+          if (backupData['events'] != null) {
+            await txn.delete('events', where: 'id = ?', whereArgs: [eventId]);
+            final events = List<Map<String, dynamic>>.from(backupData['events']);
+            for (final event in events) {
+              await txn.insert('events', event);
+            }
+          }
+
+          // Event SPGs - delete existing for this event, then insert
+          if (backupData['event_spgs'] != null) {
+            await txn.delete('event_spgs', where: 'event_id = ?', whereArgs: [eventId]);
+            final eventSpgs = List<Map<String, dynamic>>.from(backupData['event_spgs']);
+            for (final es in eventSpgs) {
+              await txn.insert('event_spgs', es);
+            }
+          }
+
+          // Event Products - delete existing for this event, then insert
+          if (backupData['event_products'] != null) {
+            await txn.delete('event_products', where: 'event_id = ?', whereArgs: [eventId]);
+            final eventProducts = List<Map<String, dynamic>>.from(backupData['event_products']);
+            for (final ep in eventProducts) {
+              await txn.insert('event_products', ep);
+            }
+          }
+
+          // Stock Mutations - delete existing for this event, then insert
+          if (backupData['stock_mutations'] != null) {
+            await txn.delete('stock_mutations', where: 'event_id = ?', whereArgs: [eventId]);
+            final mutations = List<Map<String, dynamic>>.from(backupData['stock_mutations']);
+            for (final m in mutations) {
+              await txn.insert('stock_mutations', m);
+            }
+          }
+
+          // Sales - delete existing for this event, then insert
+          if (backupData['sales'] != null) {
+            await txn.delete('sales', where: 'event_id = ?', whereArgs: [eventId]);
+            final sales = List<Map<String, dynamic>>.from(backupData['sales']);
+            for (final s in sales) {
+              await txn.insert('sales', s);
+            }
+          }
+
+          // Cash Records - delete existing for this event, then insert
+          if (backupData['cash_records'] != null) {
+            await txn.delete('cash_records', where: 'event_id = ?', whereArgs: [eventId]);
+            final cashRecords = List<Map<String, dynamic>>.from(backupData['cash_records']);
+            for (final c in cashRecords) {
+              await txn.insert('cash_records', c);
+            }
+          }
+
+          // SPG Product Targets - delete existing for this event, then insert
+          if (backupData['spg_product_targets'] != null) {
+            await txn.delete('spg_product_targets', where: 'event_id = ?', whereArgs: [eventId]);
+            final targets = List<Map<String, dynamic>>.from(backupData['spg_product_targets']);
+            for (final t in targets) {
+              await txn.insert('spg_product_targets', t);
+            }
           }
         }
-
-        // Import products (only if global backup)
-        if (backupData['products'] != null) {
-          final products = List<Map<String, dynamic>>.from(
-            backupData['products'],
-          );
-          for (final product in products) {
-            await txn.insert('products', product);
-          }
-        }
-
-        // Import SPGs (only if global backup)
-        if (backupData['spgs'] != null) {
-          final spgs = List<Map<String, dynamic>>.from(backupData['spgs']);
-          for (final spg in spgs) {
-            await txn.insert('spgs', spg);
-          }
-        }
-
-        // Import other tables...
-        // TODO: Implement for all tables
       });
 
       await db.insert('backup_logs', {
         'id': const Uuid().v4(),
-        'event_id': backupData['event_id'] ?? '',
+        'event_id': eventId ?? '',
         'file_name': filePath.split('/').last,
         'timestamp': DateTime.now().toIso8601String(),
         'status': 'success',

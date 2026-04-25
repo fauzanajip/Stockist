@@ -119,6 +119,17 @@
 | 76  | Route: /event/:eventId/bulk_topup                            | ✅ DONE    | Added to app_router.dart                    |
 | 77  | Menu: RESUPPLY tile in Event Dashboard                        | ✅ DONE    | Icon: add_circle_outline, Color: Secondary  |
 
+## Backup/Restore Fix (Session 2026-04-25)
+
+| #   | Task                                                         | Status     | Notes                                       |
+| --- | ------------------------------------------------------------ | ---------- | ------------------------------------------- |
+| 78  | Add file_picker package for import                           | ✅ DONE    | v8.3.7 installed                            |
+| 79  | BackupService.exportBackup: add spg_product_targets table    | ✅ DONE    | Both global & event-specific export         |
+| 80  | BackupService.importBackup: complete all tables with delete-existing | ✅ DONE | Global backup replaces all; Event backup replaces event data only |
+| 81  | BackupScreen: connect buttons to BackupService               | ✅ DONE    | Export button → exportBackup(), Import → file_picker + importBackup() |
+| 82  | BackupScreen: add confirm dialog before import               | ✅ DONE    | DATA_OVERRIDE_PROTOCOL warning dialog       |
+| 83  | BackupScreen: add success/error SnackBar feedback            | ✅ DONE    | DATA_EXFILTRATION_COMPLETE / DATA_INFILTRATION_COMPLETE |
+
 ## Completed Features (Summary)
 
 1. StockCalculator - all business logic calculations
@@ -145,8 +156,8 @@
 
 ## Progress Summary
 
-- ✅ Completed: 77/77 (100%)
-- ⏳ Pending: 0/77 (0%)
+- ✅ Completed: 83/83 (100%)
+- ⏳ Pending: 0/83 (0%)
 
 ## PRD Reference
 

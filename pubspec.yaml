@@ -36,6 +36,7 @@ dependencies:
   dartz: ^0.10.1
   open_filex: ^4.5.0
   permission_handler: ^11.0.1
+  file_picker: ^8.0.0
   
   # Icons
   cupertino_icons: ^1.0.8

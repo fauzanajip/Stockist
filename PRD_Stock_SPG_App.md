@@ -2,7 +2,7 @@
 
 ## Mobile Offline Stock & SPG Reconciliation App
 
-**Versi:** 2.10 — Bulk Topup (RESUPPLY) Feature  
+**Versi:** 2.11 — Backup/Restore Complete Fix  
 **Tanggal:** April 2026
 
 ---
@@ -819,6 +819,28 @@ Static (same for all SPGs) - current warehouse stock remaining.
 
 ---
 
+### 11.4 Backup/Restore Complete Fix (v2.11)
+
+**Purpose**: Complete and functional import/export for all database tables.
+
+**Tables Exported (10 total)**:
+- Global backup: events, products, spgs, spbs, event_spgs, event_products, stock_mutations, sales, cash_records, spg_product_targets, backup_logs
+- Event backup: event-specific data only (events, event_spgs, event_products, stock_mutations, sales, cash_records, spg_product_targets)
+
+**Import Logic**:
+- **Global backup**: Replace ALL existing data (delete then insert for each table)
+- **Event backup**: Replace only event-specific data (delete by event_id, then insert)
+
+**User Flow**:
+1. Export: Tap button → BackupService.exportBackup() → Share sheet opens
+2. Import: Tap button → FilePicker opens → Confirm dialog → BackupService.importBackup() → Reload blocs → Success SnackBar
+
+**Confirm Dialog**: BottomSheet with DATA_OVERRIDE_PROTOCOL warning, source archive name, ABORT/CONFIRM_OVERRIDE buttons
+
+**Feedback**: SnackBar on success (DATA_EXFILTRATION_COMPLETE / DATA_INFILTRATION_COMPLETE) or error
+
+---
+
 ## 12. ✅ Success Metrics
 
 - Input time < 3 detik per transaksi
@@ -832,6 +854,7 @@ Static (same for all SPGs) - current warehouse stock remaining.
 
 | Versi | Perubahan                                                                                                                                                                                                                                                 |
 | ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v2.11 | **Backup/Restore Fix**: Complete import/export for all tables (10 tables including spg_product_targets); Replace-existing logic (global vs event-specific); file_picker for import; Confirm dialog with DATA_OVERRIDE warning; Success/error SnackBar feedback; Industrial Precision UI. |
 | v2.10 | **Bulk Topup (RESUPPLY)**: Additive topup records per SPG per product; Warehouse limit validation (static: IN - DIS + Return); Skip qty=0; Success BottomSheet showing SPG/product/qty summary; Industrial Precision UI with Secondary (orange) accent; Entry point: RESUPPLY menu tile. |
 | v2.9  | **Sales Target & Bulk Initial Distribution**: Target penjualan per SPG per product (upsert); Progress tracking in SPG dashboard & Closing screen; Bulk initial distribution with warehouse limit validation (Option B: dynamic per SPG); qty=0 = delete record; Real-time EXCEEDS warning; Industrial Precision UI consistency. PRODUCT TELEMETRY now shows IN/DIS/SOLD (warehouse remaining / distributed / sold). |
 | v2.8  | **Industrial Precision UI Overhaul**: Migrated entire app to "Command Center" aesthetic (Zero radius, w900 all-caps typography); Standardized BottomSheets for master data editing; Fixed `SpgListScreen` syntax & duplication errors. |
