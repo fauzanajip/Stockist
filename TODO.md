@@ -130,6 +130,20 @@
 | 82  | BackupScreen: add confirm dialog before import               | ✅ DONE    | DATA_OVERRIDE_PROTOCOL warning dialog       |
 | 83  | BackupScreen: add success/error SnackBar feedback            | ✅ DONE    | DATA_EXFILTRATION_COMPLETE / DATA_INFILTRATION_COMPLETE |
 
+## Sales Import from Excel (Session 2026-04-25)
+
+| #   | Task                                                         | Status     | Notes                                       |
+| --- | ------------------------------------------------------------ | ---------- | ------------------------------------------- |
+| 84  | ExcelImportService: parse xlsx/csv Transaction Report        | ✅ DONE    | Extract Name/Product/Qty columns            |
+| 85  | Domain Layer: BulkSalesItem class + BulkReplaceSales usecase | ✅ DONE    | Delete existing + create new sales records  |
+| 86  | Data Layer: SalesRepository.deleteByEvent()                  | ✅ DONE    | Clear sales before bulk insert              |
+| 87  | Bloc Layer: BulkReplaceSalesEvent + handler                  | ✅ DONE    | SalesBloc with bulk replace logic           |
+| 88  | DI: Register BulkReplaceSales usecase                        | ✅ DONE    | dependency_injection.dart                   |
+| 89  | UI: ImportSalesPreviewScreen with mapping                    | ✅ DONE    | Auto-match + manual fix via BottomSheet    |
+| 90  | Picker BottomSheets: SPG/Product selection dialogs           | ✅ DONE    | Industrial Precision style, check icon      |
+| 91  | Route: /event/:eventId/import_sales_preview                  | ✅ DONE    | app_router.dart with extra param            |
+| 92  | Menu: IMPORT SALES tile in Event Dashboard                   | ✅ DONE    | Icon: upload_file_outlined, Color: tertiary |
+
 ## Completed Features (Summary)
 
 1. StockCalculator - all business logic calculations
@@ -151,13 +165,14 @@
 17. **Stock History (Audit)**: Riwayat Mutasi with edit/delete.
 18. **Save + Open + Share**: Full Excel export workflow.
 19. **Industrial Precision Overhaul**: Tactical "Command Center" aesthetic across all screens.
+20. **Sales Import from Excel**: Import external Transaction Report with preview & mapping UI.
 
 ---
 
 ## Progress Summary
 
-- ✅ Completed: 83/83 (100%)
-- ⏳ Pending: 0/83 (0%)
+- ✅ Completed: 92/92 (100%)
+- ⏳ Pending: 0/92 (0%)
 
 ## PRD Reference
 
@@ -170,3 +185,4 @@
 - **Design System**: Industrial Precision Tactical UI ✅
 - **Sales Target**: Per-SPG per-product target qty with progress tracking ✅
 - **Bulk Initial Distribution**: Upsert warehouse-limited initial stock ✅
+- **Sales Import**: Import sales data from external Excel/CSV with preview & mapping ✅

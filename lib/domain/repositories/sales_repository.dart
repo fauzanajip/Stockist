@@ -11,4 +11,5 @@ abstract class SalesRepository {
   Future<SalesEntity> create(SalesEntity sales);
   Future<SalesEntity> update(SalesEntity sales);
   Future<int> getTotalSold(String eventId, String spgId, String productId);
+  Future<void> deleteByEvent(String eventId);
 }

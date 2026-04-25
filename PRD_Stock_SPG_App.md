@@ -2,7 +2,7 @@
 
 ## Mobile Offline Stock & SPG Reconciliation App
 
-**Versi:** 2.11 — Backup/Restore Complete Fix  
+**Versi:** 2.12 — Sales Import from Excel  
 **Tanggal:** April 2026
 
 ---
@@ -841,6 +841,47 @@ Static (same for all SPGs) - current warehouse stock remaining.
 
 ---
 
+### 11.5 Sales Import from Excel (v2.12)
+
+**Purpose**: Import sales data from external Transaction Report Excel file.
+
+**Import Mode**: Replace (delete existing sales for event, then insert new records)
+
+**Entry Point**: Event Dashboard → MANAGEMENT section → "IMPORT SALES" button
+
+**Excel Format Supported**:
+- Transaction-Report format: Header at row 4 (Name, Transactions, Product, Qty, ...)
+- Columns mapped: Name → SPG, Product → Product, Qty → qtySold
+- Skip: Transactions, Total Qty, Total Cash, Total Non-Cash, Total Price (summary columns)
+- Skip: Row with Name = "TOTAL"
+
+**User Flow**:
+1. Tap "IMPORT SALES" → FilePicker opens (xlsx, xls, csv)
+2. Parse file → Extract SPG/Product/Qty rows
+3. **Preview Screen**:
+   - Auto-match: SPG/Product by exact name (uppercase comparison)
+   - Show MATCHED vs UNMATCHED counts
+   - Tap unmatched row → BottomSheet picker (SPG or Product selection)
+   - Industrial Precision BottomSheet style: header with icon, scrollable list, check icon for selected, CLEAR_MAPPING option
+4. Fix all mappings → "COMMIT_IMPORT" enabled
+5. Execute: Delete existing sales → Insert new records → Reload dashboard → Success SnackBar
+
+**Data Layer**:
+- `SalesRepository.deleteByEvent(eventId)` — clear existing sales before import
+- `BulkSalesItem` class — spgId, productId, qtySold
+- `BulkReplaceSales` usecase — delete + bulk insert
+
+**Validation**:
+- qtySold > 0 required (skip zero/negative)
+- All rows must be matched before COMMIT
+- Show warning if UNMATCHED rows exist
+
+**UI Components**:
+- `ImportSalesPreviewScreen`: Industrial Precision design, MATCHED/UNMATCHED badges
+- Picker BottomSheets: Searchable list, selected highlight (Secondary color), CLEAR_MAPPING with Error color
+
+---
+
 ## 12. ✅ Success Metrics
 
 - Input time < 3 detik per transaksi
@@ -854,6 +895,7 @@ Static (same for all SPGs) - current warehouse stock remaining.
 
 | Versi | Perubahan                                                                                                                                                                                                                                                 |
 | ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v2.12 | **Sales Import from Excel**: Import external Transaction Report (xlsx/csv); Preview screen with auto-match & manual mapping; Picker BottomSheets (Industrial Precision style); Replace mode (delete existing + insert new); Entry: IMPORT SALES in Event Dashboard; FilePicker integration; qtySold > 0 validation. |
 | v2.11 | **Backup/Restore Fix**: Complete import/export for all tables (10 tables including spg_product_targets); Replace-existing logic (global vs event-specific); file_picker for import; Confirm dialog with DATA_OVERRIDE warning; Success/error SnackBar feedback; Industrial Precision UI. |
 | v2.10 | **Bulk Topup (RESUPPLY)**: Additive topup records per SPG per product; Warehouse limit validation (static: IN - DIS + Return); Skip qty=0; Success BottomSheet showing SPG/product/qty summary; Industrial Precision UI with Secondary (orange) accent; Entry point: RESUPPLY menu tile. |
 | v2.9  | **Sales Target & Bulk Initial Distribution**: Target penjualan per SPG per product (upsert); Progress tracking in SPG dashboard & Closing screen; Bulk initial distribution with warehouse limit validation (Option B: dynamic per SPG); qty=0 = delete record; Real-time EXCEEDS warning; Industrial Precision UI consistency. PRODUCT TELEMETRY now shows IN/DIS/SOLD (warehouse remaining / distributed / sold). |

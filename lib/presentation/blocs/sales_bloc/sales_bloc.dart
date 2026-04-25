@@ -7,15 +7,18 @@ class SalesBloc extends Bloc<SalesEvent, SalesState> {
   final CreateOrUpdateSales createOrUpdateSales;
   final GetSalesByEventSpg getSalesByEventSpg;
   final GetSalesByEvent getSalesByEvent;
+  final BulkReplaceSales bulkReplaceSales;
 
   SalesBloc({
     required this.createOrUpdateSales,
     required this.getSalesByEventSpg,
     required this.getSalesByEvent,
+    required this.bulkReplaceSales,
   }) : super(const SalesState()) {
     on<UpdateSales>(_onUpdateSales);
     on<LoadSales>(_onLoadSales);
     on<LoadAllSalesByEvent>(_onLoadAllSalesByEvent);
+    on<BulkReplaceSalesEvent>(_onBulkReplaceSales);
   }
 
   Future<void> _onUpdateSales(
@@ -58,6 +61,25 @@ class SalesBloc extends Bloc<SalesEvent, SalesState> {
   ) async {
     try {
       emit(state.copyWith(isLoading: true, errorMessage: null));
+      final allSales = await getSalesByEvent(event.eventId);
+      emit(state.copyWith(isLoading: false, allSales: allSales));
+    } catch (e) {
+      emit(state.copyWith(isLoading: false, errorMessage: e.toString()));
+    }
+  }
+
+  Future<void> _onBulkReplaceSales(
+    BulkReplaceSalesEvent event,
+    Emitter<SalesState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(isLoading: true, errorMessage: null));
+      await bulkReplaceSales(
+        BulkReplaceSalesParams(
+          eventId: event.eventId,
+          salesItems: event.salesItems,
+        ),
+      );
       final allSales = await getSalesByEvent(event.eventId);
       emit(state.copyWith(isLoading: false, allSales: allSales));
     } catch (e) {

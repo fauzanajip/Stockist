@@ -84,3 +84,49 @@ class GetTotalSold {
     return await repository.getTotalSold(eventId, spgId, productId);
   }
 }
+
+class BulkSalesItem {
+  final String spgId;
+  final String productId;
+  final int qtySold;
+
+  const BulkSalesItem({
+    required this.spgId,
+    required this.productId,
+    required this.qtySold,
+  });
+}
+
+class BulkReplaceSalesParams {
+  final String eventId;
+  final List<BulkSalesItem> salesItems;
+
+  BulkReplaceSalesParams({
+    required this.eventId,
+    required this.salesItems,
+  });
+}
+
+class BulkReplaceSales {
+  final SalesRepository repository;
+
+  BulkReplaceSales(this.repository);
+
+  Future<void> call(BulkReplaceSalesParams params) async {
+    await repository.deleteByEvent(params.eventId);
+
+    for (final item in params.salesItems) {
+      await repository.create(
+        SalesEntity(
+          id: '',
+          eventId: params.eventId,
+          spgId: item.spgId,
+          productId: item.productId,
+          qtySold: item.qtySold,
+          updatedAt: DateTime.now(),
+          previousQty: null,
+        ),
+      );
+    }
+  }
+}

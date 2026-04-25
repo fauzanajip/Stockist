@@ -147,6 +147,7 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton(() => GetSalesByEventSpg(sl()));
   sl.registerLazySingleton(() => GetSalesByEvent(sl()));
   sl.registerLazySingleton(() => GetTotalSold(sl()));
+  sl.registerLazySingleton(() => BulkReplaceSales(sl()));
 
   // Use Cases - Cash Record
   sl.registerLazySingleton(() => CreateOrUpdateCashRecord(sl()));
@@ -222,6 +223,7 @@ Future<void> initDependencies() async {
       createOrUpdateSales: sl(),
       getSalesByEventSpg: sl(),
       getSalesByEvent: sl(),
+      bulkReplaceSales: sl(),
     ),
   );
 

@@ -130,4 +130,18 @@ class SalesRepositoryImpl implements SalesRepository {
       throw AppDatabaseException(message: 'Gagal menghitung total sold: $e');
     }
   }
+
+  @override
+  Future<void> deleteByEvent(String eventId) async {
+    try {
+      final db = await dbHelper.database;
+      await db.delete(
+        'sales',
+        where: 'event_id = ?',
+        whereArgs: [eventId],
+      );
+    } catch (e) {
+      throw AppDatabaseException(message: 'Gagal menghapus data sales: $e');
+    }
+  }
 }

@@ -12,6 +12,7 @@ import '../../presentation/screens/stock/topup_screen.dart';
 import '../../presentation/screens/stock/return_screen.dart';
 import '../../presentation/screens/stock/stock_history_screen.dart';
 import '../../presentation/screens/sales/sales_input_screen.dart';
+import '../../presentation/screens/sales/import_sales_screen.dart';
 import '../../presentation/screens/cash/cash_input_screen.dart';
 import '../../presentation/screens/settings/backup_screen.dart';
 import '../../presentation/screens/settings/settings_screen.dart';
@@ -161,6 +162,20 @@ class AppRouter {
           final eventId = state.pathParameters['eventId']!;
           final spgId = state.pathParameters['spgId']!;
           return SalesInputScreen(eventId: eventId, spgId: spgId);
+        },
+      ),
+
+      // Import Sales Preview Route
+      GoRoute(
+        path: '/event/:eventId/import_sales_preview',
+        name: 'import_sales_preview',
+        builder: (context, state) {
+          final eventId = state.pathParameters['eventId']!;
+          final importItems = state.extra as List<dynamic>;
+          return ImportSalesPreviewScreen(
+            eventId: eventId,
+            importItems: importItems.cast(),
+          );
         },
       ),
 

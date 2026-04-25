@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/constants/app_theme.dart';
 import '../../core/utils/formatters.dart' as app_formatters;
+import '../../core/utils/excel_import_service.dart';
 import '../../domain/entities/event_entity.dart';
 import '../../domain/entities/stock_mutation_entity.dart';
 import '../blocs/stock_bloc/stock_bloc.dart';
@@ -381,7 +382,7 @@ class EventDashboardView extends StatelessWidget {
     );
   }
 
-  Widget _buildManagementActions(BuildContext context) {
+Widget _buildManagementActions(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -434,7 +435,7 @@ class EventDashboardView extends StatelessWidget {
             pathParameters: {'eventId': event.id},
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         _buildActionTile(
           context,
           icon: Icons.inventory_outlined,
@@ -446,7 +447,7 @@ class EventDashboardView extends StatelessWidget {
             pathParameters: {'eventId': event.id},
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         _buildActionTile(
           context,
           icon: Icons.add_circle_outline,
@@ -458,8 +459,45 @@ class EventDashboardView extends StatelessWidget {
             pathParameters: {'eventId': event.id},
           ),
         ),
+        const SizedBox(height: 8),
+        _buildActionTile(
+          context,
+          icon: Icons.upload_file_outlined,
+          title: 'IMPORT SALES',
+          subtitle: 'Import sales from Excel',
+          color: AppColors.tertiary,
+          onTap: () => _handleImportSales(context),
+        ),
       ],
     );
+  }
+
+  Future<void> _handleImportSales(BuildContext context) async {
+    try {
+      final result = await ExcelImportService.pickExcelFile();
+      if (result == null || result.files.isEmpty) return;
+
+      final filePath = result.files.first.path!;
+      if (filePath.isEmpty) return;
+
+      final importItems = await ExcelImportService.parseTransactionReport(filePath);
+      if (importItems.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('NO_SALES_DATA_FOUND_IN_FILE')),
+        );
+        return;
+      }
+
+      context.pushNamed(
+        'import_sales_preview',
+        pathParameters: {'eventId': event.id},
+        extra: importItems,
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('IMPORT_ERROR: ${e.toString().toUpperCase()}')),
+      );
+    }
   }
 
   Widget _buildSectionLabel(BuildContext context, String label) {
