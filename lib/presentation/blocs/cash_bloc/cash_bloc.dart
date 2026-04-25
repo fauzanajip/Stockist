@@ -7,15 +7,18 @@ class CashBloc extends Bloc<CashEvent, CashState> {
   final CreateOrUpdateCashRecord createOrUpdateCashRecord;
   final GetCashRecordByEventSpg getCashRecordByEventSpg;
   final GetCashRecordsByEvent getCashRecordsByEvent;
+  final BulkUpsertCash bulkUpsertCash;
 
   CashBloc({
     required this.createOrUpdateCashRecord,
     required this.getCashRecordByEventSpg,
     required this.getCashRecordsByEvent,
+    required this.bulkUpsertCash,
   }) : super(const CashState()) {
     on<UpdateCashRecord>(_onUpdateCashRecord);
     on<LoadCashRecord>(_onLoadCashRecord);
     on<LoadAllCashByEvent>(_onLoadAllCashByEvent);
+    on<BulkUpsertCashEvent>(_onBulkUpsertCash);
   }
 
   Future<void> _onUpdateCashRecord(
@@ -81,6 +84,25 @@ class CashBloc extends Bloc<CashEvent, CashState> {
   ) async {
     try {
       emit(state.copyWith(isLoading: true, errorMessage: null));
+      final allCash = await getCashRecordsByEvent(event.eventId);
+      emit(state.copyWith(isLoading: false, allCash: allCash));
+    } catch (e) {
+      emit(state.copyWith(isLoading: false, errorMessage: e.toString()));
+    }
+  }
+
+  Future<void> _onBulkUpsertCash(
+    BulkUpsertCashEvent event,
+    Emitter<CashState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(isLoading: true, errorMessage: null));
+      await bulkUpsertCash(
+        BulkUpsertCashParams(
+          eventId: event.eventId,
+          cashItems: event.cashItems,
+        ),
+      );
       final allCash = await getCashRecordsByEvent(event.eventId);
       emit(state.copyWith(isLoading: false, allCash: allCash));
     } catch (e) {

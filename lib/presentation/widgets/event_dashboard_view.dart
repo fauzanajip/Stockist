@@ -501,11 +501,11 @@ Widget _buildManagementActions(BuildContext context) {
 
       final platformFile = result.files.first;
 
-      final importItems = await ExcelImportService.parseTransactionReport(platformFile);
-      if (importItems.isEmpty) {
+      final importResult = await ExcelImportService.parseTransactionReport(platformFile);
+      if (importResult.salesItems.isEmpty && importResult.cashItems.isEmpty) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('NO_SALES_DATA_FOUND_IN_FILE')),
+            const SnackBar(content: Text('NO_DATA_FOUND_IN_FILE')),
           );
         }
         return;
@@ -515,7 +515,7 @@ Widget _buildManagementActions(BuildContext context) {
         context.pushNamed(
           'import_sales_preview',
           pathParameters: {'eventId': widget.event.id},
-          extra: importItems,
+          extra: importResult,
         );
       }
     } catch (e) {

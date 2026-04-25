@@ -148,6 +148,19 @@
 | 95  | Fix: Auto-match trim DB names before compare                 | ✅ DONE    | s.name.trim().toUpperCase() comparison      |
 | 96  | Fix: setState after auto-match for bottom bar                | ✅ DONE    | PostFrameCallback triggers rebuild          |
 
+## Cash Import from Excel (Session 2026-04-25)
+
+| #   | Task                                                         | Status     | Notes                                       |
+| --- | ------------------------------------------------------------ | ---------- | ------------------------------------------- |
+| 97  | ExcelImportService: extract Cash per unique SPG              | ✅ DONE    | Dedupe by SPG name, Total Cash + Total Non-Cash (QRIS) |
+| 98  | CashImportItem class: spgName, cashReceived, qrisReceived    | ✅ DONE    | TransactionImportResult returns both sales + cash |
+| 99  | Domain Layer: BulkUpsertCashItem + BulkUpsertCash usecase    | ✅ DONE    | Upsert mode (update if exists, create if new) |
+| 100 | Bloc Layer: BulkUpsertCashEvent + handler                    | ✅ DONE    | CashBloc with bulk upsert logic             |
+| 101 | DI: Register BulkUpsertCash usecase                          | ✅ DONE    | dependency_injection.dart                   |
+| 102 | UI: Cash Summary section in Preview Screen                   | ✅ DONE    | Shows Cash/QRIS per SPG + totals            |
+| 103 | UI: Execute Sales then Cash sequentially                     | ✅ DONE    | SalesBloc listener triggers CashBloc import |
+| 104 | UI: Loading indicator shows "SALES..." or "CASH..."          | ✅ DONE    | Conditional text based on saving state      |
+
 ## Completed Features (Summary)
 
 1. StockCalculator - all business logic calculations
@@ -175,8 +188,8 @@
 
 ## Progress Summary
 
-- ✅ Completed: 96/96 (100%)
-- ⏳ Pending: 0/96 (0%)
+- ✅ Completed: 104/104 (100%)
+- ⏳ Pending: 0/104 (0%)
 
 ## PRD Reference
 

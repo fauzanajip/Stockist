@@ -16,6 +16,28 @@ class SalesImportItem {
   });
 }
 
+class CashImportItem {
+  final String spgName;
+  final double cashReceived;
+  final double qrisReceived;
+
+  CashImportItem({
+    required this.spgName,
+    required this.cashReceived,
+    required this.qrisReceived,
+  });
+}
+
+class TransactionImportResult {
+  final List<SalesImportItem> salesItems;
+  final List<CashImportItem> cashItems;
+
+  TransactionImportResult({
+    required this.salesItems,
+    required this.cashItems,
+  });
+}
+
 class ExcelImportService {
   ExcelImportService._();
 
@@ -28,7 +50,7 @@ class ExcelImportService {
     return result;
   }
 
-  static Future<List<SalesImportItem>> parseTransactionReport(PlatformFile platformFile) async {
+  static Future<TransactionImportResult> parseTransactionReport(PlatformFile platformFile) async {
     if (platformFile.name.toLowerCase().endsWith('.csv')) {
       return _parseCsv(platformFile);
     }
@@ -36,7 +58,9 @@ class ExcelImportService {
     final bytes = kIsWeb ? platformFile.bytes! : await File(platformFile.path!).readAsBytes();
     final excel = Excel.decodeBytes(bytes);
 
-    final items = <SalesImportItem>[];
+    final salesItems = <SalesImportItem>[];
+    final cashItems = <CashImportItem>[];
+    final seenSpgNames = <String>{};
 
     for (final sheetName in excel.tables.keys) {
       final sheet = excel[sheetName];
@@ -50,6 +74,8 @@ class ExcelImportService {
       final nameColIndex = _findColumnIndex(headerRow, 'Name');
       final productColIndex = _findColumnIndex(headerRow, 'Product');
       final qtyColIndex = _findColumnIndex(headerRow, 'Qty');
+      final cashColIndex = _findColumnIndex(headerRow, 'Total Cash');
+      final nonCashColIndex = _findColumnIndex(headerRow, 'Total Non-Cash');
 
       if (nameColIndex == -1 || productColIndex == -1 || qtyColIndex == -1) {
         continue;
@@ -80,16 +106,30 @@ class ExcelImportService {
         final qtySold = int.tryParse(qtyStr) ?? 0;
 
         if (qtySold > 0) {
-          items.add(SalesImportItem(
+          salesItems.add(SalesImportItem(
             spgName: spgName,
             productName: productName.trim().toUpperCase(),
             qtySold: qtySold,
           ));
         }
+
+        // Extract cash (only once per unique SPG)
+        if (!seenSpgNames.contains(spgName) && cashColIndex != -1 && nonCashColIndex != -1) {
+          seenSpgNames.add(spgName);
+          
+          final cashStr = _getCellValueDouble(row[cashColIndex]);
+          final nonCashStr = _getCellValueDouble(row[nonCashColIndex]);
+          
+          cashItems.add(CashImportItem(
+            spgName: spgName,
+            cashReceived: cashStr,
+            qrisReceived: nonCashStr,
+          ));
+        }
       }
     }
 
-    return items;
+    return TransactionImportResult(salesItems: salesItems, cashItems: cashItems);
   }
 
   static int _findColumnIndex(List<Data?> row, String headerName) {
@@ -122,7 +162,25 @@ class ExcelImportService {
     return '';
   }
 
-  static Future<List<SalesImportItem>> _parseCsv(PlatformFile platformFile) async {
+  static double _getCellValueDouble(Data? cell) {
+    if (cell == null) return 0;
+    final value = cell.value;
+    if (value == null) return 0;
+
+    if (value is IntCellValue) {
+      return value.value.toDouble();
+    } else if (value is DoubleCellValue) {
+      return value.value;
+    } else if (value is TextCellValue) {
+      final textSpan = value.value;
+      final text = textSpan.text ?? '';
+      return double.tryParse(text.replaceAll(RegExp(r'[^\d.]'), '')) ?? 0;
+    }
+
+    return 0;
+  }
+
+  static Future<TransactionImportResult> _parseCsv(PlatformFile platformFile) async {
     String fileString;
     if (kIsWeb) {
       fileString = utf8.decode(platformFile.bytes!);
@@ -131,18 +189,21 @@ class ExcelImportService {
     }
     
     final lines = fileString.split(RegExp(r'\r\n|\r|\n'));
-    final items = <SalesImportItem>[];
+    final salesItems = <SalesImportItem>[];
+    final cashItems = <CashImportItem>[];
+    final seenSpgNames = <String>{};
 
-    if (lines.length < 5) return items;
+    if (lines.length < 5) return TransactionImportResult(salesItems: [], cashItems: []);
 
-    // header row is row index 3
     final headerRow = _splitCsvLine(lines[3]);
     final nameColIndex = _findCsvColumnIndex(headerRow, 'Name');
     final productColIndex = _findCsvColumnIndex(headerRow, 'Product');
     final qtyColIndex = _findCsvColumnIndex(headerRow, 'Qty');
+    final cashColIndex = _findCsvColumnIndex(headerRow, 'Total Cash');
+    final nonCashColIndex = _findCsvColumnIndex(headerRow, 'Total Non-Cash');
 
     if (nameColIndex == -1 || productColIndex == -1 || qtyColIndex == -1) {
-      return items;
+      return TransactionImportResult(salesItems: [], cashItems: []);
     }
 
     String lastSpgName = '';
@@ -175,15 +236,31 @@ class ExcelImportService {
       final qtySold = int.tryParse(qtyStr) ?? 0;
 
       if (qtySold > 0) {
-        items.add(SalesImportItem(
+        salesItems.add(SalesImportItem(
           spgName: spgName,
           productName: productName,
           qtySold: qtySold,
         ));
       }
+
+      // Extract cash (only once per unique SPG)
+      if (!seenSpgNames.contains(spgName) && cashColIndex != -1 && nonCashColIndex != -1) {
+        if (row.length > cashColIndex && row.length > nonCashColIndex) {
+          seenSpgNames.add(spgName);
+          
+          final cashStr = row[cashColIndex].trim().replaceAll(RegExp(r'[^\d.]'), '');
+          final nonCashStr = row[nonCashColIndex].trim().replaceAll(RegExp(r'[^\d.]'), '');
+          
+          cashItems.add(CashImportItem(
+            spgName: spgName,
+            cashReceived: double.tryParse(cashStr) ?? 0,
+            qrisReceived: double.tryParse(nonCashStr) ?? 0,
+          ));
+        }
+      }
     }
 
-    return items;
+    return TransactionImportResult(salesItems: salesItems, cashItems: cashItems);
   }
 
   static int _findCsvColumnIndex(List<String> row, String headerName) {

@@ -2,7 +2,7 @@
 
 ## Mobile Offline Stock & SPG Reconciliation App
 
-**Versi:** 2.12.1 — Sales Import Bug Fixes  
+**Versi:** 2.13 — Sales & Cash Import Complete  
 **Tanggal:** April 2026
 
 ---
@@ -841,51 +841,72 @@ Static (same for all SPGs) - current warehouse stock remaining.
 
 ---
 
-### 11.5 Sales Import from Excel (v2.12)
+### 11.5 Sales & Cash Import from Excel (v2.13)
 
-**Purpose**: Import sales data from external Transaction Report Excel file.
+**Purpose**: Import sales and cash data from external Transaction Report Excel file.
 
-**Import Mode**: Replace (delete existing sales for event, then insert new records)
+**Import Mode**:
+- **Sales**: Replace (delete existing sales for event, then insert new records)
+- **Cash**: Upsert (update if exists, create if new - preserve existing `note`)
 
 **Entry Point**: Event Dashboard → MANAGEMENT section → "IMPORT SALES" button
 
 **Excel Format Supported**:
-- Transaction-Report format: Header at row 4 (Name, Transactions, Product, Qty, ...)
-- Columns mapped: Name → SPG, Product → Product, Qty → qtySold
-- Skip: Transactions, Total Qty, Total Cash, Total Non-Cash, Total Price (summary columns)
+- Transaction-Report format: Header at row 4 (Name, Transactions, Product, Qty, Total Cash, Total Non-Cash, ...)
+- Columns mapped:
+  - Name → SPG mapping
+  - Product → Product mapping
+  - Qty → qtySold
+  - Total Cash → cashReceived
+  - Total Non-Cash → qrisReceived (QRIS)
+- Skip: Transactions, Total Qty, Total Price (summary columns)
 - Skip: Row with Name = "TOTAL"
-- **Merged Cells Handling**: If SPG name cell is empty (merged), use previous row's SPG name
+- **Merged Cells Handling**: If SPG name cell is empty, use previous row's SPG name
+
+**Cash Extraction**:
+- Dedupe by SPG name - take first occurrence per unique SPG
+- Total Cash and Total Non-Cash are per-SPG totals (already summed in Excel)
 
 **User Flow**:
 1. Tap "IMPORT SALES" → FilePicker opens (xlsx, xls, csv)
-2. Parse file → Extract SPG/Product/Qty rows
+2. Parse file → Extract Sales rows + Cash per SPG
 3. **Preview Screen**:
-   - Auto-match: SPG/Product by exact name (uppercase, trimmed comparison)
-   - Show MATCHED vs UNMATCHED counts
+   - Sales mapping: Auto-match SPG/Product by exact name (uppercase, trimmed)
+   - Cash Summary section: Shows Cash/QRIS per matched SPG + totals
    - Tap unmatched row → BottomSheet picker (SPG or Product selection)
    - Industrial Precision BottomSheet style: header with icon, scrollable list, check icon for selected, CLEAR_MAPPING option
 4. Fix all mappings → "COMMIT_IMPORT" enabled
-5. Execute: Delete existing sales → Insert new records → Reload dashboard → Success SnackBar
+5. Execute:
+   - Step 1: Delete existing sales → Insert new sales records
+   - Step 2: Upsert cash records (update if exists, create if new)
+   - Loading indicator shows "SALES..." or "CASH..."
+6. Success → Pop to Event Dashboard with SnackBar
 
 **Data Layer**:
-- `SalesRepository.deleteByEvent(eventId)` — clear existing sales before import
+- `SalesRepository.deleteByEvent(eventId)` — clear existing sales
 - `BulkSalesItem` class — spgId, productId, qtySold
-- `BulkReplaceSales` usecase — delete + bulk insert
+- `BulkReplaceSales` usecase — delete + bulk insert sales
+- `BulkUpsertCashItem` class — spgId, cashReceived, qrisReceived
+- `BulkUpsertCash` usecase — loop: check existing → update or create
 
 **Validation**:
 - qtySold > 0 required (skip zero/negative)
-- All rows must be matched before COMMIT
-- Show warning if UNMATCHED rows exist
+- All sales rows must be matched before COMMIT
+- Cash values >= 0 (allow zero)
 
 **UI Components**:
-- `ImportSalesPreviewScreen`: Industrial Precision design, MATCHED/UNMATCHED badges
-- Picker BottomSheets: Searchable list, selected highlight (Secondary color), CLEAR_MAPPING with Error color
+- `ImportSalesPreviewScreen`: Industrial Precision design
+  - Summary header: MATCHED/UNMATCHED counts
+  - Cash Summary section: SPG | Cash | QRIS + totals
+  - Sales rows: SPG/Product/Qty with mapping status
+- Picker BottomSheets: Searchable list, selected highlight, CLEAR_MAPPING
 
-**Bug Fixes (v2.12.1)**:
-- **Merged Cells**: Track `lastSpgName` - use previous SPG name if current row's Name column is empty
-- **Event Isolation**: `EventDashboardView` converted to StatefulWidget - `initState()` loads SalesBloc/StockBloc/CashBloc/EventProductBloc for current event.id
-- **Auto-match Trim**: DB names trimmed before comparing with Excel names (which are already trimmed/uppercase)
-- **setState Timing**: `_autoMatch` calls `setState` via `addPostFrameCallback` to update `bottomNavigationBar` after mappings filled
+**Bug Fixes (v2.12.1 → v2.13)**:
+- Merged cells: Track `lastSpgName` for empty SPG cells
+- Event isolation: `EventDashboardView` → StatefulWidget with `initState()` bloc loading
+- Auto-match trim: DB names trimmed before comparing
+- Bottom bar rebuild: `setState` via `addPostFrameCallback`
+- Sequential import: Sales → Cash with loading indicator
 
 ---
 
@@ -902,6 +923,7 @@ Static (same for all SPGs) - current warehouse stock remaining.
 
 | Versi | Perubahan                                                                                                                                                                                                                                                 |
 | ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v2.13 | **Sales & Cash Import Complete**: Import sales (replace mode) + cash (upsert mode) from Transaction Report; Cash Summary section in preview; Sequential execution with loading indicator; Total Cash → cashReceived, Total Non-Cash → qrisReceived; Dedupe cash per unique SPG. |
 | v2.12.1 | **Sales Import Bug Fixes**: Fix merged cells (track last SPG name); Event isolation (EventDashboardView StatefulWidget with initState bloc loading); Auto-match trim DB names; setState via PostFrameCallback for bottom bar rebuild; CSV parser added. |
 | v2.12 | **Sales Import from Excel**: Import external Transaction Report (xlsx/csv); Preview screen with auto-match & manual mapping; Picker BottomSheets (Industrial Precision style); Replace mode (delete existing + insert new); Entry: IMPORT SALES in Event Dashboard; FilePicker integration; qtySold > 0 validation. |
 | v2.11 | **Backup/Restore Fix**: Complete import/export for all tables (10 tables including spg_product_targets); Replace-existing logic (global vs event-specific); file_picker for import; Confirm dialog with DATA_OVERRIDE warning; Success/error SnackBar feedback; Industrial Precision UI. |

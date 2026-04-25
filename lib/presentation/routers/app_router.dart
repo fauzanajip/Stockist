@@ -1,4 +1,5 @@
 import 'package:go_router/go_router.dart';
+import '../../core/utils/excel_import_service.dart';
 import '../../presentation/screens/home/home_screen.dart';
 import '../../presentation/screens/event/create_event_screen.dart';
 import '../../presentation/screens/event/event_setup_screen.dart';
@@ -171,10 +172,10 @@ class AppRouter {
         name: 'import_sales_preview',
         builder: (context, state) {
           final eventId = state.pathParameters['eventId']!;
-          final importItems = state.extra as List<dynamic>;
+          final importResult = state.extra as TransactionImportResult;
           return ImportSalesPreviewScreen(
             eventId: eventId,
-            importItems: importItems.cast(),
+            importResult: importResult,
           );
         },
       ),

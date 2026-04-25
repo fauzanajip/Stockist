@@ -73,3 +73,64 @@ class GetCashRecordsByEvent {
     return await repository.getByEvent(eventId);
   }
 }
+
+class BulkUpsertCashItem {
+  final String spgId;
+  final double cashReceived;
+  final double qrisReceived;
+
+  const BulkUpsertCashItem({
+    required this.spgId,
+    required this.cashReceived,
+    required this.qrisReceived,
+  });
+}
+
+class BulkUpsertCashParams {
+  final String eventId;
+  final List<BulkUpsertCashItem> cashItems;
+
+  BulkUpsertCashParams({
+    required this.eventId,
+    required this.cashItems,
+  });
+}
+
+class BulkUpsertCash {
+  final CashRecordRepository repository;
+
+  BulkUpsertCash(this.repository);
+
+  Future<void> call(BulkUpsertCashParams params) async {
+    for (final item in params.cashItems) {
+      final existing = await repository.getByEventAndSpg(
+        params.eventId,
+        item.spgId,
+      );
+
+      if (existing != null) {
+        await repository.update(
+          CashRecordEntity(
+            id: existing.id,
+            eventId: params.eventId,
+            spgId: item.spgId,
+            cashReceived: item.cashReceived,
+            qrisReceived: item.qrisReceived,
+            note: existing.note,
+          ),
+        );
+      } else {
+        await repository.create(
+          CashRecordEntity(
+            id: '',
+            eventId: params.eventId,
+            spgId: item.spgId,
+            cashReceived: item.cashReceived,
+            qrisReceived: item.qrisReceived,
+            note: null,
+          ),
+        );
+      }
+    }
+  }
+}

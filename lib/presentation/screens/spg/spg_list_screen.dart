@@ -32,7 +32,7 @@ import '../../blocs/spg_target_bloc/spg_target_event.dart';
 import '../../blocs/spg_target_bloc/spg_target_state.dart';
 import '../../../domain/entities/spg_product_target_entity.dart';
 
-enum _SpgSortMode { name, spb }
+enum _SpgSortMode { name, spb, sold }
 
 class SpgListScreen extends StatefulWidget {
   final String eventId;
@@ -132,34 +132,39 @@ class _SpgListScreenState extends State<SpgListScreen> {
             );
           }
           if (state is AvailableSpgsLoaded) {
-            return BlocBuilder<SpgBloc, SpgState>(
-              builder: (context, spgState) {
-                final sortedSpgs = _sortEventSpgs(
-                  state.assignedSpgs,
-                  state.spbs,
-                  spgState,
-                );
+            return BlocBuilder<SalesBloc, SalesState>(
+              builder: (context, salesState) {
+                return BlocBuilder<SpgBloc, SpgState>(
+                  builder: (context, spgState) {
+                    final sortedSpgs = _sortEventSpgs(
+                      state.assignedSpgs,
+                      state.spbs,
+                      spgState,
+                      salesState,
+                    );
 
-                if (sortedSpgs.isEmpty) {
-                  return _buildEmptyState(context);
-                }
+                    if (sortedSpgs.isEmpty) {
+                      return _buildEmptyState(context);
+                    }
 
-                return CustomScrollView(
-                  slivers: [
-                    SliverToBoxAdapter(child: _buildOperationalToolbar()),
-                    SliverPadding(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-                      sliver: SliverList(
-                        delegate: SliverChildBuilderDelegate((context, index) {
-                          return SpgDashboardCard(
-                            eventId: widget.eventId,
-                            eventSpg: sortedSpgs[index],
-                            spbs: state.spbs,
-                          );
-                        }, childCount: sortedSpgs.length),
-                      ),
-                    ),
-                  ],
+                    return CustomScrollView(
+                      slivers: [
+                        SliverToBoxAdapter(child: _buildOperationalToolbar()),
+                        SliverPadding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                          sliver: SliverList(
+                            delegate: SliverChildBuilderDelegate((context, index) {
+                              return SpgDashboardCard(
+                                eventId: widget.eventId,
+                                eventSpg: sortedSpgs[index],
+                                spbs: state.spbs,
+                              );
+                            }, childCount: sortedSpgs.length),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 );
               },
             );
@@ -201,6 +206,8 @@ class _SpgListScreenState extends State<SpgListScreen> {
               _buildSortChip('UNIT NAME', _SpgSortMode.name),
               const SizedBox(width: 8),
               _buildSortChip('SPB COORDINATOR', _SpgSortMode.spb),
+              const SizedBox(width: 8),
+              _buildSortChip('TOP SOLD', _SpgSortMode.sold),
             ],
           ),
           const SizedBox(height: 8),
@@ -272,6 +279,7 @@ class _SpgListScreenState extends State<SpgListScreen> {
     List<EventSpgEntity> eventSpgs,
     List<SpbEntity> spbs,
     SpgState spgState,
+    SalesState salesState,
   ) {
     if (spgState is! SpqsLoaded) return eventSpgs;
 
@@ -285,7 +293,7 @@ class _SpgListScreenState extends State<SpgListScreen> {
         final nameB = spgB?.name ?? '';
         return nameA.compareTo(nameB);
       });
-    } else {
+    } else if (_sortMode == _SpgSortMode.spb) {
       sorted.sort((a, b) {
         final spbA = spbs.firstWhereOrNull((s) => s.id == a.spbId);
         final spbB = spbs.firstWhereOrNull((s) => s.id == b.spbId);
@@ -294,6 +302,16 @@ class _SpgListScreenState extends State<SpgListScreen> {
         if (a.spbId == null && b.spbId != null) return 1;
         if (a.spbId != null && b.spbId == null) return -1;
         return nameA.compareTo(nameB);
+      });
+    } else if (_sortMode == _SpgSortMode.sold) {
+      sorted.sort((a, b) {
+        final soldA = salesState.allSales
+            .where((s) => s.spgId == a.spgId)
+            .fold(0, (sum, s) => sum + s.qtySold);
+        final soldB = salesState.allSales
+            .where((s) => s.spgId == b.spgId)
+            .fold(0, (sum, s) => sum + s.qtySold);
+        return soldB.compareTo(soldA); // Descending: highest sold first
       });
     }
 

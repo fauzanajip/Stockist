@@ -5,9 +5,13 @@ import 'package:collection/collection.dart';
 import '../../../core/constants/app_theme.dart';
 import '../../../core/utils/excel_import_service.dart';
 import '../../../domain/usecases/sales_usecases.dart';
+import '../../../domain/usecases/cash_record_usecases.dart';
 import '../../blocs/sales_bloc/sales_bloc.dart';
 import '../../blocs/sales_bloc/sales_event.dart';
 import '../../blocs/sales_bloc/sales_state.dart';
+import '../../blocs/cash_bloc/cash_bloc.dart';
+import '../../blocs/cash_bloc/cash_event.dart';
+import '../../blocs/cash_bloc/cash_state.dart';
 import '../../blocs/event_spg_bloc/event_spg_bloc.dart';
 import '../../blocs/event_spg_bloc/event_spg_event.dart';
 import '../../blocs/event_spg_bloc/event_spg_state.dart';
@@ -17,12 +21,12 @@ import '../../blocs/event_product_bloc/event_product_state.dart';
 
 class ImportSalesPreviewScreen extends StatefulWidget {
   final String eventId;
-  final List<SalesImportItem> importItems;
+  final TransactionImportResult importResult;
 
   const ImportSalesPreviewScreen({
     super.key,
     required this.eventId,
-    required this.importItems,
+    required this.importResult,
   });
 
   @override
@@ -34,6 +38,7 @@ class _ImportSalesPreviewScreenState extends State<ImportSalesPreviewScreen> {
   final Map<String, String> _productMappings = {};
   bool _isSaving = false;
   bool _hasAutoMatched = false;
+  bool _isCashSaving = false;
 
   @override
   void initState() {
@@ -51,7 +56,7 @@ class _ImportSalesPreviewScreenState extends State<ImportSalesPreviewScreen> {
     
     bool anyMatched = false;
     
-    for (final item in widget.importItems) {
+    for (final item in widget.importResult.salesItems) {
       final matchedSpg = spgState.spgs.firstWhereOrNull(
         (s) => s.name.trim().toUpperCase() == item.spgName,
       );
@@ -330,7 +335,7 @@ class _ImportSalesPreviewScreenState extends State<ImportSalesPreviewScreen> {
 
   List<BulkSalesItem> _buildSalesItems() {
     final items = <BulkSalesItem>[];
-    for (final importItem in widget.importItems) {
+    for (final importItem in widget.importResult.salesItems) {
       final spgId = _spgMappings[importItem.spgName];
       final productId = _productMappings[importItem.productName];
       if (spgId != null && productId != null && importItem.qtySold > 0) {
@@ -344,9 +349,24 @@ class _ImportSalesPreviewScreenState extends State<ImportSalesPreviewScreen> {
     return items;
   }
 
+  List<BulkUpsertCashItem> _buildCashItems() {
+    final items = <BulkUpsertCashItem>[];
+    for (final cashItem in widget.importResult.cashItems) {
+      final spgId = _spgMappings[cashItem.spgName];
+      if (spgId != null) {
+        items.add(BulkUpsertCashItem(
+          spgId: spgId,
+          cashReceived: cashItem.cashReceived,
+          qrisReceived: cashItem.qrisReceived,
+        ));
+      }
+    }
+    return items;
+  }
+
   int _countUnmatched() {
     int count = 0;
-    for (final item in widget.importItems) {
+    for (final item in widget.importResult.salesItems) {
       if (_spgMappings[item.spgName] == null || _productMappings[item.productName] == null) {
         count++;
       }
@@ -401,78 +421,118 @@ class _ImportSalesPreviewScreenState extends State<ImportSalesPreviewScreen> {
       body: BlocConsumer<SalesBloc, SalesState>(
         listener: (context, state) {
           if (!state.isLoading && _isSaving) {
-            setState(() => _isSaving = false);
             if (state.errorMessage == null) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('SALES_DATA_IMPORTED_SUCCESS'),
-                  backgroundColor: AppColors.success,
-                ),
-              );
-              context.pop();
+              // Sales done, now import cash
+              final cashItems = _buildCashItems();
+              if (cashItems.isNotEmpty) {
+                setState(() {
+                  _isSaving = false;
+                  _isCashSaving = true;
+                });
+                context.read<CashBloc>().add(
+                  BulkUpsertCashEvent(
+                    eventId: widget.eventId,
+                    cashItems: cashItems,
+                  ),
+                );
+              } else {
+                setState(() => _isSaving = false);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('SALES_DATA_IMPORTED_SUCCESS'),
+                    backgroundColor: AppColors.success,
+                  ),
+                );
+                context.pop();
+              }
             } else {
+              setState(() => _isSaving = false);
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('IMPORT_ERROR: ${state.errorMessage!.toUpperCase()}')),
+                SnackBar(content: Text('SALES_IMPORT_ERROR: ${state.errorMessage!.toUpperCase()}')),
               );
             }
           }
         },
         builder: (context, salesState) {
-          return BlocBuilder<EventSpgBloc, EventSpgState>(
-            builder: (context, spgState) {
-              return BlocBuilder<EventProductBloc, EventProductState>(
-                builder: (context, productState) {
-                  if (spgState is EventSpgLoading || productState is EventProductLoading) {
-                    return const Center(child: CircularProgressIndicator(strokeWidth: 2));
-                  }
-
-                  if (spgState is! AvailableSpgsLoaded || productState is! AvailableProductsLoaded) {
-                    return _buildEmptyState();
-                  }
-
-                  _autoMatch(spgState, productState);
-
-                  final unmatchedCount = _countUnmatched();
-                  final matchedCount = widget.importItems.length - unmatchedCount;
-
-                  return CustomScrollView(
-                    slivers: [
-                      SliverToBoxAdapter(child: _buildSummary(matchedCount, unmatchedCount)),
-                      SliverPadding(
-                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
-                        sliver: SliverList(
-                          delegate: SliverChildBuilderDelegate(
-                            (context, index) {
-                              final item = widget.importItems[index];
-                              final spgMatched = _spgMappings[item.spgName] != null;
-                              final productMatched = _productMappings[item.productName] != null;
-                              final fullyMatched = spgMatched && productMatched;
-
-                              return _buildImportRow(
-                                context,
-                                item,
-                                spgMatched,
-                                productMatched,
-                                fullyMatched,
-                                spgState,
-                                productState,
-                              );
-                            },
-                            childCount: widget.importItems.length,
-                          ),
-                        ),
-                      ),
-                    ],
+          return BlocConsumer<CashBloc, CashState>(
+            listener: (context, cashState) {
+              if (!cashState.isLoading && _isCashSaving) {
+                setState(() => _isCashSaving = false);
+                if (cashState.errorMessage == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('SALES_AND_CASH_IMPORTED_SUCCESS'),
+                      backgroundColor: AppColors.success,
+                    ),
                   );
-                },
-              );
+                  context.pop();
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('CASH_IMPORT_ERROR: ${cashState.errorMessage!.toUpperCase()}')),
+                  );
+                }
+              }
             },
-          );
-        },
-      ),
-      bottomNavigationBar: _buildBottomAction(),
-    );
-  }
+            builder: (context, cashState) {
+              return BlocBuilder<EventSpgBloc, EventSpgState>(
+                builder: (context, spgState) {
+                  return BlocBuilder<EventProductBloc, EventProductState>(
+                    builder: (context, productState) {
+                      if (spgState is EventSpgLoading || productState is EventProductLoading) {
+                        return const Center(child: CircularProgressIndicator(strokeWidth: 2));
+                      }
+
+                      if (spgState is! AvailableSpgsLoaded || productState is! AvailableProductsLoaded) {
+                        return _buildEmptyState();
+                      }
+
+                      _autoMatch(spgState, productState);
+
+                      final unmatchedCount = _countUnmatched();
+                      final matchedCount = widget.importResult.salesItems.length - unmatchedCount;
+
+                      return CustomScrollView(
+                        slivers: [
+                          SliverToBoxAdapter(child: _buildSummary(matchedCount, unmatchedCount)),
+                          if (widget.importResult.cashItems.isNotEmpty)
+                            SliverToBoxAdapter(child: _buildCashSummary(spgState)),
+                          SliverPadding(
+                            padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
+                            sliver: SliverList(
+                              delegate: SliverChildBuilderDelegate(
+                                (context, index) {
+                                  final item = widget.importResult.salesItems[index];
+                                  final spgMatched = _spgMappings[item.spgName] != null;
+                                  final productMatched = _productMappings[item.productName] != null;
+                                  final fullyMatched = spgMatched && productMatched;
+
+                                  return _buildImportRow(
+                                    context,
+                                    item,
+                                    spgMatched,
+                                    productMatched,
+                                    fullyMatched,
+                                    spgState,
+                                    productState,
+                                  );
+                                },
+                                childCount: widget.importResult.salesItems.length,
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                      },
+                    );
+                  },
+                );
+              },
+            );
+          },
+        ),
+        bottomNavigationBar: _buildBottomAction(),
+      );
+    }
 
   Widget _buildSummary(int matched, int unmatched) {
     return Container(
@@ -531,13 +591,149 @@ class _ImportSalesPreviewScreenState extends State<ImportSalesPreviewScreen> {
                 style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1, color: AppColors.onSurfaceVariant),
               ),
               Text(
-                '${widget.importItems.length}',
+                '${widget.importResult.salesItems.length}',
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: AppColors.primary),
               ),
             ],
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildCashSummary(AvailableSpgsLoaded spgState) {
+    final totalCash = widget.importResult.cashItems.fold(0.0, (sum, item) => sum + item.cashReceived);
+    final totalQris = widget.importResult.cashItems.fold(0.0, (sum, item) => sum + item.qrisReceived);
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceContainerLowest,
+        border: Border.all(color: AppColors.surfaceContainerHigh),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.analytics_outlined, color: AppColors.tertiary, size: 16),
+              const SizedBox(width: 8),
+              const Text(
+                'CASH_IMPORT_SUMMARY',
+                style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 2, color: AppColors.onSurfaceVariant),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              border: Border.all(color: AppColors.surfaceContainerHigh),
+            ),
+            child: Column(
+              children: [
+                ...widget.importResult.cashItems.map((cashItem) {
+                  final matchedSpg = spgState.spgs.firstWhereOrNull(
+                    (s) => s.name.trim().toUpperCase() == cashItem.spgName,
+                  );
+                  final spgId = _spgMappings[cashItem.spgName];
+                  final isMatched = spgId != null;
+
+                  return Container(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: const BoxDecoration(
+                      border: Border(bottom: BorderSide(color: AppColors.surfaceContainerHigh)),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: Text(
+                            matchedSpg?.name.toUpperCase() ?? cashItem.spgName,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w900,
+                              color: isMatched ? AppColors.onSurface : AppColors.error,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              const Text(
+                                'CASH',
+                                style: TextStyle(fontSize: 8, fontWeight: FontWeight.w900, color: AppColors.onSurfaceVariant),
+                              ),
+                              Text(
+                                _formatCurrency(cashItem.cashReceived),
+                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: AppColors.primary),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              const Text(
+                                'QRIS',
+                                style: TextStyle(fontSize: 8, fontWeight: FontWeight.w900, color: AppColors.onSurfaceVariant),
+                              ),
+                              Text(
+                                _formatCurrency(cashItem.qrisReceived),
+                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: AppColors.tertiary),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: const BoxDecoration(color: AppColors.surfaceContainer),
+                  child: Row(
+                    children: [
+                      const Expanded(
+                        flex: 2,
+                        child: Text(
+                          'TOTAL',
+                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: AppColors.secondary),
+                        ),
+                      ),
+                      Expanded(
+                        child: Text(
+                          _formatCurrency(totalCash),
+                          textAlign: TextAlign.right,
+                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: AppColors.primary),
+                        ),
+                      ),
+                      Expanded(
+                        child: Text(
+                          _formatCurrency(totalQris),
+                          textAlign: TextAlign.right,
+                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: AppColors.tertiary),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatCurrency(double value) {
+    return value.toInt().toString().replaceAllMapped(
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (Match m) => '${m[1]}.',
     );
   }
 
@@ -699,7 +895,8 @@ class _ImportSalesPreviewScreenState extends State<ImportSalesPreviewScreen> {
 
   Widget _buildBottomAction() {
     final unmatchedCount = _countUnmatched();
-    final canSave = unmatchedCount == 0 && !_isSaving;
+    final isSavingAny = _isSaving || _isCashSaving;
+    final canSave = unmatchedCount == 0 && !isSavingAny;
 
     return Container(
       padding: EdgeInsets.fromLTRB(20, 20, 20, 20 + MediaQuery.of(context).padding.bottom),
@@ -735,7 +932,7 @@ class _ImportSalesPreviewScreenState extends State<ImportSalesPreviewScreen> {
             children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: _isSaving ? null : () => context.pop(),
+                  onPressed: isSavingAny ? null : () => context.pop(),
                   style: OutlinedButton.styleFrom(
                     shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
                     side: const BorderSide(color: AppColors.surfaceContainerHigh),
@@ -754,11 +951,21 @@ class _ImportSalesPreviewScreenState extends State<ImportSalesPreviewScreen> {
                     shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
                     elevation: 0,
                   ),
-                  child: _isSaving
-                      ? const SizedBox(
-                          height: 24,
-                          width: 24,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                  child: isSavingAny
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              _isSaving ? 'SALES...' : 'CASH...',
+                              style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.5),
+                            ),
+                          ],
                         )
                       : Text(
                           canSave ? 'COMMIT_IMPORT' : 'FIX_MAPPING_FIRST',

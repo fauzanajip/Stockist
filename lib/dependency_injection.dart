@@ -153,6 +153,7 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton(() => CreateOrUpdateCashRecord(sl()));
   sl.registerLazySingleton(() => GetCashRecordByEventSpg(sl()));
   sl.registerLazySingleton(() => GetCashRecordsByEvent(sl()));
+  sl.registerLazySingleton(() => BulkUpsertCash(sl()));
 
   // Use Cases - SPG Product Target
   sl.registerLazySingleton(() => GetTargetsByEvent(sl()));
@@ -232,6 +233,7 @@ Future<void> initDependencies() async {
       createOrUpdateCashRecord: sl(),
       getCashRecordByEventSpg: sl(),
       getCashRecordsByEvent: sl(),
+      bulkUpsertCash: sl(),
     ),
   );
 

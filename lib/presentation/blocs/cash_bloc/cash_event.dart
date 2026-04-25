@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../../domain/usecases/cash_record_usecases.dart';
 
 class CashEvent extends Equatable {
   const CashEvent();
@@ -43,4 +44,17 @@ class LoadAllCashByEvent extends CashEvent {
 
   @override
   List<Object?> get props => [eventId];
+}
+
+class BulkUpsertCashEvent extends CashEvent {
+  final String eventId;
+  final List<BulkUpsertCashItem> cashItems;
+
+  const BulkUpsertCashEvent({
+    required this.eventId,
+    required this.cashItems,
+  });
+
+  @override
+  List<Object?> get props => [eventId, cashItems];
 }
