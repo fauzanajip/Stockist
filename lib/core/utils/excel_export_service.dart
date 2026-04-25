@@ -202,6 +202,7 @@ class ExcelExportService {
       'QRIS',
       'Expected Cash',
       'Surplus',
+      'Note',
     ];
 
     for (int col = 0; col < headers.length; col++) {
@@ -237,6 +238,7 @@ class ExcelExportService {
       final cashRecord = cashRecords.firstWhereOrNull((c) => c.spgId == spg.id);
       final cashReceived = cashRecord?.cashReceived ?? 0;
       final qrisReceived = cashRecord?.qrisReceived ?? 0;
+      final cashNote = cashRecord?.note ?? '';
 
       final expectedCash = _calculateExpectedCash(
         eventProducts: eventProducts,
@@ -257,6 +259,7 @@ class ExcelExportService {
         DoubleCellValue(qrisReceived),
         DoubleCellValue(expectedCash),
         DoubleCellValue(surplus),
+        TextCellValue(cashNote),
       ];
 
       for (int col = 0; col < values.length; col++) {
