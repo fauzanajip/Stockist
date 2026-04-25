@@ -1,5 +1,7 @@
 import 'package:sqflite/sqflite.dart' hide DatabaseException;
 import 'package:path/path.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 import '../../../core/constants/app_constants.dart';
 
 class DatabaseHelper {
@@ -16,6 +18,16 @@ class DatabaseHelper {
   }
 
   Future<Database> _initDatabase() async {
+    if (kIsWeb) {
+      databaseFactory = databaseFactoryFfiWeb;
+      return await openDatabase(
+        AppConstants.databaseName,
+        version: AppConstants.databaseVersion,
+        onCreate: _onCreate,
+        onUpgrade: _onUpgrade,
+      );
+    }
+
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, AppConstants.databaseName);
 

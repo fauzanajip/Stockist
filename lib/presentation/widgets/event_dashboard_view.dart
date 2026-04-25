@@ -7,18 +7,40 @@ import '../../core/utils/excel_import_service.dart';
 import '../../domain/entities/event_entity.dart';
 import '../../domain/entities/stock_mutation_entity.dart';
 import '../blocs/stock_bloc/stock_bloc.dart';
+import '../blocs/stock_bloc/stock_event.dart';
 import '../blocs/stock_bloc/stock_state.dart';
 import '../blocs/sales_bloc/sales_bloc.dart';
+import '../blocs/sales_bloc/sales_event.dart';
 import '../blocs/sales_bloc/sales_state.dart';
 import '../blocs/cash_bloc/cash_bloc.dart';
+import '../blocs/cash_bloc/cash_event.dart';
 import '../blocs/cash_bloc/cash_state.dart';
 import '../blocs/event_product_bloc/event_product_bloc.dart';
+import '../blocs/event_product_bloc/event_product_event.dart';
 import '../blocs/event_product_bloc/event_product_state.dart';
 
-class EventDashboardView extends StatelessWidget {
+class EventDashboardView extends StatefulWidget {
   final EventEntity event;
 
   const EventDashboardView({super.key, required this.event});
+
+  @override
+  State<EventDashboardView> createState() => _EventDashboardViewState();
+}
+
+class _EventDashboardViewState extends State<EventDashboardView> {
+  @override
+  void initState() {
+    super.initState();
+    _loadEventData();
+  }
+
+  void _loadEventData() {
+    context.read<SalesBloc>().add(LoadAllSalesByEvent(eventId: widget.event.id));
+    context.read<StockBloc>().add(LoadStockByEvent(eventId: widget.event.id));
+    context.read<CashBloc>().add(LoadAllCashByEvent(eventId: widget.event.id));
+    context.read<EventProductBloc>().add(LoadAvailableProducts(eventId: widget.event.id));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +83,7 @@ class EventDashboardView extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Text(
-          event.name.toUpperCase(),
+          widget.event.name.toUpperCase(),
           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.w900,
                 letterSpacing: -1,
@@ -74,7 +96,7 @@ class EventDashboardView extends StatelessWidget {
             const Icon(Icons.event_seat_outlined, size: 14, color: AppColors.onSurfaceVariant),
             const SizedBox(width: 8),
             Text(
-              app_formatters.Formatters.formatDate(event.date).toUpperCase(),
+              app_formatters.Formatters.formatDate(widget.event.date).toUpperCase(),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: AppColors.onSurfaceVariant,
                     fontWeight: FontWeight.w900,
@@ -396,7 +418,7 @@ Widget _buildManagementActions(BuildContext context) {
           color: AppColors.primary,
           onTap: () => context.pushNamed(
             'spg_list',
-            pathParameters: {'eventId': event.id},
+            pathParameters: {'eventId': widget.event.id},
           ),
         ),
         const SizedBox(height: 8),
@@ -408,7 +430,7 @@ Widget _buildManagementActions(BuildContext context) {
           color: AppColors.secondary,
           onTap: () => context.pushNamed(
             'stock_history',
-            pathParameters: {'eventId': event.id},
+            pathParameters: {'eventId': widget.event.id},
           ),
         ),
         const SizedBox(height: 8),
@@ -420,7 +442,7 @@ Widget _buildManagementActions(BuildContext context) {
           color: AppColors.onSurfaceVariant,
           onTap: () => context.pushNamed(
             'event_setup',
-            pathParameters: {'eventId': event.id},
+            pathParameters: {'eventId': widget.event.id},
           ),
         ),
         const SizedBox(height: 8),
@@ -432,7 +454,7 @@ Widget _buildManagementActions(BuildContext context) {
           color: AppColors.success,
           onTap: () => context.pushNamed(
             'sales_targets',
-            pathParameters: {'eventId': event.id},
+            pathParameters: {'eventId': widget.event.id},
           ),
         ),
         const SizedBox(height: 8),
@@ -444,7 +466,7 @@ Widget _buildManagementActions(BuildContext context) {
           color: AppColors.primary,
           onTap: () => context.pushNamed(
             'bulk_initial',
-            pathParameters: {'eventId': event.id},
+            pathParameters: {'eventId': widget.event.id},
           ),
         ),
         const SizedBox(height: 8),
@@ -456,7 +478,7 @@ Widget _buildManagementActions(BuildContext context) {
           color: AppColors.secondary,
           onTap: () => context.pushNamed(
             'bulk_topup',
-            pathParameters: {'eventId': event.id},
+            pathParameters: {'eventId': widget.event.id},
           ),
         ),
         const SizedBox(height: 8),
@@ -477,26 +499,31 @@ Widget _buildManagementActions(BuildContext context) {
       final result = await ExcelImportService.pickExcelFile();
       if (result == null || result.files.isEmpty) return;
 
-      final filePath = result.files.first.path!;
-      if (filePath.isEmpty) return;
+      final platformFile = result.files.first;
 
-      final importItems = await ExcelImportService.parseTransactionReport(filePath);
+      final importItems = await ExcelImportService.parseTransactionReport(platformFile);
       if (importItems.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('NO_SALES_DATA_FOUND_IN_FILE')),
-        );
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('NO_SALES_DATA_FOUND_IN_FILE')),
+          );
+        }
         return;
       }
 
-      context.pushNamed(
-        'import_sales_preview',
-        pathParameters: {'eventId': event.id},
-        extra: importItems,
-      );
+      if (context.mounted) {
+        context.pushNamed(
+          'import_sales_preview',
+          pathParameters: {'eventId': widget.event.id},
+          extra: importItems,
+        );
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('IMPORT_ERROR: ${e.toString().toUpperCase()}')),
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('IMPORT_ERROR: ${e.toString().toUpperCase()}')),
+        );
+      }
     }
   }
 

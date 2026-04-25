@@ -2,7 +2,7 @@
 
 ## Mobile Offline Stock & SPG Reconciliation App
 
-**Versi:** 2.12 — Sales Import from Excel  
+**Versi:** 2.12.1 — Sales Import Bug Fixes  
 **Tanggal:** April 2026
 
 ---
@@ -854,12 +854,13 @@ Static (same for all SPGs) - current warehouse stock remaining.
 - Columns mapped: Name → SPG, Product → Product, Qty → qtySold
 - Skip: Transactions, Total Qty, Total Cash, Total Non-Cash, Total Price (summary columns)
 - Skip: Row with Name = "TOTAL"
+- **Merged Cells Handling**: If SPG name cell is empty (merged), use previous row's SPG name
 
 **User Flow**:
 1. Tap "IMPORT SALES" → FilePicker opens (xlsx, xls, csv)
 2. Parse file → Extract SPG/Product/Qty rows
 3. **Preview Screen**:
-   - Auto-match: SPG/Product by exact name (uppercase comparison)
+   - Auto-match: SPG/Product by exact name (uppercase, trimmed comparison)
    - Show MATCHED vs UNMATCHED counts
    - Tap unmatched row → BottomSheet picker (SPG or Product selection)
    - Industrial Precision BottomSheet style: header with icon, scrollable list, check icon for selected, CLEAR_MAPPING option
@@ -880,6 +881,12 @@ Static (same for all SPGs) - current warehouse stock remaining.
 - `ImportSalesPreviewScreen`: Industrial Precision design, MATCHED/UNMATCHED badges
 - Picker BottomSheets: Searchable list, selected highlight (Secondary color), CLEAR_MAPPING with Error color
 
+**Bug Fixes (v2.12.1)**:
+- **Merged Cells**: Track `lastSpgName` - use previous SPG name if current row's Name column is empty
+- **Event Isolation**: `EventDashboardView` converted to StatefulWidget - `initState()` loads SalesBloc/StockBloc/CashBloc/EventProductBloc for current event.id
+- **Auto-match Trim**: DB names trimmed before comparing with Excel names (which are already trimmed/uppercase)
+- **setState Timing**: `_autoMatch` calls `setState` via `addPostFrameCallback` to update `bottomNavigationBar` after mappings filled
+
 ---
 
 ## 12. ✅ Success Metrics
@@ -895,6 +902,7 @@ Static (same for all SPGs) - current warehouse stock remaining.
 
 | Versi | Perubahan                                                                                                                                                                                                                                                 |
 | ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v2.12.1 | **Sales Import Bug Fixes**: Fix merged cells (track last SPG name); Event isolation (EventDashboardView StatefulWidget with initState bloc loading); Auto-match trim DB names; setState via PostFrameCallback for bottom bar rebuild; CSV parser added. |
 | v2.12 | **Sales Import from Excel**: Import external Transaction Report (xlsx/csv); Preview screen with auto-match & manual mapping; Picker BottomSheets (Industrial Precision style); Replace mode (delete existing + insert new); Entry: IMPORT SALES in Event Dashboard; FilePicker integration; qtySold > 0 validation. |
 | v2.11 | **Backup/Restore Fix**: Complete import/export for all tables (10 tables including spg_product_targets); Replace-existing logic (global vs event-specific); file_picker for import; Confirm dialog with DATA_OVERRIDE warning; Success/error SnackBar feedback; Industrial Precision UI. |
 | v2.10 | **Bulk Topup (RESUPPLY)**: Additive topup records per SPG per product; Warehouse limit validation (static: IN - DIS + Return); Skip qty=0; Success BottomSheet showing SPG/product/qty summary; Industrial Precision UI with Secondary (orange) accent; Entry point: RESUPPLY menu tile. |

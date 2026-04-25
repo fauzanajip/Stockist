@@ -33,6 +33,7 @@ class _ImportSalesPreviewScreenState extends State<ImportSalesPreviewScreen> {
   final Map<String, String> _spgMappings = {};
   final Map<String, String> _productMappings = {};
   bool _isSaving = false;
+  bool _hasAutoMatched = false;
 
   @override
   void initState() {
@@ -46,20 +47,34 @@ class _ImportSalesPreviewScreenState extends State<ImportSalesPreviewScreen> {
   }
 
   void _autoMatch(AvailableSpgsLoaded spgState, AvailableProductsLoaded productState) {
+    if (_hasAutoMatched) return;
+    
+    bool anyMatched = false;
+    
     for (final item in widget.importItems) {
       final matchedSpg = spgState.spgs.firstWhereOrNull(
-        (s) => s.name.toUpperCase() == item.spgName.toUpperCase(),
+        (s) => s.name.trim().toUpperCase() == item.spgName,
       );
       if (matchedSpg != null) {
         _spgMappings[item.spgName] = matchedSpg.id;
+        anyMatched = true;
       }
 
       final matchedProduct = productState.products.firstWhereOrNull(
-        (p) => p.name.toUpperCase() == item.productName.toUpperCase(),
+        (p) => p.name.trim().toUpperCase() == item.productName,
       );
       if (matchedProduct != null) {
         _productMappings[item.productName] = matchedProduct.id;
+        anyMatched = true;
       }
+    }
+    
+    _hasAutoMatched = true;
+    
+    if (anyMatched) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setState(() {});
+      });
     }
   }
 
@@ -415,9 +430,7 @@ class _ImportSalesPreviewScreenState extends State<ImportSalesPreviewScreen> {
                     return _buildEmptyState();
                   }
 
-                  if (_spgMappings.isEmpty && _productMappings.isEmpty) {
-                    _autoMatch(spgState, productState);
-                  }
+                  _autoMatch(spgState, productState);
 
                   final unmatchedCount = _countUnmatched();
                   final matchedCount = widget.importItems.length - unmatchedCount;

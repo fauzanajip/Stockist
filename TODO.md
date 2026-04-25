@@ -143,6 +143,10 @@
 | 90  | Picker BottomSheets: SPG/Product selection dialogs           | ✅ DONE    | Industrial Precision style, check icon      |
 | 91  | Route: /event/:eventId/import_sales_preview                  | ✅ DONE    | app_router.dart with extra param            |
 | 92  | Menu: IMPORT SALES tile in Event Dashboard                   | ✅ DONE    | Icon: upload_file_outlined, Color: tertiary |
+| 93  | Fix: Track last SPG name for merged cells                    | ✅ DONE    | Excel rows use previous SPG if empty        |
+| 94  | Fix: EventDashboardView reload data per event                | ✅ DONE    | Convert to StatefulWidget, initState loads blocs |
+| 95  | Fix: Auto-match trim DB names before compare                 | ✅ DONE    | s.name.trim().toUpperCase() comparison      |
+| 96  | Fix: setState after auto-match for bottom bar                | ✅ DONE    | PostFrameCallback triggers rebuild          |
 
 ## Completed Features (Summary)
 
@@ -171,8 +175,8 @@
 
 ## Progress Summary
 
-- ✅ Completed: 92/92 (100%)
-- ⏳ Pending: 0/92 (0%)
+- ✅ Completed: 96/96 (100%)
+- ⏳ Pending: 0/96 (0%)
 
 ## PRD Reference
 

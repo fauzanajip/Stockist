@@ -145,16 +145,17 @@ class BackupScreen extends StatelessWidget {
                         final result = await FilePicker.platform.pickFiles(
                           type: FileType.custom,
                           allowedExtensions: ['json'],
+                          withData: true,
                         );
 
-                        if (result != null && result.files.single.path != null) {
-                          final filePath = result.files.single.path!;
-                          final fileName = result.files.single.name;
+                        if (result != null && result.files.isNotEmpty) {
+                          final platformFile = result.files.single;
+                          final fileName = platformFile.name;
 
                           final confirmed = await _showConfirmDialog(context, fileName);
                           if (confirmed == true) {
                             try {
-                              await BackupService.importBackup(filePath);
+                              await BackupService.importBackup(platformFile);
 
                               // Reload all blocs
                               context.read<EventBloc>().add(LoadAllEvents());

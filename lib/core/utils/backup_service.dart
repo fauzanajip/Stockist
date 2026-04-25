@@ -1,6 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
+import 'downloader/downloader.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:uuid/uuid.dart';
 import '../../data/data_sources/database_helper.dart';
@@ -33,19 +37,19 @@ class BackupService {
       };
 
       final jsonString = JsonEncoder.withIndent('  ').convert(backupData);
+      final fileName = 'stockist_backup_${DateTime.now().millisecondsSinceEpoch}.json';
 
-      // Save to file
-      final directory = await getApplicationDocumentsDirectory();
-      final fileName =
-          'stockist_backup_${DateTime.now().millisecondsSinceEpoch}.json';
-      final filePath = '${directory.path}/$fileName';
-
-      final file = File(filePath);
-      await file.writeAsString(jsonString);
-
-      // Share via Android Share Sheet
-      final xFile = XFile(filePath);
-      await Share.shareXFiles([xFile], text: 'Backup Data Stockist App');
+      if (kIsWeb) {
+        final bytes = utf8.encode(jsonString);
+        await downloadFile(bytes, fileName, mimeType: 'application/json');
+      } else {
+        final directory = await getApplicationDocumentsDirectory();
+        final filePath = '${directory.path}/$fileName';
+        final file = File(filePath);
+        await file.writeAsString(jsonString);
+        final xFile = XFile(filePath);
+        await Share.shareXFiles([xFile], text: 'Backup Data Stockist App');
+      }
 
       // Log backup
       await db.insert('backup_logs', {
@@ -108,16 +112,19 @@ class BackupService {
       };
 
       final jsonString = JsonEncoder.withIndent('  ').convert(backupData);
-
-      final directory = await getApplicationDocumentsDirectory();
       final fileName = 'stockist_event_$eventId.json';
-      final filePath = '${directory.path}/$fileName';
 
-      final file = File(filePath);
-      await file.writeAsString(jsonString);
-
-      final xFile = XFile(filePath);
-      await Share.shareXFiles([xFile], text: 'Backup Data Event Stockist');
+      if (kIsWeb) {
+        final bytes = utf8.encode(jsonString);
+        await downloadFile(bytes, fileName, mimeType: 'application/json');
+      } else {
+        final directory = await getApplicationDocumentsDirectory();
+        final filePath = '${directory.path}/$fileName';
+        final file = File(filePath);
+        await file.writeAsString(jsonString);
+        final xFile = XFile(filePath);
+        await Share.shareXFiles([xFile], text: 'Backup Data Event Stockist');
+      }
 
       await db.insert('backup_logs', {
         'id': const Uuid().v4(),
@@ -133,10 +140,15 @@ class BackupService {
   }
 
   /// Import backup from JSON file
-  static Future<void> importBackup(String filePath) async {
+  static Future<void> importBackup(PlatformFile file) async {
     try {
-      final file = File(filePath);
-      final jsonString = await file.readAsString();
+      String jsonString;
+      if (kIsWeb) {
+        jsonString = utf8.decode(file.bytes!);
+      } else {
+        jsonString = await File(file.path!).readAsString();
+      }
+      
       final backupData = jsonDecode(jsonString) as Map<String, dynamic>;
 
       final db = await DatabaseHelper.instance.database;
@@ -306,7 +318,7 @@ class BackupService {
       await db.insert('backup_logs', {
         'id': const Uuid().v4(),
         'event_id': eventId ?? '',
-        'file_name': filePath.split('/').last,
+        'file_name': file.name,
         'timestamp': DateTime.now().toIso8601String(),
         'status': 'success',
         'created_at': DateTime.now().toIso8601String(),
