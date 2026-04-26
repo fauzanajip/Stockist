@@ -103,4 +103,22 @@ class EventSpgRepositoryImpl implements EventSpgRepository {
       throw AppDatabaseException(message: 'Gagal hapus Event SPG: $e');
     }
   }
+
+  @override
+  Future<String?> getSpbIdBySpg(String eventId, String spgId) async {
+    try {
+      final db = await dbHelper.database;
+      final List<Map<String, dynamic>> maps = await db.query(
+        'event_spgs',
+        where: 'event_id = ? AND spg_id = ?',
+        whereArgs: [eventId, spgId],
+      );
+      if (maps.isNotEmpty) {
+        return maps.first['spb_id'] as String?;
+      }
+      return null;
+    } catch (e) {
+      throw AppDatabaseException(message: 'Gagal mengambil SPB ID: $e');
+    }
+  }
 }

@@ -21,6 +21,7 @@ class AppColors {
   static const Color surface = Color(0xFF1B1B1F);
   static const Color surfaceContainer = Color(0xFF25252A);
   static const Color surfaceContainerHigh = Color(0xFF2F2F35);
+  static const Color surfaceContainerHighest = Color(0xFF3A3A40);
 
   // Text Colors
   static const Color onSurface = Color(0xFFE8E8E8);
@@ -28,6 +29,7 @@ class AppColors {
 
   // Status Colors
   static const Color success = Color(0xFF10B981);
+  static const Color onSuccess = Color(0xFFFFFFFF);
   static const Color error = Color(0xFFEF4444);
   static const Color warning = Color(0xFFF59E0B);
 }

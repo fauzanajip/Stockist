@@ -12,6 +12,7 @@ import '../../presentation/screens/stock/bulk_topup_screen.dart';
 import '../../presentation/screens/stock/topup_screen.dart';
 import '../../presentation/screens/stock/return_screen.dart';
 import '../../presentation/screens/stock/stock_history_screen.dart';
+import '../../presentation/screens/stock/stock_distribution_screen.dart';
 import '../../presentation/screens/sales/sales_input_screen.dart';
 import '../../presentation/screens/sales/import_sales_screen.dart';
 import '../../presentation/screens/cash/cash_input_screen.dart';
@@ -152,6 +153,16 @@ class AppRouter {
         builder: (context, state) {
           final eventId = state.pathParameters['eventId']!;
           return BulkTopupScreen(eventId: eventId);
+        },
+      ),
+
+      // Stock Distribution Route
+      GoRoute(
+        path: '/event/:eventId/stock_distribution',
+        name: 'stock_distribution',
+        builder: (context, state) {
+          final eventId = state.pathParameters['eventId']!;
+          return StockDistributionScreen(eventId: eventId);
         },
       ),
 

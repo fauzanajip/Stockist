@@ -11,6 +11,7 @@ import '../data/repositories/sales_repository_impl.dart';
 import '../data/repositories/cash_record_repository_impl.dart';
 import '../data/repositories/backup_log_repository_impl.dart';
 import '../data/repositories/spg_product_target_repository_impl.dart';
+import '../data/repositories/pending_topup_repository_impl.dart';
 import '../domain/repositories/event_repository.dart';
 import '../domain/repositories/product_repository.dart';
 import '../domain/repositories/spg_repository.dart';
@@ -22,6 +23,7 @@ import '../domain/repositories/sales_repository.dart';
 import '../domain/repositories/cash_record_repository.dart';
 import '../domain/repositories/backup_log_repository.dart';
 import '../domain/repositories/spg_product_target_repository.dart';
+import '../domain/repositories/pending_topup_repository.dart';
 import '../domain/usecases/event_usecases.dart';
 import '../domain/usecases/product_usecases.dart';
 import '../domain/usecases/spg_usecases.dart';
@@ -32,6 +34,7 @@ import '../domain/usecases/stock_mutation_usecases.dart';
 import '../domain/usecases/sales_usecases.dart';
 import '../domain/usecases/cash_record_usecases.dart';
 import '../domain/usecases/spg_product_target_usecases.dart';
+import '../domain/usecases/pending_topup_usecases.dart';
 import '../presentation/blocs/event_bloc/event_bloc.dart';
 import '../presentation/blocs/spg_bloc/spg_bloc.dart';
 import '../presentation/blocs/product_bloc/product_bloc.dart';
@@ -42,6 +45,7 @@ import '../presentation/blocs/event_spg_bloc/event_spg_bloc.dart';
 import '../presentation/blocs/event_product_bloc/event_product_bloc.dart';
 import '../presentation/blocs/spb_bloc/spb_bloc.dart';
 import '../presentation/blocs/spg_target_bloc/spg_target_bloc.dart';
+import '../presentation/blocs/pending_topup_bloc/pending_topup_bloc.dart';
 
 final sl = GetIt.instance;
 
@@ -82,6 +86,9 @@ Future<void> initDependencies() async {
   );
   sl.registerLazySingleton<SpgProductTargetRepository>(
     () => SpgProductTargetRepositoryImpl(dbHelper: sl()),
+  );
+  sl.registerLazySingleton<PendingTopupRepository>(
+    () => PendingTopupRepositoryImpl(dbHelper: sl()),
   );
 
   // Use Cases - Event
@@ -164,6 +171,14 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton(() => DeleteSpgProductTarget(sl()));
   sl.registerLazySingleton(() => BulkCreateOrUpdateTargets(sl()));
 
+  // Use Cases - Pending Topup
+  sl.registerLazySingleton(() => GetPendingTopupsByEvent(sl()));
+  sl.registerLazySingleton(() => GetPendingTopupsByEventAndSpb(sl()));
+  sl.registerLazySingleton(() => CreatePendingTopupUsecase(sl()));
+  sl.registerLazySingleton(() => UpdatePendingTopupUsecase(sl()));
+  sl.registerLazySingleton(() => DeletePendingTopupUsecase(sl()));
+  sl.registerLazySingleton(() => GetPendingTopupById(sl()));
+
   // Blocs
   sl.registerFactory(
     () => EventBloc(
@@ -216,6 +231,9 @@ Future<void> initDependencies() async {
       getWarehouseStockByProduct: sl(),
       getDistributedByProduct: sl(),
       getReturnsByProduct: sl(),
+      createPendingTopup: sl(),
+      pendingTopupRepository: sl(),
+      eventSpgRepository: sl(),
     ),
   );
 
@@ -264,6 +282,19 @@ Future<void> initDependencies() async {
       updateSpgProductTarget: sl(),
       deleteSpgProductTarget: sl(),
       bulkCreateOrUpdateTargets: sl(),
+    ),
+  );
+  sl.registerFactory(
+    () => PendingTopupBloc(
+      getPendingTopupsByEvent: sl(),
+      getPendingTopupsByEventAndSpb: sl(),
+      createPendingTopup: sl(),
+      updatePendingTopup: sl(),
+      deletePendingTopup: sl(),
+      getPendingTopupById: sl(),
+      createStockMutation: sl(),
+      deleteStockMutation: sl(),
+      eventSpgRepository: sl(),
     ),
   );
 }

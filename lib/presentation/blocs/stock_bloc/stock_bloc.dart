@@ -1,7 +1,11 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../domain/entities/stock_mutation_entity.dart';
+import '../../../domain/entities/pending_topup_entity.dart';
 import '../../../domain/usecases/stock_mutation_usecases.dart';
 import '../../../domain/usecases/sales_usecases.dart';
+import '../../../domain/usecases/pending_topup_usecases.dart';
+import '../../../domain/repositories/event_spg_repository.dart';
+import '../../../domain/repositories/pending_topup_repository.dart';
 import 'stock_event.dart';
 import 'stock_state.dart';
 
@@ -18,6 +22,9 @@ class StockBloc extends Bloc<StockEvent, StockState> {
   final GetWarehouseStockByProduct getWarehouseStockByProduct;
   final GetDistributedByProduct getDistributedByProduct;
   final GetReturnsByProduct getReturnsByProduct;
+  final CreatePendingTopupUsecase createPendingTopup;
+  final PendingTopupRepository pendingTopupRepository;
+  final EventSpgRepository eventSpgRepository;
 
   StockBloc({
     required this.createStockMutation,
@@ -32,6 +39,9 @@ class StockBloc extends Bloc<StockEvent, StockState> {
     required this.getWarehouseStockByProduct,
     required this.getDistributedByProduct,
     required this.getReturnsByProduct,
+    required this.createPendingTopup,
+    required this.pendingTopupRepository,
+    required this.eventSpgRepository,
   }) : super(const StockState()) {
     on<CreateInitialDistribution>(_onCreateInitialDistribution);
     on<BulkCreateOrUpdateInitialDistributionEvent>(_onBulkCreateOrUpdateInitialDistribution);
@@ -85,13 +95,29 @@ class StockBloc extends Bloc<StockEvent, StockState> {
   ) async {
     try {
       emit(state.copyWith(isLoading: true, errorMessage: null));
-      await createStockMutation(
+      final mutation = await createStockMutation(
         CreateStockMutationParams(
           eventId: event.eventId,
           spgId: event.spgId,
           productId: event.productId,
           qty: event.qty,
           type: MutationType.initial,
+        ),
+      );
+      final spbId = await eventSpgRepository.getSpbIdBySpg(event.eventId, event.spgId);
+      await createPendingTopup(
+        PendingTopupEntity(
+          id: '',
+          eventId: event.eventId,
+          spbId: spbId,
+          spgId: event.spgId,
+          productId: event.productId,
+          qty: event.qty,
+          type: PendingTopupType.initial,
+          isChecked: true,
+          stockMutationId: mutation.id,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
         ),
       );
       add(LoadStockByEvent(eventId: event.eventId));
@@ -107,6 +133,31 @@ class StockBloc extends Bloc<StockEvent, StockState> {
     try {
       emit(state.copyWith(isLoading: true, errorMessage: null));
       await bulkCreateOrUpdateInitialStock(event.distributions);
+      for (final dist in event.distributions) {
+        if (dist.qty > 0) {
+          final spbId = await eventSpgRepository.getSpbIdBySpg(dist.eventId, dist.spgId);
+          final mutations = await getStockMutationsByEvent(dist.eventId);
+          final mutation = mutations.firstWhere(
+            (m) => m.spgId == dist.spgId && m.productId == dist.productId && m.type == MutationType.initial,
+            orElse: () => throw Exception('Mutation not found'),
+          );
+          await createPendingTopup(
+            PendingTopupEntity(
+              id: '',
+              eventId: dist.eventId,
+              spbId: spbId,
+              spgId: dist.spgId,
+              productId: dist.productId,
+              qty: dist.qty,
+              type: PendingTopupType.initial,
+              isChecked: true,
+              stockMutationId: mutation.id,
+              createdAt: DateTime.now(),
+              updatedAt: DateTime.now(),
+            ),
+          );
+        }
+      }
       if (event.distributions.isNotEmpty) {
         add(LoadStockByEvent(eventId: event.distributions.first.eventId));
       }
@@ -122,7 +173,7 @@ class StockBloc extends Bloc<StockEvent, StockState> {
   ) async {
     try {
       emit(state.copyWith(isLoading: true, errorMessage: null));
-      await createStockMutation(
+      final mutation = await createStockMutation(
         CreateStockMutationParams(
           eventId: event.eventId,
           spgId: event.spgId,
@@ -130,6 +181,22 @@ class StockBloc extends Bloc<StockEvent, StockState> {
           qty: event.qty,
           type: MutationType.topup,
           note: event.note,
+        ),
+      );
+      final spbId = await eventSpgRepository.getSpbIdBySpg(event.eventId, event.spgId);
+      await createPendingTopup(
+        PendingTopupEntity(
+          id: '',
+          eventId: event.eventId,
+          spbId: spbId,
+          spgId: event.spgId,
+          productId: event.productId,
+          qty: event.qty,
+          type: PendingTopupType.topup,
+          isChecked: true,
+          stockMutationId: mutation.id,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
         ),
       );
       add(LoadStockByEvent(eventId: event.eventId));
@@ -146,7 +213,7 @@ class StockBloc extends Bloc<StockEvent, StockState> {
       emit(state.copyWith(isLoading: true, errorMessage: null));
       for (final topup in event.topups) {
         if (topup.qty > 0) {
-          await createStockMutation(
+          final mutation = await createStockMutation(
             CreateStockMutationParams(
               eventId: topup.eventId,
               spgId: topup.spgId,
@@ -154,6 +221,22 @@ class StockBloc extends Bloc<StockEvent, StockState> {
               qty: topup.qty,
               type: MutationType.topup,
               note: null,
+            ),
+          );
+          final spbId = await eventSpgRepository.getSpbIdBySpg(topup.eventId, topup.spgId);
+          await createPendingTopup(
+            PendingTopupEntity(
+              id: '',
+              eventId: topup.eventId,
+              spbId: spbId,
+              spgId: topup.spgId,
+              productId: topup.productId,
+              qty: topup.qty,
+              type: PendingTopupType.topup,
+              isChecked: true,
+              stockMutationId: mutation.id,
+              createdAt: DateTime.now(),
+              updatedAt: DateTime.now(),
             ),
           );
         }

@@ -7,4 +7,5 @@ abstract class EventSpgRepository {
   Future<EventSpgEntity> update(EventSpgEntity eventSpg);
   Future<void> delete(String id);
   Future<void> deleteByEvent(String eventId);
+  Future<String?> getSpbIdBySpg(String eventId, String spgId);
 }

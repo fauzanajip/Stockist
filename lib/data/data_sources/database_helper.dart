@@ -192,6 +192,28 @@ class DatabaseHelper {
         FOREIGN KEY (product_id) REFERENCES products(id)
       )
     ''');
+
+    // Pending Topups
+    await db.execute('''
+      CREATE TABLE pending_topups (
+        id TEXT PRIMARY KEY,
+        event_id TEXT NOT NULL,
+        spb_id TEXT,
+        spg_id TEXT NOT NULL,
+        product_id TEXT NOT NULL,
+        qty INTEGER NOT NULL,
+        type TEXT NOT NULL,
+        is_checked INTEGER NOT NULL DEFAULT 0,
+        stock_mutation_id TEXT,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
+        FOREIGN KEY (spb_id) REFERENCES spbs(id),
+        FOREIGN KEY (spg_id) REFERENCES spgs(id),
+        FOREIGN KEY (product_id) REFERENCES products(id),
+        FOREIGN KEY (stock_mutation_id) REFERENCES stock_mutations(id)
+      )
+    ''');
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -217,11 +239,34 @@ class DatabaseHelper {
         )
       ''');
     }
+    if (oldVersion < 4) {
+      await db.execute('''
+        CREATE TABLE pending_topups (
+          id TEXT PRIMARY KEY,
+          event_id TEXT NOT NULL,
+          spb_id TEXT,
+          spg_id TEXT NOT NULL,
+          product_id TEXT NOT NULL,
+          qty INTEGER NOT NULL,
+          type TEXT NOT NULL,
+          is_checked INTEGER NOT NULL DEFAULT 0,
+          stock_mutation_id TEXT,
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL,
+          FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
+          FOREIGN KEY (spb_id) REFERENCES spbs(id),
+          FOREIGN KEY (spg_id) REFERENCES spgs(id),
+          FOREIGN KEY (product_id) REFERENCES products(id),
+          FOREIGN KEY (stock_mutation_id) REFERENCES stock_mutations(id)
+        )
+      ''');
+    }
   }
 
   Future<void> clearAllData() async {
     final db = await database;
     await db.transaction((txn) async {
+      await txn.delete('pending_topups');
       await txn.delete('spg_product_targets');
       await txn.delete('backup_logs');
       await txn.delete('cash_records');

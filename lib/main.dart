@@ -17,6 +17,7 @@ import 'presentation/blocs/event_spg_bloc/event_spg_bloc.dart';
 import 'presentation/blocs/event_product_bloc/event_product_bloc.dart';
 import 'presentation/blocs/spb_bloc/spb_bloc.dart';
 import 'presentation/blocs/spg_target_bloc/spg_target_bloc.dart';
+import 'presentation/blocs/pending_topup_bloc/pending_topup_bloc.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -51,6 +52,7 @@ class StockistApp extends StatelessWidget {
           create: (context) => sl<EventProductBloc>(),
         ),
         BlocProvider<SpgTargetBloc>(create: (context) => sl<SpgTargetBloc>()),
+        BlocProvider<PendingTopupBloc>(create: (context) => sl<PendingTopupBloc>()),
       ],
       child: MaterialApp.router(
         title: 'Stockist App',
