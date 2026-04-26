@@ -161,6 +161,38 @@
 | 103 | UI: Execute Sales then Cash sequentially                     | ✅ DONE    | SalesBloc listener triggers CashBloc import |
 | 104 | UI: Loading indicator shows "SALES..." or "CASH..."          | ✅ DONE    | Conditional text based on saving state      |
 
+## Pending Topup System (Session 2026-04-26)
+
+| #   | Task                                                         | Status     | Notes                                       |
+| --- | ------------------------------------------------------------ | ---------- | ------------------------------------------- |
+| 105 | Data Layer: pending_topups table + migration (v4)           | ✅ DONE    | Fields: id, event_id, spb_id, spg_id, product_id, qty, type, is_checked, stock_mutation_id |
+| 106 | Entity: PendingTopupEntity with type enum (initial/topup)    | ✅ DONE    | pending_topup_entity.dart                   |
+| 107 | Model: PendingTopupModel with fromMap/toMap/fromEntity      | ✅ DONE    | pending_topup_model.dart                    |
+| 108 | Repository: PendingTopupRepository interface + impl         | ✅ DONE    | CRUD + getByEvent + getByEventAndSpb        |
+| 109 | EventSpgRepository: Add getSpbIdBySpg(eventId, spgId)        | ✅ DONE    | Lookup SPB for auto-topup from other menus  |
+| 110 | Domain: 6 usecases (GetByEvent, GetBySpb, Create, Update, Delete, GetById) | ✅ DONE | pending_topup_usecases.dart                 |
+| 111 | Bloc: PendingTopupBloc with toggle checkbox logic           | ✅ DONE    | Toggle creates/deletes stock mutation       |
+| 112 | StockBloc: Modify handlers to create pending_topups         | ✅ DONE    | CreateInitial, BulkInitial, CreateTopup, BulkTopup all create pending_topup entries |
+| 113 | UI: StockDistributionScreen with responsive layout          | ✅ DONE    | Web: left-right, Mobile: tabs               |
+| 114 | History table: TYPE/SPB columns + disabled checkbox for INITIAL | ✅ DONE | Checkbox disabled for type=initial          |
+| 115 | Add form: SPB dropdown → SPG dropdown (filtered) → Product  | ✅ DONE    | DropdownButtonFormField with type annotations |
+| 116 | Stock info panel: SPG stock + Warehouse available           | ✅ DONE    | Real-time calculation on selection          |
+| 117 | Product dropdown: stock badge ("WH: XX" or "OUT OF STOCK")  | ✅ DONE    | Color indicator for out-of-stock            |
+| 118 | Quick actions: INITIAL DISTRIBUTION + RESUPPLY buttons      | ✅ DONE    | Navigate to bulk screens                    |
+| 119 | Route + Menu: STOCK DISTRIBUTION replaces INITIAL/RESUPPLY  | ✅ DONE    | Unified hub in Event Dashboard              |
+
+## Master Data Batch Import (Session 2026-04-26)
+
+| #   | Task                                                         | Status     | Notes                                       |
+| --- | ------------------------------------------------------------ | ---------- | ------------------------------------------- |
+| 120 | Bloc: BatchCreateSpbsEvent + handler                         | ✅ DONE    | Batch creation for SPB master               |
+| 121 | Bloc: BatchCreateSpgsEvent + handler                         | ✅ DONE    | Batch creation for SPG master               |
+| 122 | Bloc: BatchCreateProductsEvent + handler                     | ✅ DONE    | Batch creation for Product master           |
+| 123 | Repository: Duplicate name validation (case-insensitive)     | ✅ DONE    | Check before insert, throw DuplicateException |
+| 124 | ExcelImportService: Template generation + parsing            | ✅ DONE    | Generate .xlsx template, parse import file   |
+| 125 | UI: Batch entry form with animated list                      | ✅ DONE    | Add/remove rows, error display              |
+| 126 | UI: Import from Excel button + file picker                   | ✅ DONE    | Import flow with duplicate validation       |
+
 ## Completed Features (Summary)
 
 1. StockCalculator - all business logic calculations
@@ -183,13 +215,15 @@
 18. **Save + Open + Share**: Full Excel export workflow.
 19. **Industrial Precision Overhaul**: Tactical "Command Center" aesthetic across all screens.
 20. **Sales Import from Excel**: Import external Transaction Report with preview & mapping UI.
+21. **Pending Topup System**: Unified stock distribution hub with pending/processed tracking.
+22. **Master Data Batch Import**: Batch creation + duplicate validation + Excel import.
 
 ---
 
 ## Progress Summary
 
-- ✅ Completed: 104/104 (100%)
-- ⏳ Pending: 0/104 (0%)
+- ✅ Completed: 126/126 (100%)
+- ⏳ Pending: 0/126 (0%)
 
 ## PRD Reference
 
@@ -197,9 +231,14 @@
 - PRD Section 6.2: Setup Data (Event Setup) ✅
 - PRD Section 6.3-6.8: Stock & Sales operations ✅
 - PRD Section 6.9: Edit & Delete Distribusi ✅
+- PRD Section 6.10: Local Backup ✅
+- PRD Section 6.11: Stock Distribution Hub (Pending Topup System) ✅
+- PRD Section 6.12: Master Data Batch Import ✅
 - PRD Section 7.1: Home Screen (Active Event Dashboard) ✅
 - PRD Section 8: Export Excel ✅
 - **Design System**: Industrial Precision Tactical UI ✅
 - **Sales Target**: Per-SPG per-product target qty with progress tracking ✅
 - **Bulk Initial Distribution**: Upsert warehouse-limited initial stock ✅
 - **Sales Import**: Import sales data from external Excel/CSV with preview & mapping ✅
+- **Pending Topup System**: Unified hub with toggle checkbox ✅
+- **Master Data Batch Import**: Batch creation + Excel import ✅

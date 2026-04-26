@@ -2,7 +2,7 @@
 
 ## Mobile Offline Stock & SPG Reconciliation App
 
-**Versi:** 2.13 — Sales & Cash Import Complete  
+**Versi:** 2.14 — Pending Topup System & Master Data Batch Import  
 **Tanggal:** April 2026
 
 ---
@@ -244,6 +244,30 @@ status (success | failed)
 
 ---
 
+### 4.11 Pending Topups
+
+```
+id
+event_id
+spb_id (nullable)
+spg_id
+product_id
+qty
+type (initial | topup)
+is_checked (0 | 1)
+stock_mutation_id (nullable)
+created_at
+updated_at
+```
+
+> ✅ **Purpose**: Unified tracking for all stock distributions (initial & topup).  
+> ✅ `type`: INITIAL records are auto-checked (disabled checkbox), TOPUP can be toggled.  
+> ✅ `is_checked`: 0 = pending (not yet processed), 1 = processed (stock mutation created).  
+> ✅ `stock_mutation_id`: Links to the actual stock mutation when processed.  
+> ✅ All topups from other menus (batch, single, SPG detail) also create pending_topup entries with `is_checked=1`.
+
+---
+
 ## 5. 🔄 Core Logic
 
 ---
@@ -460,6 +484,89 @@ User input tambahan:
 
 > ✅ Format backup dipilih: **JSON** (lebih portable, bisa dibaca manual jika perlu restore).  
 > ⚠️ Reminder otomatis muncul setiap 4 jam atau setelah sesi distribusi besar.
+
+---
+
+### 6.11 Stock Distribution Hub (Pending Topup System)
+
+**Purpose**: Unified management for all stock-to-SPG operations with pending/processed tracking.
+
+**Entry Point**: Event Dashboard → MANAGEMENT section → "STOCK DISTRIBUTION" button
+
+**Unified Hub**:
+- Replaces separate INITIAL DISTRIBUTION and RESUPPLY menu tiles
+- Quick action buttons inside for accessing bulk operations
+
+**Pending Topup System**:
+- All topups (initial, batch, single, SPG detail) create `pending_topups` entries
+- `type`: INITIAL (auto-checked, disabled checkbox) | TOPUP (toggleable checkbox)
+- `is_checked`: 0 = pending (waiting), 1 = processed (stock mutation created)
+
+**History Table Columns**:
+| CHK | TYPE | SPB | SPG | PRODUCT | QTY | CREATED AT |
+|------|------|-----|-----|---------|-----|------------|
+| Checkbox (disabled for INITIAL) | INITIAL/TOPUP badge | SPB name or "-" | SPG name | Product name | Quantity | Timestamp |
+
+**Checkbox Behavior**:
+- INITIAL type: Disabled (grayed out, always checked)
+- TOPUP type: Clickable - toggle creates/deletes stock mutation
+
+**Add Topup Form**:
+- SPB dropdown (optional, "All SPGs" option) - filters SPG list
+- SPG dropdown (filtered by SPB selection)
+- Product dropdown (shows warehouse stock badge: "WH: XX" or "OUT OF STOCK")
+- Qty input with validation: block if qty > warehouse available
+- Real-time stock info panel: SPG stock + Warehouse available
+
+**Responsive Layout**:
+- Web (>600px): Left panel (History) | Right panel (Add form + Quick actions)
+- Mobile (<600px): Tabs - "HISTORY" tab | "ADD" tab
+
+**Quick Actions Section**:
+- INITIAL DISTRIBUTION button → navigates to bulk_initial screen
+- RESUPPLY button → navigates to bulk_topup screen
+
+**SPB Filter in History**:
+- Dropdown at top of history section
+- "All SPGs" option + individual SPB names
+- Filters displayed records by `spb_id`
+
+---
+
+### 6.12 Master Data Batch Import
+
+**Purpose**: Create multiple SPB/SPG/Product records via batch entry or Excel import.
+
+**Entry Points**:
+- Settings → Master Data tabs (SPB Master, SPG Master, Product Master)
+- Each master screen has "BATCH ENTRY" and "IMPORT FROM EXCEL" buttons
+
+**Batch Entry Form**:
+- Animated list of name input fields
+- Add/Remove row buttons
+- Duplicate validation: Case-insensitive check before insert
+- Error display for duplicate names
+
+**Excel Import**:
+- Template generation button (download .xlsx template)
+- File picker for import (xlsx, xls, csv)
+- Parsing: One name per row, skip empty rows
+- Duplicate validation during import
+- Success/error feedback
+
+**Duplicate Validation Logic**:
+```dart
+// Case-insensitive duplicate check
+existing = repository.getAll().where((e) => 
+  e.name.trim().toUpperCase() == newName.trim().toUpperCase()
+).firstOrNull;
+if (existing != null) throw DuplicateException;
+```
+
+**Batch Creation Bloc Events**:
+- `BatchCreateSpbsEvent(List<String> names)`
+- `BatchCreateSpgsEvent(List<String> names)`
+- `BatchCreateProductsEvent(List<ProductData> items)`
 
 ---
 
@@ -923,6 +1030,7 @@ Static (same for all SPGs) - current warehouse stock remaining.
 
 | Versi | Perubahan                                                                                                                                                                                                                                                 |
 | ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v2.14 | **Pending Topup System & Master Data Batch Import**: Unified Stock Distribution hub (replaces separate INITIAL/RESUPPLY menus); Pending topup tracking with toggle checkbox (disabled for INITIAL type); SPB filter in history; Real-time stock info panel (SPG + Warehouse); Batch creation for SPB/SPG/Product; Duplicate name validation (case-insensitive); Excel import with template generation; Responsive layout (web/mobile tabs). |
 | v2.13 | **Sales & Cash Import Complete**: Import sales (replace mode) + cash (upsert mode) from Transaction Report; Cash Summary section in preview; Sequential execution with loading indicator; Total Cash → cashReceived, Total Non-Cash → qrisReceived; Dedupe cash per unique SPG. |
 | v2.12.1 | **Sales Import Bug Fixes**: Fix merged cells (track last SPG name); Event isolation (EventDashboardView StatefulWidget with initState bloc loading); Auto-match trim DB names; setState via PostFrameCallback for bottom bar rebuild; CSV parser added. |
 | v2.12 | **Sales Import from Excel**: Import external Transaction Report (xlsx/csv); Preview screen with auto-match & manual mapping; Picker BottomSheets (Industrial Precision style); Replace mode (delete existing + insert new); Entry: IMPORT SALES in Event Dashboard; FilePicker integration; qtySold > 0 validation. |
