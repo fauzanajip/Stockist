@@ -290,4 +290,103 @@ class ExcelImportService {
     result.add(currentField.toString());
     return result;
   }
+
+  // --- Master Data Section ---
+
+  static List<int>? generateProductTemplate() {
+    final excel = Excel.createExcel();
+    final sheet = excel['Sheet1'];
+    
+    // Header
+    sheet.appendRow([
+      TextCellValue('ASSET_NAME'),
+      TextCellValue('SKU_ID'),
+      TextCellValue('BASE_VALUE'),
+    ]);
+
+    // Sample
+    sheet.appendRow([
+      TextCellValue('EXAMPLE PRODUCT'),
+      TextCellValue('SKU001'),
+      IntCellValue(25000),
+    ]);
+
+    return excel.encode();
+  }
+
+  static List<int>? generateNameOnlyTemplate(String header) {
+    final excel = Excel.createExcel();
+    final sheet = excel['Sheet1'];
+    
+    sheet.appendRow([TextCellValue(header)]);
+    sheet.appendRow([TextCellValue('EXAMPLE NAME')]);
+
+    return excel.encode();
+  }
+
+  static Future<List<Map<String, dynamic>>> parseProductExcel(PlatformFile platformFile) async {
+    final bytes = kIsWeb ? platformFile.bytes! : await File(platformFile.path!).readAsBytes();
+    final excel = Excel.decodeBytes(bytes);
+    final result = <Map<String, dynamic>>[];
+
+    for (final sheetName in excel.tables.keys) {
+      final sheet = excel[sheetName];
+      if (sheet == null || sheet.rows.isEmpty) continue;
+
+      final rows = sheet.rows;
+      final header = rows[0];
+      
+      final nameIdx = _findColumnIndex(header, 'ASSET_NAME');
+      final skuIdx = _findColumnIndex(header, 'SKU_ID');
+      final valIdx = _findColumnIndex(header, 'BASE_VALUE');
+
+      if (nameIdx == -1) continue;
+
+      for (int i = 1; i < rows.length; i++) {
+        final row = rows[i];
+        if (row.isEmpty) continue;
+
+        final name = _getCellValue(row[nameIdx]);
+        if (name.isEmpty) continue;
+
+        final sku = skuIdx != -1 ? _getCellValue(row[skuIdx]) : '';
+        final price = valIdx != -1 ? _getCellValueDouble(row[valIdx]) : 0.0;
+
+        result.add({
+          'name': name,
+          'sku': sku,
+          'price': price,
+        });
+      }
+    }
+    return result;
+  }
+
+  static Future<List<String>> parseNameOnlyExcel(PlatformFile platformFile, String headerName) async {
+    final bytes = kIsWeb ? platformFile.bytes! : await File(platformFile.path!).readAsBytes();
+    final excel = Excel.decodeBytes(bytes);
+    final result = <String>[];
+
+    for (final sheetName in excel.tables.keys) {
+      final sheet = excel[sheetName];
+      if (sheet == null || sheet.rows.isEmpty) continue;
+
+      final rows = sheet.rows;
+      final header = rows[0];
+      final nameIdx = _findColumnIndex(header, headerName);
+
+      if (nameIdx == -1) continue;
+
+      for (int i = 1; i < rows.length; i++) {
+        final row = rows[i];
+        if (row.isEmpty) continue;
+
+        final name = _getCellValue(row[nameIdx]).trim();
+        if (name.isNotEmpty) {
+          result.add(name);
+        }
+      }
+    }
+    return result;
+  }
 }

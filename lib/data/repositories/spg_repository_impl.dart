@@ -58,10 +58,22 @@ class SpgRepositoryImpl implements SpgRepository {
     }
   }
 
+  Future<void> _checkDuplicateName(dynamic db, String name, [String? excludeId]) async {
+    final List<Map<String, dynamic>> result = await db.query(
+      'spgs',
+      where: excludeId != null ? 'LOWER(name) = LOWER(?) AND id != ?' : 'LOWER(name) = LOWER(?)',
+      whereArgs: excludeId != null ? [name, excludeId] : [name],
+    );
+    if (result.isNotEmpty) {
+      throw AppDatabaseException(message: 'SPG dengan nama tersebut sudah ada.');
+    }
+  }
+
   @override
   Future<SpgEntity> create(SpgEntity spg) async {
     try {
       final db = await dbHelper.database;
+      await _checkDuplicateName(db, spg.name);
       final model = SpgModel.fromEntity(spg);
       await db.insert('spgs', model.toMap());
       return model;
@@ -74,6 +86,7 @@ class SpgRepositoryImpl implements SpgRepository {
   Future<SpgEntity> update(SpgEntity spg) async {
     try {
       final db = await dbHelper.database;
+      await _checkDuplicateName(db, spg.name, spg.id);
       final model = SpgModel.fromEntity(
         spg,
       ).copyWith(updatedAt: DateTime.now());

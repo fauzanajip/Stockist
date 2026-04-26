@@ -19,6 +19,15 @@ class CreateSpbEvent extends SpbEvent {
   List<Object?> get props => [name];
 }
 
+class CreateMultipleSpbs extends SpbEvent {
+  final List<String> names;
+
+  const CreateMultipleSpbs({required this.names});
+
+  @override
+  List<Object?> get props => [names];
+}
+
 class UpdateSpbEvent extends SpbEvent {
   final SpbEntity spb;
 

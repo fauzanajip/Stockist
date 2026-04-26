@@ -42,10 +42,22 @@ class SpbRepositoryImpl implements SpbRepository {
     }
   }
 
+  Future<void> _checkDuplicateName(dynamic db, String name, [String? excludeId]) async {
+    final List<Map<String, dynamic>> result = await db.query(
+      'spbs',
+      where: excludeId != null ? 'LOWER(name) = LOWER(?) AND id != ?' : 'LOWER(name) = LOWER(?)',
+      whereArgs: excludeId != null ? [name, excludeId] : [name],
+    );
+    if (result.isNotEmpty) {
+      throw AppDatabaseException(message: 'SPB dengan nama tersebut sudah ada.');
+    }
+  }
+
   @override
   Future<SpbEntity> create(SpbEntity spb) async {
     try {
       final db = await dbHelper.database;
+      await _checkDuplicateName(db, spb.name);
       final model = SpbModel(
         id: const Uuid().v4(),
         name: spb.name,
@@ -72,6 +84,7 @@ class SpbRepositoryImpl implements SpbRepository {
   Future<SpbEntity> update(SpbEntity spb) async {
     try {
       final db = await dbHelper.database;
+      await _checkDuplicateName(db, spb.name, spb.id);
       final model = SpbModel.fromEntity(spb).copyWith(createdAt: DateTime.now());
       await db.update(
         'spbs',

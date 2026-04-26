@@ -22,9 +22,9 @@ class SpbsLoaded extends SpbState {
 }
 
 class SpbCreated extends SpbState {
-  final SpbEntity spb;
+  final SpbEntity? spb;
 
-  const SpbCreated({required this.spb});
+  const SpbCreated({this.spb});
 
   @override
   List<Object?> get props => [spb];

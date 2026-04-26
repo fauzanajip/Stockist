@@ -62,10 +62,22 @@ class ProductRepositoryImpl implements ProductRepository {
     }
   }
 
+  Future<void> _checkDuplicateName(dynamic db, String name, [String? excludeId]) async {
+    final List<Map<String, dynamic>> result = await db.query(
+      'products',
+      where: excludeId != null ? 'LOWER(name) = LOWER(?) AND id != ?' : 'LOWER(name) = LOWER(?)',
+      whereArgs: excludeId != null ? [name, excludeId] : [name],
+    );
+    if (result.isNotEmpty) {
+      throw AppDatabaseException(message: 'Product dengan nama tersebut sudah ada.');
+    }
+  }
+
   @override
   Future<ProductEntity> create(ProductEntity product) async {
     try {
       final db = await dbHelper.database;
+      await _checkDuplicateName(db, product.name);
       final model = ProductModel.fromEntity(product);
       await db.insert('products', model.toMap());
       return model;
@@ -78,6 +90,7 @@ class ProductRepositoryImpl implements ProductRepository {
   Future<ProductEntity> update(ProductEntity product) async {
     try {
       final db = await dbHelper.database;
+      await _checkDuplicateName(db, product.name, product.id);
       final model = ProductModel.fromEntity(
         product,
       ).copyWith(updatedAt: DateTime.now());

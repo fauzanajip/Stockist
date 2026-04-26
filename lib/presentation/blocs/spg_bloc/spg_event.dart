@@ -21,6 +21,15 @@ class CreateNewSpq extends SpgEvent {
   List<Object?> get props => [name];
 }
 
+class CreateMultipleSpqs extends SpgEvent {
+  final List<String> names;
+
+  const CreateMultipleSpqs({required this.names});
+
+  @override
+  List<Object?> get props => [names];
+}
+
 class UpdateSpgEvent extends SpgEvent {
   final SpgEntity spg;
 

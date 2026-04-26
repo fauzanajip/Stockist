@@ -42,9 +42,6 @@ dependencies:
   cupertino_icons: ^1.0.8
   google_fonts: ^6.1.0
   collection: ^1.19.1
-  
-  # Dropdown
-  dropdown_search: ^5.0.6
   sqflite_common_ffi: ^2.4.0+3
   sqflite_common_ffi_web: ^1.1.1
 

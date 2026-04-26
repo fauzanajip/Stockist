@@ -22,9 +22,9 @@ class ProductsLoaded extends ProductState {
 }
 
 class ProductCreated extends ProductState {
-  final ProductEntity product;
+  final ProductEntity? product;
 
-  const ProductCreated({required this.product});
+  const ProductCreated({this.product});
 
   @override
   List<Object?> get props => [product];

@@ -20,8 +20,42 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     on<LoadAllProducts>(_onLoadAllProducts);
     on<LoadActiveProducts>(_onLoadActiveProducts);
     on<CreateNewProduct>(_onCreateNewProduct);
+    on<CreateMultipleProducts>(_onCreateMultipleProducts);
     on<UpdateProduct>(_onUpdateProduct);
     on<SoftDeleteProductEvent>(_onSoftDeleteProduct);
+  }
+
+  Future<void> _onCreateMultipleProducts(
+    CreateMultipleProducts event,
+    Emitter<ProductState> emit,
+  ) async {
+    try {
+      emit(ProductLoading());
+      int successCount = 0;
+      List<String> errors = [];
+      
+      for (var p in event.products) {
+        try {
+          await createProduct(
+            usecase.CreateProductParams(name: p.name, sku: p.sku, price: p.price),
+          );
+          successCount++;
+        } catch (e) {
+          errors.add('${p.name}: ${e.toString().replaceAll('Exception: ', '')}');
+        }
+      }
+
+      if (errors.isNotEmpty) {
+        emit(ProductError(message: 'Sukses $successCount, Gagal ${errors.length}:\n${errors.take(2).join('\n')}${errors.length > 2 ? '\n...' : ''}'));
+      } else {
+        // Here we just use a mock product for the created state since UI just checks state type
+        emit(ProductCreated(product: null));
+      }
+      add(LoadActiveProducts());
+    } catch (e) {
+      emit(ProductError(message: e.toString()));
+      add(LoadActiveProducts());
+    }
   }
 
   Future<void> _onLoadAllProducts(
@@ -67,6 +101,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       add(LoadActiveProducts());
     } catch (e) {
       emit(ProductError(message: e.toString()));
+      add(LoadActiveProducts());
     }
   }
 

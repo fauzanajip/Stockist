@@ -20,8 +20,39 @@ class SpgBloc extends Bloc<SpgEvent, SpgState> {
     on<LoadAllSpqs>(_onLoadAllSpqs);
     on<LoadActiveSpqs>(_onLoadActiveSpqs);
     on<CreateNewSpq>(_onCreateNewSpq);
+    on<CreateMultipleSpqs>(_onCreateMultipleSpqs);
     on<UpdateSpgEvent>(_onUpdateSpg);
     on<SoftDeleteSpqEvent>(_onSoftDeleteSpq);
+  }
+
+  Future<void> _onCreateMultipleSpqs(
+    CreateMultipleSpqs event,
+    Emitter<SpgState> emit,
+  ) async {
+    try {
+      emit(SpgLoading());
+      int successCount = 0;
+      List<String> errors = [];
+      
+      for (var name in event.names) {
+        try {
+          await createSpg(name);
+          successCount++;
+        } catch (e) {
+          errors.add('$name: ${e.toString().replaceAll('Exception: ', '')}');
+        }
+      }
+
+      if (errors.isNotEmpty) {
+        emit(SpgError(message: 'Sukses $successCount, Gagal ${errors.length}:\n${errors.take(2).join('\n')}${errors.length > 2 ? '\n...' : ''}'));
+      } else {
+        emit(SpqCreated());
+      }
+      add(LoadActiveSpqs());
+    } catch (e) {
+      emit(SpgError(message: e.toString()));
+      add(LoadActiveSpqs());
+    }
   }
 
   Future<void> _onLoadAllSpqs(LoadAllSpqs event, Emitter<SpgState> emit) async {
@@ -58,6 +89,7 @@ class SpgBloc extends Bloc<SpgEvent, SpgState> {
       add(LoadActiveSpqs());
     } catch (e) {
       emit(SpgError(message: e.toString()));
+      add(LoadActiveSpqs());
     }
   }
 
@@ -72,6 +104,7 @@ class SpgBloc extends Bloc<SpgEvent, SpgState> {
       add(LoadActiveSpqs());
     } catch (e) {
       emit(SpgError(message: e.toString()));
+      add(LoadActiveSpqs());
     }
   }
 
@@ -86,6 +119,7 @@ class SpgBloc extends Bloc<SpgEvent, SpgState> {
       add(LoadActiveSpqs());
     } catch (e) {
       emit(SpgError(message: e.toString()));
+      add(LoadActiveSpqs());
     }
   }
 }

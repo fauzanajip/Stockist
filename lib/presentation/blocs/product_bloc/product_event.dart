@@ -27,6 +27,15 @@ class CreateNewProduct extends ProductEvent {
   List<Object?> get props => [name, sku, price];
 }
 
+class CreateMultipleProducts extends ProductEvent {
+  final List<CreateNewProduct> products;
+
+  const CreateMultipleProducts({required this.products});
+
+  @override
+  List<Object?> get props => [products];
+}
+
 class UpdateProduct extends ProductEvent {
   final ProductEntity product;
 
