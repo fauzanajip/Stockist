@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 import '../../../core/constants/app_theme.dart';
 import '../../../domain/entities/pending_topup_entity.dart';
 import '../../../domain/entities/stock_mutation_entity.dart';
+import '../../../domain/entities/spb_entity.dart';
+import '../../../domain/entities/spg_entity.dart';
+import '../../../domain/entities/product_entity.dart';
+import '../../../domain/entities/event_spg_entity.dart';
 import '../../blocs/pending_topup_bloc/pending_topup_bloc.dart';
 import '../../blocs/pending_topup_bloc/pending_topup_event.dart';
 import '../../blocs/pending_topup_bloc/pending_topup_state.dart';
@@ -231,53 +236,92 @@ class _StockDistributionScreenState extends State<StockDistributionScreen> {
   }
 
   Widget _buildHistoryFilter(BuildContext context) {
-    return BlocBuilder<SpbBloc, SpbState>(
-      builder: (context, spbState) {
-        final spbs = spbState is SpbsLoaded ? spbState.spbs : [];
+    return BlocBuilder<EventSpgBloc, EventSpgState>(
+      builder: (context, eventSpgState) {
+        return BlocBuilder<SpbBloc, SpbState>(
+          builder: (context, spbState) {
+            final List<SpbEntity> allSpbs = spbState is SpbsLoaded ? spbState.spbs : [];
+            final spgStateLoaded = eventSpgState is AvailableSpgsLoaded ? eventSpgState : null;
+            final List<EventSpgEntity> assignedSpgs = spgStateLoaded?.assignedSpgs ?? [];
+            
+            final eventSpbIds = assignedSpgs
+              .where((es) => es.spbId != null)
+              .map((es) => es.spbId!)
+              .toSet();
+            
+            final List<SpbEntity> eventSpbs = allSpbs.where((s) => eventSpbIds.contains(s.id)).toList();
 
-        return Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: AppColors.surfaceContainerLowest,
-            border: Border(bottom: BorderSide(color: AppColors.surfaceContainerHigh)),
-          ),
-          child: Row(
-            children: [
-              Text(
-                'FILTER_SPB:',
-                style: const TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.onSurfaceVariant,
-                  letterSpacing: 1,
-                ),
+            return Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceContainerLowest,
+                border: Border(bottom: BorderSide(color: AppColors.surfaceContainerHigh)),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: DropdownButtonFormField<String?>(
-                  value: _historyFilterSpbId,
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: AppColors.surface,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.zero),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Row(
+                children: [
+                  Text(
+                    'FILTER_SPB:',
+                    style: const TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.onSurfaceVariant,
+                      letterSpacing: 1,
+                    ),
                   ),
-                  items: [
-                    const DropdownMenuItem(value: null, child: Text('ALL_SPGS', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 12))),
-                    ...spbs.map((s) => DropdownMenuItem(
-                      value: s.id,
-                      child: Text(s.name.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12)),
-                    )),
-                  ],
-                  onChanged: (value) {
-                    setState(() => _historyFilterSpbId = value);
-                  },
-                  dropdownColor: AppColors.surface,
-                  style: const TextStyle(color: AppColors.onSurface, fontWeight: FontWeight.w900),
-                ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: DropdownSearch<SpbEntity>(
+                      selectedItem: _historyFilterSpbId != null 
+                        ? eventSpbs.where((s) => s.id == _historyFilterSpbId).firstOrNull 
+                        : null,
+                      items: (f, cs) => eventSpbs.toList(),
+                      itemAsString: (spb) => spb.name.toUpperCase(),
+                      compareFn: (a, b) => a.id == b.id,
+                      decoratorProps: DropDownDecoratorProps(
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: AppColors.surface,
+                          border: OutlineInputBorder(borderRadius: BorderRadius.zero),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          hintText: 'ALL_SPGS',
+                          hintStyle: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12),
+                        ),
+                      ),
+                      popupProps: PopupProps.menu(
+                        showSearchBox: true,
+                        searchFieldProps: TextFieldProps(
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: AppColors.surface,
+                            border: OutlineInputBorder(borderRadius: BorderRadius.zero),
+                            hintText: 'SEARCH_SPB',
+                            hintStyle: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12),
+                          ),
+                          style: const TextStyle(fontWeight: FontWeight.w900),
+                        ),
+                        menuProps: MenuProps(
+                          backgroundColor: AppColors.surface,
+                          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                        ),
+                        itemBuilder: (context, spb, isDisabled, isSelected) {
+                          return Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            child: Text(
+                              spb.name.toUpperCase(),
+                              style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12),
+                            ),
+                          );
+                        },
+                      ),
+                      onSelected: (spb) {
+                        setState(() => _historyFilterSpbId = spb?.id);
+                      },
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         );
       },
     );
@@ -308,9 +352,10 @@ class _StockDistributionScreenState extends State<StockDistributionScreen> {
     final spgState = context.read<EventSpgBloc>().state;
     final productState = context.read<EventProductBloc>().state;
 
-    final spbs = spbState is SpbsLoaded ? spbState.spbs : [];
-    final spgs = spgState is AvailableSpgsLoaded ? spgState.spgs : [];
-    final products = productState is AvailableProductsLoaded ? productState.products : [];
+    final List<SpbEntity> spbs = spbState is SpbsLoaded ? spbState.spbs : [];
+    final spgStateLoaded = spgState is AvailableSpgsLoaded ? spgState : null;
+    final List<SpgEntity> allSpgs = spgStateLoaded?.spgs ?? [];
+    final List<ProductEntity> products = productState is AvailableProductsLoaded ? productState.products : [];
 
     return SingleChildScrollView(
       child: DataTable(
@@ -329,7 +374,7 @@ class _StockDistributionScreenState extends State<StockDistributionScreen> {
           final spbName = topup.spbId != null
             ? spbs.where((s) => s.id == topup.spbId).firstOrNull?.name ?? '-'
             : '-';
-          final spgName = spgs.where((s) => s.id == topup.spgId).firstOrNull?.name ?? topup.spgId;
+          final spgName = allSpgs.where((s) => s.id == topup.spgId).firstOrNull?.name ?? topup.spgId;
           final productName = products.where((p) => p.id == topup.productId).firstOrNull?.name ?? topup.productId;
 
           return DataRow(
@@ -400,9 +445,24 @@ class _StockDistributionScreenState extends State<StockDistributionScreen> {
     final spgState = context.read<EventSpgBloc>().state;
     final productState = context.read<EventProductBloc>().state;
 
-    final spbs = spbState is SpbsLoaded ? spbState.spbs : [];
-    final spgs = spgState is AvailableSpgsLoaded ? spgState.spgs : [];
-    final products = productState is AvailableProductsLoaded ? productState.products : [];
+    final List<SpbEntity> allSpbs = spbState is SpbsLoaded ? spbState.spbs : [];
+    final spgStateLoaded = spgState is AvailableSpgsLoaded ? spgState : null;
+    final List<EventSpgEntity> assignedSpgs = spgStateLoaded?.assignedSpgs ?? [];
+    final List<SpgEntity> allSpgs = spgStateLoaded?.spgs ?? [];
+    final List<ProductEntity> products = productState is AvailableProductsLoaded ? productState.products : [];
+
+    final eventSpbIds = assignedSpgs
+      .where((es) => es.spbId != null)
+      .map((es) => es.spbId!)
+      .toSet();
+    
+    final List<SpbEntity> eventSpbs = allSpbs.where((s) => eventSpbIds.contains(s.id)).toList();
+
+    final List<String> filteredAssignedSpgIds = _selectedSpbId != null
+      ? assignedSpgs.where((es) => es.spbId == _selectedSpbId).map((es) => es.spgId).toList()
+      : assignedSpgs.map((es) => es.spgId).toList();
+
+    final List<SpgEntity> filteredSpgs = allSpgs.where((s) => filteredAssignedSpgIds.contains(s.id)).toList();
 
     final warehouseInfo = _selectedProductId != null
       ? _calculateWarehouseStock(stockState, _selectedProductId!)
@@ -424,96 +484,172 @@ class _StockDistributionScreenState extends State<StockDistributionScreen> {
         ),
         const SizedBox(height: 20),
 
-        // SPB Dropdown
         Text('SPB_OPTIONAL', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: AppColors.onSurfaceVariant, letterSpacing: 1)),
         const SizedBox(height: 8),
-        DropdownButtonFormField<String?>(
-          value: _selectedSpbId,
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: AppColors.surface,
-            border: OutlineInputBorder(borderRadius: BorderRadius.zero),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        DropdownSearch<SpbEntity>(
+          selectedItem: _selectedSpbId != null 
+            ? eventSpbs.where((s) => s.id == _selectedSpbId).firstOrNull 
+            : null,
+          items: (f, cs) => eventSpbs.toList(),
+          itemAsString: (spb) => spb.name.toUpperCase(),
+          compareFn: (a, b) => a.id == b.id,
+          decoratorProps: DropDownDecoratorProps(
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: AppColors.surface,
+              border: OutlineInputBorder(borderRadius: BorderRadius.zero),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              hintText: 'ALL_SPGS',
+              hintStyle: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13),
+            ),
           ),
-          items: [
-            const DropdownMenuItem(value: null, child: Text('ALL_SPGS', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 13))),
-            ...spbs.map((s) => DropdownMenuItem(
-              value: s.id,
-              child: Text(s.name.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13)),
-            )),
-          ],
-          onChanged: (value) {
+          popupProps: PopupProps.menu(
+            showSearchBox: true,
+            searchFieldProps: TextFieldProps(
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: AppColors.surface,
+                border: OutlineInputBorder(borderRadius: BorderRadius.zero),
+                hintText: 'SEARCH_SPB',
+                hintStyle: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12),
+              ),
+              style: const TextStyle(fontWeight: FontWeight.w900),
+            ),
+            menuProps: MenuProps(
+              backgroundColor: AppColors.surface,
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+            ),
+            itemBuilder: (context, spb, isDisabled, isSelected) {
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                child: Text(
+                  spb.name.toUpperCase(),
+                  style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13),
+                ),
+              );
+            },
+          ),
+          onSelected: (spb) {
             setState(() {
-              _selectedSpbId = value;
+              _selectedSpbId = spb?.id;
               _selectedSpgId = null;
             });
           },
-          dropdownColor: AppColors.surface,
-          style: const TextStyle(color: AppColors.onSurface, fontWeight: FontWeight.w900),
         ),
         const SizedBox(height: 16),
 
-        // SPG Dropdown
         Text('SPG', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: AppColors.onSurfaceVariant, letterSpacing: 1)),
         const SizedBox(height: 8),
-        DropdownButtonFormField<String>(
-          value: _selectedSpgId,
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: AppColors.surface,
-            border: OutlineInputBorder(borderRadius: BorderRadius.zero),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        DropdownSearch<SpgEntity>(
+          selectedItem: _selectedSpgId != null 
+            ? filteredSpgs.where((s) => s.id == _selectedSpgId).firstOrNull 
+            : null,
+          items: (f, cs) => filteredSpgs.toList(),
+          itemAsString: (spg) => spg.name.toUpperCase(),
+          compareFn: (a, b) => a.id == b.id,
+          decoratorProps: DropDownDecoratorProps(
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: AppColors.surface,
+              border: OutlineInputBorder(borderRadius: BorderRadius.zero),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              hintText: 'SELECT_SPG',
+              hintStyle: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13),
+            ),
           ),
-          items: <DropdownMenuItem<String>>[
-            ...spgs
-              .where((s) => _selectedSpbId == null || s.spbId == _selectedSpbId)
-              .map((s) => DropdownMenuItem<String>(
-                value: s.id,
-                child: Text(s.name.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13)),
-              )),
-          ],
-          onChanged: (value) {
-            setState(() => _selectedSpgId = value);
+          popupProps: PopupProps.menu(
+            showSearchBox: true,
+            searchFieldProps: TextFieldProps(
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: AppColors.surface,
+                border: OutlineInputBorder(borderRadius: BorderRadius.zero),
+                hintText: 'SEARCH_SPG',
+                hintStyle: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12),
+              ),
+              style: const TextStyle(fontWeight: FontWeight.w900),
+            ),
+            menuProps: MenuProps(
+              backgroundColor: AppColors.surface,
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+            ),
+            itemBuilder: (context, spg, isDisabled, isSelected) {
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                child: Text(
+                  spg.name.toUpperCase(),
+                  style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13),
+                ),
+              );
+            },
+          ),
+          onSelected: (spg) {
+            setState(() => _selectedSpgId = spg?.id);
           },
-          dropdownColor: AppColors.surface,
-          style: const TextStyle(color: AppColors.onSurface, fontWeight: FontWeight.w900),
         ),
         const SizedBox(height: 16),
 
-        // Product Dropdown
         Text('PRODUCT', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: AppColors.onSurfaceVariant, letterSpacing: 1)),
         const SizedBox(height: 8),
-        DropdownButtonFormField<String>(
-          value: _selectedProductId,
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: AppColors.surface,
-            border: OutlineInputBorder(borderRadius: BorderRadius.zero),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        DropdownSearch<ProductEntity>(
+          selectedItem: _selectedProductId != null 
+            ? products.where((p) => p.id == _selectedProductId).firstOrNull 
+            : null,
+          items: (f, cs) => products.toList(),
+          itemAsString: (p) {
+            final warehouse = _calculateWarehouseStock(stockState, p.id);
+            final badge = warehouse <= 0 ? ' (OUT_OF_STOCK)' : ' (WH: $warehouse)';
+            return '${p.name.toUpperCase()}$badge';
+          },
+          compareFn: (a, b) => a.id == b.id,
+          decoratorProps: DropDownDecoratorProps(
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: AppColors.surface,
+              border: OutlineInputBorder(borderRadius: BorderRadius.zero),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              hintText: 'SELECT_PRODUCT',
+              hintStyle: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13),
+            ),
           ),
-          items: <DropdownMenuItem<String>>[
-            ...products.map((p) {
+          popupProps: PopupProps.menu(
+            showSearchBox: true,
+            searchFieldProps: TextFieldProps(
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: AppColors.surface,
+                border: OutlineInputBorder(borderRadius: BorderRadius.zero),
+                hintText: 'SEARCH_PRODUCT',
+                hintStyle: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12),
+              ),
+              style: const TextStyle(fontWeight: FontWeight.w900),
+            ),
+            menuProps: MenuProps(
+              backgroundColor: AppColors.surface,
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+            ),
+            itemBuilder: (context, p, isDisabled, isSelected) {
               final warehouse = _calculateWarehouseStock(stockState, p.id);
               final badge = warehouse <= 0 ? ' (OUT_OF_STOCK)' : ' (WH: $warehouse)';
-              return DropdownMenuItem<String>(
-                value: p.id,
-                child: Text('${p.name.toUpperCase()}$badge', style: TextStyle(
-                  fontWeight: FontWeight.w900,
-                  fontSize: 12,
-                  color: warehouse <= 0 ? AppColors.error : AppColors.onSurface,
-                )),
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                child: Text(
+                  '${p.name.toUpperCase()}$badge',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 12,
+                    color: warehouse <= 0 ? AppColors.error : AppColors.onSurface,
+                  ),
+                ),
               );
-            }),
-          ],
-          onChanged: (value) {
-            setState(() => _selectedProductId = value);
+            },
+          ),
+          onSelected: (p) {
+            setState(() => _selectedProductId = p?.id);
           },
-          dropdownColor: AppColors.surface,
-          style: const TextStyle(color: AppColors.onSurface, fontWeight: FontWeight.w900),
         ),
         const SizedBox(height: 16),
 
-        // Stock Info Panel
         if (spgStockInfo != null || warehouseInfo != null)
           Container(
             padding: const EdgeInsets.all(12),
@@ -550,7 +686,6 @@ class _StockDistributionScreenState extends State<StockDistributionScreen> {
             ),
           ),
 
-        // Qty Input
         Text('QTY_TO_ADD', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: AppColors.onSurfaceVariant, letterSpacing: 1)),
         const SizedBox(height: 8),
         TextField(
@@ -565,7 +700,6 @@ class _StockDistributionScreenState extends State<StockDistributionScreen> {
           style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16),
         ),
 
-        // Validation warning
         if (_qty > 0 && warehouseInfo != null && _qty > warehouseInfo)
           Container(
             margin: const EdgeInsets.only(top: 8),
@@ -585,7 +719,6 @@ class _StockDistributionScreenState extends State<StockDistributionScreen> {
 
         const SizedBox(height: 20),
 
-        // Buttons
         Row(
           children: [
             Expanded(
@@ -637,7 +770,6 @@ class _StockDistributionScreenState extends State<StockDistributionScreen> {
         ),
         const SizedBox(height: 12),
 
-        // Initial Distribution Button
         _buildActionCard(
           context,
           icon: Icons.inventory_outlined,
@@ -648,7 +780,6 @@ class _StockDistributionScreenState extends State<StockDistributionScreen> {
         ),
         const SizedBox(height: 8),
 
-        // Resupply Button
         _buildActionCard(
           context,
           icon: Icons.add_circle_outline,

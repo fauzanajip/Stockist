@@ -563,7 +563,7 @@ class _ProductAssignmentCardState extends State<ProductAssignmentCard> {
       text: _currentPrice.toInt().toString(),
     );
     _stockController = TextEditingController(
-      text: widget.distributorStock.toString(),
+      text: widget.distributorStock > 0 ? widget.distributorStock.toString() : '',
     );
   }
 
@@ -571,7 +571,7 @@ class _ProductAssignmentCardState extends State<ProductAssignmentCard> {
   void didUpdateWidget(ProductAssignmentCard oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.distributorStock != widget.distributorStock) {
-      _stockController.text = widget.distributorStock.toString();
+      _stockController.text = widget.distributorStock > 0 ? widget.distributorStock.toString() : '';
     }
     if (oldWidget.assignedProduct.price != widget.assignedProduct.price) {
       _priceController.text = widget.assignedProduct.price.toInt().toString();
@@ -725,6 +725,7 @@ class _ProductAssignmentCardState extends State<ProductAssignmentCard> {
                             contentPadding: const EdgeInsets.symmetric(horizontal: 12),
                             fillColor: AppColors.surface,
                             filled: true,
+                            hintText: '0',
                             border: OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: AppColors.surfaceContainerHigh)),
                             enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: AppColors.surfaceContainerHigh)),
                             focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide(color: AppColors.primary)),

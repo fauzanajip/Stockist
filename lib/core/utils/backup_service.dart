@@ -33,6 +33,7 @@ class BackupService {
         'sales': await db.query('sales'),
         'cash_records': await db.query('cash_records'),
         'spg_product_targets': await db.query('spg_product_targets'),
+        'pending_topups': await db.query('pending_topups'),
         'backup_logs': await db.query('backup_logs'),
       };
 
@@ -106,6 +107,11 @@ class BackupService {
         ),
         'spg_product_targets': await db.query(
           'spg_product_targets',
+          where: 'event_id = ?',
+          whereArgs: [eventId],
+        ),
+        'pending_topups': await db.query(
+          'pending_topups',
           where: 'event_id = ?',
           whereArgs: [eventId],
         ),
@@ -247,6 +253,15 @@ class BackupService {
               await txn.insert('spg_product_targets', t);
             }
           }
+
+          // Pending Topups - delete all, then insert
+          if (backupData['pending_topups'] != null) {
+            await txn.delete('pending_topups');
+            final pendingTopups = List<Map<String, dynamic>>.from(backupData['pending_topups']);
+            for (final pt in pendingTopups) {
+              await txn.insert('pending_topups', pt);
+            }
+          }
         } else {
           // === EVENT-SPECIFIC BACKUP: Replace only event data ===
 
@@ -310,6 +325,15 @@ class BackupService {
             final targets = List<Map<String, dynamic>>.from(backupData['spg_product_targets']);
             for (final t in targets) {
               await txn.insert('spg_product_targets', t);
+            }
+          }
+
+          // Pending Topups - delete existing for this event, then insert
+          if (backupData['pending_topups'] != null) {
+            await txn.delete('pending_topups', where: 'event_id = ?', whereArgs: [eventId]);
+            final pendingTopups = List<Map<String, dynamic>>.from(backupData['pending_topups']);
+            for (final pt in pendingTopups) {
+              await txn.insert('pending_topups', pt);
             }
           }
         }
